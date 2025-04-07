@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router";
 import PrivateRoute from "./PrivateRoute";
 import Account from "../features/account/Account";
 import Landing from "../features/landing/Landing";
-import SignUp from "../features/auth/Signup";
+import SignUp from "../features/auth/SignUp";
 function AppRoutes() {
   return (
     <Routes>
