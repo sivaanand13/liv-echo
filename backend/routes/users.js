@@ -52,7 +52,7 @@ router.route("/signup/uniqueCheck/").get(async (req, res) => {
 
 router.route("/signup/").post(async (req, res) => {
   let { uid, name, email, username, dob } = req.body;
-  console.log("Trying signup for", email);
+  console.log("Trying signup for", uid, name, email, username, dob);
 
   try {
     await verifyUserByUID(uid);

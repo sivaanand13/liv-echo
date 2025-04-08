@@ -65,7 +65,7 @@ function SignUp() {
         setErrorState("");
       } catch (e) {
         const errors = [].concat(e);
-        setErrorState(<Errors errors={errors} />);
+        setErrorState(errors.join("\n"));
       }
     } else {
       try {
@@ -73,7 +73,7 @@ function SignUp() {
         setErrorState("");
       } catch (e) {
         const errors = [].concat(e);
-        setErrorState(<Errors errors={errors} />);
+        setErrorState(errors.join("\n"));
       }
     }
   };

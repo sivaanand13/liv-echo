@@ -37,6 +37,7 @@ async function signUpUser(name, email, username, dob, password) {
   try {
     const auth = getAuth();
     const user = auth.currentUser;
+    console.log(user);
     await post("users/signup/", { uid: user.uid, name, email, username, dob });
   } catch (e) {
     await firebaseUtils.deleteFirebaseUser();
