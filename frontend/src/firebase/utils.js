@@ -4,6 +4,7 @@ import {
   updateProfile,
   deleteUser,
   signOut,
+  signInWithEmailAndPassword
 } from "firebase/auth";
 
 async function createFirebaseUser(email, password, displayName) {
@@ -21,5 +22,8 @@ async function signOutFirebaseUser() {
   const auth = getAuth();
   await signOut(auth);
 }
-
-export default { createFirebaseUser, deleteFirebaseUser, signOutFirebaseUser };
+async function signInFirebaseUser(email,password) {
+  const auth = getAuth()
+  await signInWithEmailAndPassword(auth,email,password);
+}
+export default { createFirebaseUser, deleteFirebaseUser, signOutFirebaseUser, signInFirebaseUser };

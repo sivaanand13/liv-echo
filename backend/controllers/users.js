@@ -35,8 +35,21 @@ async function signUpUser(uid, name, email, username, dob) {
   });
 }
 
+async function signInUser(uid,email,username) {
+  username = username.trim();
+  if(username.length === 0){
+    throw new Error('must enter username');
+  }
+  email = validation.validateEmail(email);
+  await verifyUserByUID(uid);
+  await validation.validateUsername(username);
+  let user = await User.findOne({username: username});
+  return user;
+  
+}
 export default {
   validateUnqiueEmail,
   validateUnqiueUsername,
   signUpUser,
+  signInUser
 };

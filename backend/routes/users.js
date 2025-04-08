@@ -118,5 +118,45 @@ router.route("/signup/").post(async (req, res) => {
     });
   }
 });
+router.route('/signin/').post(async (req,res) => {
+  let { uid, email, username } = req.body;
+  try {
+    await verifyUserByUID(uid);
+  } catch (e) {
+    return res.status(400).json({
+      message: "Invalid firebase Id",
+      errors: e,
+    });
+  }
+  try {
+    username = validation.validateUsername(username, "Username");
+  } catch (e) {
+    return res.status(400).json({
+      message: "Invalid Username!",
+      errors: e,
+    });
+  }
+  try {
+    email = validation.validateEmail(email);
+  } catch (e) {
+    return res.status(400).json({
+      message: "Invalid email!",
+      errors: e,
+    });
+  }
+  try{
+    const user = await userController.signInUser(uid,email,username);
+    return res.status(200).json({
+      message: "User Sign In successful",
+      data: user,
+    });
+  }
+  catch(e){
+    console.log(e);
+    return res.status(500).json({
+      message: "User sign in failed!",
+    });
+  }
+})
 
 export default router;

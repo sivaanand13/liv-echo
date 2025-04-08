@@ -48,6 +48,35 @@ async function signUpUser(name, email, username, dob, password) {
   }
 }
 
+async function signInUser( username, email, password) {
+  try {
+    validation.validateEmail(email);
+    validation.validateUsername(username);
+    validation.validatePassword(password);
+  } catch (e) {
+    console.log(e);
+    throw "Fix errors before submitting!";
+  }
+
+  try {
+    const user = await firebaseUtils.signInFirebaseUser(email, password);
+  } catch (e) {
+    console.log(e);
+    throw e.message;
+  }
+
+  try {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    await post("users/signin/", { uid: user.uid, email, username});
+  } catch (e) {
+    console.log(e);
+    throw e.data && e.data.message
+      ? e.data.message
+      : "Sign in failed! Try again.";
+  }
+}
 export default {
   signUpUser,
+  signInUser
 };

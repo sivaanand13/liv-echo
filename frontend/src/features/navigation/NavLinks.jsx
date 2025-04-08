@@ -15,6 +15,7 @@ function NonAuthNavigation() {
   return (
     <>
       <NavBarLink to="/signup">Sign Up</NavBarLink>
+      <NavBarLink to="/signin">Sign In</NavBarLink>
     </>
   );
 }
