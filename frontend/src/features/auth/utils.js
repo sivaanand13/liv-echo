@@ -1,6 +1,6 @@
 import { get, post } from "../../utils/requests/axios.js";
 import firebaseUtils from "../../firebase/utils.js";
-import { getAuth } from "firebase/auth";
+import { getAuth, updateProfile, updateEmail, updatePassword } from "firebase/auth";
 import validation from "../../utils/validation.js";
 async function signUpUser(name, email, username, dob, password) {
   try {
@@ -38,8 +38,7 @@ async function signUpUser(name, email, username, dob, password) {
     const auth = getAuth();
     const user = auth.currentUser;
     console.log(user);
-    const val = await post("users/signup/", { uid: user.uid, name, email, username, dob });
-    return val.data
+    await post("users/signup/", { uid: user.uid, name, email, username, dob });
   } catch (e) {
     await firebaseUtils.deleteFirebaseUser();
     console.log(e);
@@ -92,7 +91,10 @@ async function editUser(name, email, username, dob, password) {
   try {
     const auth = getAuth();
     const user = auth.currentUser;
-    console.log(user);
+    if (!user) {
+      throw new Error("No user is currently logged in!");
+    }
+    //console.log(user);
     console.log("Hi");
     await post("users/editAccount/", {
       uid: user.uid,
@@ -101,6 +103,19 @@ async function editUser(name, email, username, dob, password) {
       username,
       dob,
     });
+    if (user) {
+      await updateProfile(user, {
+        displayName: name,
+      });
+      if (email !== user.email) {
+        console.log("EMAIL PLS");
+        await updateEmail(user, email);
+      }
+      if (password) {
+        console.log("Password pls");
+        await updatePassword(user, password);
+      }
+    }
   } catch (e) {
     console.log(e);
     throw e.data && e.data.message

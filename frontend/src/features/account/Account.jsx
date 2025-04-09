@@ -12,6 +12,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { useState, useContext, useEffect } from "react";
+import { getAuth } from "firebase/auth";
 import validation from "../../utils/validation.js";
 import authUtils from "../auth/utils.js";
 import { AuthContext } from "../../contexts/AuthContext.jsx";
@@ -94,8 +95,7 @@ function Account() {
       password,
       validation.validatePassword,
       setPassword,
-      setPasswordError,
-      e
+      setPasswordError
     );
 
     const invalidFields = [
@@ -114,7 +114,7 @@ function Account() {
         await authUtils.editUser(name, email, username, dob, password);
       } catch (e) {
         console.log("Account.jsx", e);
-        setError(e);
+        setError(e.message);
       }
     }
   };
