@@ -38,7 +38,8 @@ async function signUpUser(name, email, username, dob, password) {
     const auth = getAuth();
     const user = auth.currentUser;
     console.log(user);
-    await post("users/signup/", { uid: user.uid, name, email, username, dob });
+    const val = await post("users/signup/", { uid: user.uid, name, email, username, dob });
+    return val.data
   } catch (e) {
     await firebaseUtils.deleteFirebaseUser();
     console.log(e);
@@ -76,7 +77,39 @@ async function signInUser( username, email, password) {
       : "Sign in failed! Try again.";
   }
 }
+async function editUser(name, email, username, dob, password) {
+  try {
+    validation.validateString(name);
+    validation.validateString(email);
+    validation.validateUsername(username);
+    validation.validateDob(dob);
+    validation.validatePassword(password);
+  } catch (e) {
+    console.log(e);
+    throw "Fix errors before submitting!";
+  }
+
+  try {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    console.log(user);
+    console.log("Hi");
+    await post("users/editAccount/", {
+      uid: user.uid,
+      name,
+      email,
+      username,
+      dob,
+    });
+  } catch (e) {
+    console.log(e);
+    throw e.data && e.data.message
+      ? e.data.message
+      : "Failed to update Account! Try Again";
+  }
+}
 export default {
   signUpUser,
-  signInUser
+  signInUser,
+  editUser
 };
