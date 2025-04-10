@@ -28,7 +28,7 @@ async function signInFirebaseUser(email, password) {
   await signInWithEmailAndPassword(auth, email, password);
 }
 
-async function reauthenticateFirebaseUser(oldPassword, newPassword) {
+async function reauthenticateFirebaseUser(oldPassword) {
   const auth = getAuth();
   let credential = EmailAuthProvider.credential(
     auth.currentUser.email,

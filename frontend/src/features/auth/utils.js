@@ -107,6 +107,8 @@ async function editUser(name, email, username, dob, password) {
       await updateProfile(user, {
         displayName: name,
       });
+      //await firebaseUtils.reauthenticateFirebaseUser(user.password)
+      //need to reprompt user
       if (email !== user.email) {
         console.log("EMAIL PLS");
         await updateEmail(user, email);
