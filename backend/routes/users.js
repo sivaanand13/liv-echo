@@ -158,5 +158,75 @@ router.route('/signin/').post(async (req,res) => {
     });
   }
 })
+router.route("/editAccount/").post(async (req, res) => {
+  let { uid, name, email, username, dob } = req.body;
+  console.log("Trying editAccount for", uid, name, email, username, dob);
 
+  try {
+    await verifyUserByUID(uid);
+  } catch (e) {
+    return res.status(400).json({
+      message: "Invalid firebase Id",
+      errors: e,
+    });
+  }
+
+  try {
+    name = validation.validateString(name, "Name");
+  } catch (e) {
+    return res.status(400).json({
+      message: "Invalid name",
+      errors: e,
+    });
+  }
+
+  try {
+    email = validation.validateEmail(email);
+  } catch (e) {
+    return res.status(400).json({
+      message: "Invalid email!",
+      errors: e,
+    });
+  }
+
+  try {
+    username = validation.validateUsername(username, "Username");
+  } catch (e) {
+    return res.status(400).json({
+      message: "Invalid Username!",
+      errors: e,
+    });
+  }
+
+  try {
+    validation.validateDob(dob, "Date of Birth");
+  } catch (e) {
+    return res.status(400).json({
+      message: "Unique date of birth!",
+      errors: e,
+    });
+  }
+
+  try {
+    console.log("hi");
+    const updatedUser = await userController.editUser(
+      uid,
+      name,
+      email,
+      username,
+      dob
+    );
+    console.log(updatedUser)
+    return res.status(200).json({
+      message: "User Account update successful",
+      data: updatedUser,
+    });
+  } catch (e) {
+    console.log(e);
+    console.log("Why am i here?");
+    return res.status(500).json({
+      message: "User sign up failed!",
+    });
+  }
+});
 export default router;

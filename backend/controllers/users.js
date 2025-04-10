@@ -34,6 +34,34 @@ async function signUpUser(uid, name, email, username, dob) {
     dob: new Date(dob),
   });
 }
+async function editUser(uid, name, email, username, dob) {
+  await verifyUserByUID(uid);
+  name = validation.validateString(name, "Name");
+
+  email = validation.validateEmail(email);
+  await validateUnqiueEmail(email);
+
+  username = validation.validateUsername(username, "Username");
+  await validateUnqiueUsername(username);
+
+  validation.validateDob(dob, "Date of Birth");
+
+  const val = await User.updateMany(
+    { uid },
+    {
+      $set: {
+        name,
+        email,
+        username,
+        dob: new Date(dob),
+      },
+    }
+  );
+  let user = await User.findOne({ uid: uid });
+  console.log("Howdy updated user");
+  console.log(val);
+  return user;
+}
 
 async function signInUser(uid, email, username) {
   username = username.trim();
@@ -51,4 +79,5 @@ export default {
   validateUnqiueUsername,
   signUpUser,
   signInUser,
+  editUser,
 };
