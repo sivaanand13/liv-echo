@@ -76,13 +76,14 @@ async function signInUser( username, email, password) {
       : "Sign in failed! Try again.";
   }
 }
-async function editUser(name, email, username, dob, password) {
+async function editUser(name, email, username, dob, password, oldPassword) {
   try {
     validation.validateString(name);
     validation.validateString(email);
     validation.validateUsername(username);
     validation.validateDob(dob);
     validation.validatePassword(password);
+    validation.validatePassword(oldPassword);
   } catch (e) {
     console.log(e);
     throw "Fix errors before submitting!";
@@ -107,7 +108,8 @@ async function editUser(name, email, username, dob, password) {
       await updateProfile(user, {
         displayName: name,
       });
-      //await firebaseUtils.reauthenticateFirebaseUser(user.password)
+      
+      await firebaseUtils.reauthenticateFirebaseUser(oldPassword)
       //need to reprompt user
       if (email !== user.email) {
         console.log("EMAIL PLS");

@@ -30,6 +30,9 @@ function Account() {
   const [username, setUsername] = useState("");
   const [dob, setDob] = useState("");
   const [password, setPassword] = useState("");
+  const [oldPassword, setOldPassword] = useState("");
+  const [oldPasswordError, setOldPasswordError] = useState("");
+  const [showOldPassword, setShowOldPassword] = useState(false);
 
   const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -41,6 +44,9 @@ function Account() {
   console.log(currentUser);
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
+  };
+  const toggleShowOldPassword = () => {
+    setShowOldPassword(!showOldPassword);
   };
   useEffect(() => {
     if (currentUser) {
@@ -97,13 +103,21 @@ function Account() {
       setPassword,
       setPasswordError
     );
+    validateField(
+      oldPassword,
+      validation.validatePassword,
+      setOldPassword,
+      setOldPasswordError
+    );
+
 
     const invalidFields = [
       nameError,
       emailError,
       usernameError,
       dobError,
-      passwordError
+      passwordError,
+      oldPasswordError
     ].some((e) => e != "");
 
     if (invalidFields) {
@@ -111,7 +125,7 @@ function Account() {
       return;
     } else {
       try {
-        await authUtils.editUser(name, email, username, dob, password);
+        await authUtils.editUser(name, email, username, dob, password, oldPassword);
       } catch (e) {
         console.log("Account.jsx", e);
         setError(e.message);
@@ -234,6 +248,35 @@ function Account() {
                   e
                 )
               }
+            />
+          </FormControl>
+          <FormControl>
+            <FormLabel htmlFor="old-password">Current Password</FormLabel>
+            <TextField
+              error={oldPasswordError !== ""}
+              helperText={oldPasswordError}
+              id="old-password"
+              type={showOldPassword ? "text" : "password"}
+              name="oldPassword"
+              required
+              fullWidth
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label={showOldPassword ? "Hide password" : "Show password"}
+                        onClick={toggleShowOldPassword}
+                        edge="end"
+                      >
+                        {showOldPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
             />
           </FormControl>
           <FormControl>

@@ -6,6 +6,7 @@ import {
   signOut,
   signInWithEmailAndPassword,
   reauthenticateWithCredential,
+  EmailAuthProvider
 } from "firebase/auth";
 
 async function createFirebaseUser(email, password, displayName) {
