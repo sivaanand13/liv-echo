@@ -3,9 +3,13 @@ import NavBarLink from "./NavBarLink";
 import { AuthContext } from "../../contexts/AuthContext";
 import SignOutButton from "../auth/SignOut";
 function AuthNavigation() {
+  const auth = useContext(AuthContext);
   return (
     <>
       <NavBarLink to="/account">Account</NavBarLink>
+      <NavBarLink to="/dms">Direct Messages</NavBarLink>
+      <NavBarLink to="/group-chats">Group Chats</NavBarLink>
+
       <SignOutButton />
     </>
   );

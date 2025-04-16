@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
-import settings from "./settings";
-import { CloudinaryAssetSchema } from "./cloudinaryAsset";
+import settings from "./settings.js";
+import { CloudinaryAssetSchema } from "./cloudinaryAsset.js";
 const MessageSchema = new Schema(
   {
     sender: {
@@ -9,29 +9,21 @@ const MessageSchema = new Schema(
     },
     senderName: {
       type: String,
-      required: true,
     },
     senderUsername: {
       type: String,
-      required: true,
     },
     senderProfile: {
       type: String,
-      required: true,
     },
     text: {
       type: String,
       trim: true,
       maxlength: settings.MESSAGE_LENGTH,
     },
-    message: {
-      type: String,
-      trim: true,
-      maxlength: settings.MESSAGE_LENGTH,
-    },
-    attachemnt: {
-      type: CloudinaryAssetSchema,
-      default: null,
+    attachments: {
+      type: [CloudinaryAssetSchema],
+      default: [],
     },
     chat: {
       type: mongoose.Types.ObjectId,

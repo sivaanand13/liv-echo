@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import settings from "./settings.js";
+import CloudinaryAsset, { CloudinaryAssetSchema } from "./cloudinaryAsset.js";
 const UserSchema = new Schema(
   {
     uid: {
@@ -32,12 +33,12 @@ const UserSchema = new Schema(
     },
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: settings.USER_TYPES,
       default: "user",
     },
     dob: { type: Date, required: true },
     bio: { type: String, trim: true, maxlength: settings.BIO_LENGTH },
-    profileImage: { type: String },
+    profile: { type: CloudinaryAssetSchema, required: false },
     friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
     settings: {
       notifications: {

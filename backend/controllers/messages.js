@@ -1,0 +1,183 @@
+import { ObjectId } from "mongodb";
+import Chat from "../models/chat.js";
+import chatValidation from "../utils/chat.validation.js";
+import validation from "../utils/validation.js";
+import usersController from "./users.js";
+import chatsController from "./chats.js";
+import Message from "../models/message.js";
+import cloudinary from "../cloudinary/cloudinary.js";
+import sharp from "../imageProcessing/sharp.js";
+import { chatNamespace } from "../websockets/index.js";
+async function getDisplayMessage(id) {
+  return await Message.findById(id).populate(
+    "sender",
+    "uid name username email profile"
+  );
+}
+
+async function postMessage(chatId, uid, text, attachments) {
+  const chat = await chatsController.getChatById(chatId);
+  const user = await usersController.getUserByUID(uid);
+
+  chatsController.verifyUserChatAccess(uid, chatId);
+  text = chatValidation.validateChatText(text);
+
+  let newMessage = {
+    sender: user._id,
+    senderName: user.name,
+    senderProfile: user.profile,
+    text: text,
+    attachments: [],
+    chat: chat._id,
+  };
+
+  if (attachments) {
+    for (const attachment of attachments) {
+      cloudinary.validateCloudinaryObject(attachment);
+      newMessage.attachments.push(attachment);
+    }
+  }
+
+  const message = await Message.create(newMessage);
+  await Chat.updateOne(
+    { _id: chat._id },
+    {
+      $set: {
+        latestMessage: message._id,
+      },
+    },
+    { new: true }
+  );
+  console.log("Emitting to new message to all members:");
+  const uiChat = await chatsController.getDisplayChat(chat._id);
+  const displayMessage = await getDisplayMessage(message._id);
+  uiChat.members.forEach((member) => {
+    chatNamespace.to(member.uid).emit("chatUpdated", uiChat);
+    chatNamespace.to(member.uid).emit("messageCreated", displayMessage);
+  });
+}
+
+async function updateMessageAttachments(
+  uid,
+  messageId,
+  attachments,
+  updateTimestamps
+) {
+  const message = await getMessageById(messageId);
+  const user = await usersController.getUserByUID(uid);
+
+  chatsController.verifyUserChatAccess(uid, message.chat);
+
+  if (message.sender.toString() !== user._id.toString()) {
+    throw `Only original user can attach items to this message!`;
+  }
+
+  let media = [];
+  if (attachments) {
+    validation.validateArray(attachments, "Message attachments");
+    for (const attachment of attachments) {
+      const { buffer, mimetype } = attachment;
+      if (mimetype.startsWith("image/")) {
+        const processedImage = await sharp.processChatImage(buffer);
+        const cloudinaryAsset = await cloudinary.uploadBufferedMedia(
+          processedImage
+        );
+        media.push(cloudinaryAsset);
+      } else {
+        throw `Only image attachments are allowed in chats!`;
+      }
+    }
+  }
+
+  validation.validateBoolean(updateTimestamps);
+
+  const updatedMessage = await Message.findOneAndUpdate(
+    { _id: message._id, sender: user._id },
+    {
+      $set: {
+        senderName: user.name,
+        senderProfile: user.profile,
+        attachments: media,
+      },
+    },
+    { new: true, timestamps: updateTimestamps }
+  );
+
+  return updatedMessage;
+}
+
+async function updateMessage(messageId, uid, text, attachments) {
+  let message = await getMessageById(messageId);
+  const user = await usersController.getUserByUID(uid);
+
+  chatsController.verifyUserChatAccess(uid, message.chat);
+
+  if (message.sender.toString() !== user._id.toString()) {
+    throw `Only original user can edit this message!`;
+  }
+
+  if (text) {
+    text = chatValidation.validateChatText(text);
+
+    message = await Message.findOneAndUpdate(
+      { _id: message._id, sender: user._id },
+      {
+        $set: {
+          senderName: user.name,
+          senderProfile: user.profile,
+          text: text,
+        },
+      },
+      { new: true }
+    );
+  }
+
+  if (attachments) {
+    message = await updateMessageAttachments(uid, messageId, attachments, true);
+  }
+
+  return message;
+}
+
+async function deleteMessage(uid, messageId) {
+  const message = await getMessageById(messageId);
+  const user = await usersController.getUserByUID(uid);
+  const chat = await getChatById(message.chat.toString());
+  chatsController.verifyUserChatAccess(uid, message.chat);
+
+  if (message.sender.toString() !== user._id.toString()) {
+    throw `Only original user can attach items to this message!`;
+  }
+
+  await Message.deleteOne({ _id: message._id, sender: uid });
+}
+
+async function getMessageById(messageId) {
+  messageId = validation.validateString(true, "Message Id", true);
+  messageId = ObjectId.createFromHexString(messageId);
+  const message = await Message.findById(messageId);
+  if (!message) {
+    throw `No message with id (${message})!`;
+  }
+  return message;
+}
+
+async function getMessagesByChatId(uid, chatId) {
+  await chatsController.verifyUserChatAccess(uid, chatId);
+
+  const messages = await Message.find({
+    chat: ObjectId.createFromHexString(chatId),
+  })
+    .sort({ createdAt: 1 })
+    .populate("sender", "name username email profile uid")
+    .lean();
+  return messages;
+}
+export default {
+  postMessage,
+  updateMessageAttachments,
+  updateMessage,
+  getMessageById,
+  deleteMessage,
+  getMessagesByChatId,
+};

@@ -1,20 +1,37 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createContext } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Loading from "../components/Loading";
-export const AuthContext = React.createContext();
+import chatSocket from "../sockets/namespaces/chatSocket.js";
 
-export const AuthProvider = ({ children }) => {
+export const AuthContext = createContext();
+
+export default function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
   const auth = getAuth();
   useEffect(() => {
-    let myListener = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      console.log("onAuthStateChanged", user);
+    let unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setCurrentUser(user);
+        console.log(user);
+        try {
+          await chatSocket.connect();
+        } catch (e) {
+          console.log(e);
+        }
+      } else {
+        setCurrentUser(null);
+        try {
+          await chatSocket.disconnect();
+        } catch (e) {
+          console.log(e);
+        }
+      }
       setLoadingUser(false);
     });
     return () => {
-      if (myListener) myListener();
+      unsubscribe();
+      chatSocket.disconnect();
     };
   }, []);
 
@@ -27,4 +44,4 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-};
+}

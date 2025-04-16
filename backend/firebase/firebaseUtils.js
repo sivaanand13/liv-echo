@@ -1,13 +1,23 @@
 import admin from "firebase-admin";
 
-async function verifyUserByUID(uid) {
+export async function verifyUserByUID(uid) {
   try {
     const user = await admin.auth().getUser(uid);
     return user;
   } catch (error) {
-    console.error("Error verifying user by UID:", error);
+    console.log("Error verifying user by UID:", error);
     throw `No user with firebase id (${uid})`;
   }
 }
 
-export { verifyUserByUID };
+export async function verifyAuthToken(token) {
+  try {
+    token = await admin.auth().verifyIdToken(token);
+    return token;
+  } catch (error) {
+    console.log("Error verifying auth token");
+    throw `Invalid auth token`;
+  }
+}
+
+export default { verifyUserByUID, verifyAuthToken };

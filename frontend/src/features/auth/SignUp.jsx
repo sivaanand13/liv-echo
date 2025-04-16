@@ -296,13 +296,7 @@ function SignUp() {
             <FormLabel htmlFor="confirm-password">Confirm Password</FormLabel>
             <TextField
               error={confirmPasswordError != ""}
-              helperText={
-                confirmPasswordError ? (
-                  <Errors errors={[confirmPasswordError]} />
-                ) : (
-                  ""
-                )
-              }
+              helperText={confirmPasswordError}
               id="confirm-password"
               type={showConfirmPassword ? "text" : "password"}
               name="confirm-password"
