@@ -60,7 +60,7 @@ export default function ChatSidebar({
           <CustomList
             listData={chatList}
             mappingFunction={(item) => {
-              return <ChatListItem key={item._id} item={item} />;
+              return <ChatListItem key={item} item={item} />;
             }}
           />
         )}

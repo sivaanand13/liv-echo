@@ -24,7 +24,7 @@ export default function GroupChats() {
     fetchUserGroupChats();
   }, []);
   return (
-    <Box sx={{ display: "flex", height: "100vh" }}>
+    <Box sx={{ display: "flex", height: "calc(100vh - 4rem)" }}>
       <Box
         sx={{
           minWidth: "25vw",

@@ -94,16 +94,14 @@ export default function MessageDisplay({ chat }) {
       direction="column"
       flex={1}
       sx={{
-        height: "calc(100vh - 64px)",
+        height: "calc(100vh - 5rem)",
         overflow: "hidden",
       }}
     >
       {currentChat ? (
         <>
           <Box>
-            <Typography color="red" variant="h3">
-              {currentChat.name}
-            </Typography>
+            <Typography variant="h3">{currentChat.name}</Typography>
           </Box>
           <Box
             sx={{
@@ -120,7 +118,15 @@ export default function MessageDisplay({ chat }) {
                   listData={currentChatMessages}
                   mappingFunction={(msg) => {
                     return (
-                      <ListItem>
+                      <ListItem
+                        sx={{
+                          backgroundColor: "rgba(255, 255, 255, 0.8)",
+                          backdropFilter: "blur(10px)",
+                          borderRadius: "0.5em",
+                          marginBottom: "2em",
+                          boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+                        }}
+                      >
                         <ListItemAvatar>
                           <Profile user={msg.sender} />
                         </ListItemAvatar>
@@ -130,12 +136,9 @@ export default function MessageDisplay({ chat }) {
                             <Typography variant="body1">{msg.text}</Typography>
                           }
                           secondary={
-                            <Stack
-                              direction="row"
-                              justifyContent="space-between"
-                            >
+                            <Stack direction="row" spacing={3}>
                               <Typography variant="caption">
-                                {new Date(msg.createdAt).toLocaleDateString()}
+                                {new Date(msg.createdAt).toLocaleString()}
                               </Typography>
                               <Typography variant="caption">
                                 {msg.sender?.username || "Unknown"}
@@ -177,6 +180,12 @@ export default function MessageDisplay({ chat }) {
                 }}
                 value={messageText}
                 helperText={messageError}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSend(e);
+                  }
+                }}
               />
               <IconButton type="button">
                 <AddIcon />

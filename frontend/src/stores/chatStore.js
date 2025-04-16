@@ -74,7 +74,7 @@ const chatStore = create((set, get) => ({
     const currentChat = get().currentChat;
     if (currentChat && currentChat._id === message.chat.toString()) {
       set((state) => ({
-        currentChatMessages: [message].concat(state.currentChatMessages),
+        currentChatMessages: [...state.currentChatMessages, message],
       }));
     }
   },
