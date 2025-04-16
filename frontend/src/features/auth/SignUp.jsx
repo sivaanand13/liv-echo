@@ -19,6 +19,7 @@ import { AuthContext } from "../../contexts/AuthContext.jsx";
 import { Navigate } from "react-router";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import Errors from "../../components/Errors.jsx";
 
 function SignUp() {
   const { currentUser } = useContext(AuthContext);
@@ -63,16 +64,16 @@ function SignUp() {
         validationFunc(e.target.value);
         setErrorState("");
       } catch (e) {
-        const errors = [].concat(e).join(" ");
-        setErrorState(errors);
+        const errors = [].concat(e);
+        setErrorState(errors.join("\n"));
       }
     } else {
       try {
         validationFunc(stateVar);
         setErrorState("");
       } catch (e) {
-        const errors = [].concat(e).join(" ");
-        setErrorState(errors);
+        const errors = [].concat(e);
+        setErrorState(errors.join("\n"));
       }
     }
   };

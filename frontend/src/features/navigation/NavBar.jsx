@@ -14,7 +14,7 @@ import { Link } from "react-router";
 import { useState } from "react";
 import NavBarLinks from "./NavLinks";
 import MenuIcon from "@mui/icons-material/Menu";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/logo/svg/logo-no-background.svg";
 
 function NavBar() {
   const [navDrawerOpen, setNavDrawerOpen] = useState(false);
@@ -24,9 +24,9 @@ function NavBar() {
   }
   return (
     <AppBar
-      position="fixed"
       sx={{
         width: "100%",
+        position: "sticky",
         backgroundColor: "black",
         color: "white",
         alignItems: "center",
@@ -50,7 +50,6 @@ function NavBar() {
           }}
         >
           <img src={logo} alt="LivEcho Logo" style={{ height: 50 }} />
-          <Typography variant="h4">LivEcho</Typography>
         </Button>
 
         <Box sx={{ display: { xs: "none", md: "flex" }, gap: 3 }}>
@@ -81,7 +80,6 @@ function NavBar() {
           <Stack spacing={3}>
             <Toolbar sx={{ justifyContent: "center" }}>
               <img src={logo} alt="LivEcho Logo" style={{ height: 50 }} />
-              <Typography variant="h4">SpaceX</Typography>
             </Toolbar>
             <Divider sx={{ marginLeft: "5rem", backgroundColor: "white" }} />
             <Stack spacing={2}>
