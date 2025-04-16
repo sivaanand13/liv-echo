@@ -15,12 +15,12 @@ const theme = createTheme({
       contrastText: "#FFFFFF",
     },
     background: {
-      default: "#bf1922",
-      paper: "#8F87F1",
+      default: "#fdf6f0",
+      paper: "#e3f2fd",
     },
     text: {
       primary: "#2c1a00",
-      secondary: "#000000",
+      secondary: "#1e88e5",
       disabled: "rgba(100,100,100,0.4)",
     },
     info: {
