@@ -14,16 +14,20 @@ export default function DMsListItem({ item: chat }) {
       </ListItemAvatar>
       <ListItemText
         disableTypography={true}
-        primary={user?.name || "Name not avaliable"}
+        primary={`${user?.name || "Name not avaliable"} (${
+          user.username || "Username not avaliable"
+        })`}
         secondary={
           <Stack direction={"column"}>
-            <Typography
-              component="span"
-              variant="body2"
-              sx={{ color: "text.primary", display: "inline" }}
-            >
-              {user.username || "Username not avaliable"}
-            </Typography>
+            {chat?.latestMessage?.text && (
+              <Typography
+                component="span"
+                variant="body2"
+                sx={{ color: "text.primary", display: "inline" }}
+              >
+                {`${user?.username}: ${chat.latestMessage.text}`}
+              </Typography>
+            )}
           </Stack>
         }
       />

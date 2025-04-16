@@ -100,9 +100,11 @@ export default function MessageDisplay({ chat }) {
     >
       {currentChat ? (
         <>
-          <Box>
-            <Typography variant="h3">{currentChat.name}</Typography>
-          </Box>
+          {currentChat?.type == "group" && (
+            <Box>
+              <Typography variant="h3">{currentChat.name}</Typography>
+            </Box>
+          )}
           <Box
             sx={{
               flex: 1,
