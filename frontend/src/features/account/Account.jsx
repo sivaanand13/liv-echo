@@ -88,8 +88,16 @@ function Account() {
     e.preventDefault();
 
     setError("");
-    validateField(name, validation.validateString, setName, setNameError);
-    validateField(email, validation.validateEmail, setEmail, setEmailError);
+    const finalName = name.trim() || currentUser.displayName;
+    const finalEmail = email.trim() || currentUser.email;
+    const finalPassword = password.trim() || undefined; 
+    const finalOldPassword = oldPassword.trim() || undefined;
+    if(name.trim()){
+      validateField(name, validation.validateString, setName, setNameError);
+    }
+    if(email.trim()){
+      validateField(email, validation.validateEmail, setEmail, setEmailError);
+    }
     validateField(
       username,
       validation.validateUsername,
@@ -97,18 +105,25 @@ function Account() {
       setUsernameError
     );
     validateField(dob, validation.validateDob, setDob, setDobError);
-    validateField(
-      password,
-      validation.validatePassword,
-      setPassword,
-      setPasswordError
-    );
-    validateField(
-      oldPassword,
-      validation.validatePassword,
-      setOldPassword,
-      setOldPasswordError
-    );
+    
+    if(password.trim() || oldPassword.trim()){
+      validateField(
+        password,
+        validation.validatePassword,
+        setPassword,
+        setPasswordError
+      );
+      validateField(
+        oldPassword,
+        validation.validatePassword,
+        setOldPassword,
+        setOldPasswordError
+      );
+    }
+    if(!name && !password && !oldPassword && !email && !dob && !username){
+      setError("Must put in 1 field at least before submitting");
+      return;
+    }
 
     const invalidFields = [
       nameError,
@@ -124,14 +139,7 @@ function Account() {
       return;
     } else {
       try {
-        await authUtils.editUser(
-          name,
-          email,
-          username,
-          dob,
-          password,
-          oldPassword
-        );
+        await authUtils.editUser(finalName, finalEmail, username, dob, finalPassword, finalOldPassword);
       } catch (e) {
         console.log("Account.jsx", e);
         setError(e.message);
