@@ -2,11 +2,14 @@ import React, { useState, useEffect, createContext } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Loading from "../components/Loading";
 import chatSocket from "../sockets/namespaces/chatSocket.js";
+import axios from "../utils/requests/axios.js";
 
 export const AuthContext = createContext();
 
 export default function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
+  const [serverUser, setServerUser] = useState(null);
+
   const [loadingUser, setLoadingUser] = useState(true);
   const auth = getAuth();
   useEffect(() => {
@@ -19,6 +22,13 @@ export default function AuthProvider({ children }) {
         } catch (e) {
           console.log(e);
         }
+        try {
+          const server = (await axios.get(`users/`, {})).data.data;
+          setServerUser(server);
+          console.log("server user: ", server);
+        } catch (e) {
+          console.log(e);
+        }
       } else {
         setCurrentUser(null);
         try {
@@ -27,6 +37,7 @@ export default function AuthProvider({ children }) {
           console.log(e);
         }
       }
+
       setLoadingUser(false);
     });
     return () => {
@@ -40,7 +51,7 @@ export default function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ currentUser }}>
+    <AuthContext.Provider value={{ currentUser, serverUser }}>
       {children}
     </AuthContext.Provider>
   );

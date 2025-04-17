@@ -108,16 +108,21 @@ async function updateMessageAttachments(
 }
 
 async function hasMessageDeleteAuth(chatId, messageId, uid) {
-  const chat = await chatsController.getChatById(chatId);
-  const message = await getMessageById(messageId);
+  const chat = await chatsController.getChatById(chatId.toString());
+  const message = await getMessageById(messageId.toString());
   const user = await usersController.getUserByUID(uid);
-  if (!chat.members.includes(user._id)) {
+  if (
+    !chat.members.find((member) => member.toString() == user._id.toString())
+  ) {
+    console.log(`User is not member of chat ${chat._id}`);
     return false;
   }
+
   if (
-    chat.admins.includes(user._id) ||
-    message.sender.toString() === chat._id.toString()
+    chat.admins.find((admin) => admin.toString() == user._id.toString(0)) ||
+    message.sender.toString() == user._id.toString()
   ) {
+    console.log(`User is admin or user`);
     return true;
   }
 }
@@ -161,13 +166,8 @@ async function deleteMessage(uid, messageId) {
   const chat = await chatsController.getDisplayChat(message.chat);
   await chatsController.verifyUserChatAccess(uid, message.chat.toString());
 
-  let allowed = await hasMessageDeleteAuth(
-    message.chat.toString(),
-    messageId,
-    uid
-  );
-
-  if (!allowed) {
+  let allowed = await hasMessageDeleteAuth(message.chat, message._id, uid);
+  if (allowed == false) {
     throw `Only original sender or admin can delete chat message!`;
   }
 

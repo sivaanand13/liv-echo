@@ -28,12 +28,27 @@ async function getUserById(id) {
   return user;
 }
 
-async function getUserByUID(uid) {
+async function getUserByUID(uid, display) {
   if (typeof uid == "object") {
     uid = uid.toString();
   }
   validation.validateString(uid, "User id");
-  const user = User.findOne({ uid: uid });
+  let user;
+  if (display) {
+    user = await User.findOne(
+      { uid: uid },
+      {
+        _id: 1,
+        name: 1,
+        username: 1,
+        bio: 1,
+        role: 1,
+      }
+    );
+  } else {
+    user = await User.findOne({ uid: uid });
+  }
+
   if (!user) {
     throw `No user with uid ${uid} exists!`;
   }

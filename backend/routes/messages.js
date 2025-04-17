@@ -195,6 +195,7 @@ router.route("/:chatId/messages/:messageId").delete(async (req, res) => {
     message = await messagesController.getMessageById(messageId);
     user = await usersController.getUserByUID(uid);
     chat = await chatsController.getChatById(chatId);
+    console.log("Trying to delete message: ", messageId);
   } catch (e) {
     console.log(e);
     return res.status(400).json({ message: e });
@@ -206,11 +207,11 @@ router.route("/:chatId/messages/:messageId").delete(async (req, res) => {
       messageId,
       uid
     );
-
-    if (!allowed) {
+    if (allowed == false) {
       throw `Only original sender or admin can delete chat message!`;
     }
   } catch (e) {
+    console.log(e);
     return res.status(403).json({ message: e });
   }
 

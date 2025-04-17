@@ -23,12 +23,10 @@ import SendIcon from "@mui/icons-material/Send";
 import validation from "../../utils/validation";
 import chatUtils from "./chatUtils";
 import CustomList from "../../components/CustomList";
-import Profile from "../../components/Profile";
 import MessageListItem from "./MessageListItem";
 import CloseIcon from "@mui/icons-material/Close";
-import CurrentChatMembers from "./CurrentChatMembers";
 import { AuthContext } from "../../contexts/AuthContext";
-
+import ChatActionsSidebar from "./ChatActionsSidebar";
 export default function MessageDisplay({ chat }) {
   const [messageText, setMessageText] = useState("");
   const [attachments, setAttachments] = useState([]);
@@ -278,6 +276,7 @@ export default function MessageDisplay({ chat }) {
                 </Paper>
               </Box>{" "}
             </Box>
+
             <Box
               sx={{
                 overflowY: "auto",
@@ -287,8 +286,7 @@ export default function MessageDisplay({ chat }) {
                 padding: "1rem",
               }}
             >
-              <Typography variant="h5">Members</Typography>
-              <CurrentChatMembers />
+              <ChatActionsSidebar />
             </Box>
           </Stack>
         </>

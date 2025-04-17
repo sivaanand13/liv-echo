@@ -6,6 +6,21 @@ import authMiddleware from "../middleware/authMiddleware.js";
 import uploadMiddleware from "../middleware/uploadMiddleware.js";
 const router = express.Router();
 
+router.route("/").get(authMiddleware, async (req, res) => {
+  try {
+    const user = await userController.getUserByUID(req.user.uid, false);
+    console.log("Fetched user data: ", user);
+    return res.status(200).json({
+      data: user,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      message: "User details fetch failed",
+    });
+  }
+});
+
 router.route("/signup/uniqueCheck/").get(async (req, res) => {
   let { email, username } = req.query;
   console.log("Checking unique email and username", email, username);

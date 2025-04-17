@@ -51,7 +51,7 @@ async function sendMessage(chat, messageText, attachments, sender) {
 }
 
 async function deleteMessage(msg) {
-  console.log("Attempting to delte message: ", msg._id);
+  console.log("Attempting to delte message: ", msg._id, "chat", msg.chat);
   try {
     const response = await axios.del(
       `chats/${msg.chat}/messages/${msg._id}`,
