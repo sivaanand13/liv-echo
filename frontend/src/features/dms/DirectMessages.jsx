@@ -33,8 +33,8 @@ function DirectMessages() {
     <Box sx={{ display: "flex", height: "calc(100vh - 4rem)" }}>
       <Box
         sx={{
-          minWidth: "25vw",
-          width: "fit-content",
+          flex: 1,
+          minWidth: "fit-content",
           borderRight: 1,
           borderColor: "divider",
         }}
@@ -47,7 +47,7 @@ function DirectMessages() {
           CreateChat={CreateDM}
         />
       </Box>
-      <Box sx={{ flexGrow: 1, p: 2 }}>
+      <Box sx={{ flex: 4, p: 2 }}>
         <MessageDisplay />
       </Box>
     </Box>

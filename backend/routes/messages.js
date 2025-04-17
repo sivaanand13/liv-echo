@@ -48,13 +48,14 @@ router.route("/:chatId/messages").get(async (req, res) => {
 });
 
 router.route("/:chatId/messages").post(async (req, res) => {
-  let { chatId, text, attachments } = req.body;
+  let { chatId, text, attachments, tempId } = req.body;
   let uid = req.user.uid;
 
   let user;
   let chat;
   try {
     console.log("Validating: ", text, chatId);
+    tempId = validation.validateString(tempId);
     user = await usersController.getUserByUID(uid);
     chat = await chatsController.getChatById(chatId);
     text = validation.validateString(text);
@@ -77,7 +78,8 @@ router.route("/:chatId/messages").post(async (req, res) => {
       chatId,
       uid,
       text,
-      attachments
+      attachments,
+      tempId
     );
     return res.status(200).json({
       message: "Attached message media!",
@@ -199,11 +201,13 @@ router.route("/:chatId/messages/:messageId").delete(async (req, res) => {
   }
 
   try {
-    await chatsController.verifyUserChatAccess(uid, message.chat.toString());
-    if (
-      message.sender.toString() !== user._id.toString() &&
-      !chat.admins.includes(user._id)
-    ) {
+    let allowed = await messagesController.hasMessageDeleteAuth(
+      chatId,
+      messageId,
+      uid
+    );
+
+    if (!allowed) {
       throw `Only original sender or admin can delete chat message!`;
     }
   } catch (e) {

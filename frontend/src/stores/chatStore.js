@@ -70,12 +70,41 @@ const chatStore = create((set, get) => ({
   setCurrentMessages: (messages) => {
     set({ currentChatMessages: messages });
   },
-  addCurrentChatMessages: (message) => {
+  addCurrentChatTempMessages: (message) => {
     const currentChat = get().currentChat;
+
     if (currentChat && currentChat._id === message.chat.toString()) {
-      set((state) => ({
-        currentChatMessages: [...state.currentChatMessages, message],
-      }));
+      set((state) => {
+        console.log("Temp message: ", message);
+        return {
+          currentChatMessages: [...state.currentChatMessages, message],
+        };
+      });
+    }
+  },
+  addCurrentChatMessages: (message, tempId) => {
+    const currentChat = get().currentChat;
+
+    if (currentChat && currentChat._id === message.chat.toString()) {
+      set((state) => {
+        const tempMessage = state.currentChatMessages.find(
+          (msg) => msg._id === tempId
+        );
+        console.log(tempMessage);
+        if (tempMessage) {
+          return {
+            currentChatMessages: state.currentChatMessages.map((msg) => {
+              if (msg._id == tempId) {
+                return message;
+              }
+              return msg;
+            }),
+          };
+        }
+        return {
+          currentChatMessages: [...state.currentChatMessages, message],
+        };
+      });
     }
   },
   updateCurrentChatMessages: (message) => {

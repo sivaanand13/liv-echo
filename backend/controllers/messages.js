@@ -15,7 +15,7 @@ async function getDisplayMessage(id) {
   );
 }
 
-async function postMessage(chatId, uid, text, attachments) {
+async function postMessage(chatId, uid, text, attachments, tempId) {
   const chat = await chatsController.getChatById(chatId);
   const user = await usersController.getUserByUID(uid);
 
@@ -49,12 +49,12 @@ async function postMessage(chatId, uid, text, attachments) {
     },
     { new: true }
   );
-  console.log("Emitting to new message to all members:");
+  console.log("Emitting to new message to all members:", tempId);
   const uiChat = await chatsController.getDisplayChat(chat._id);
   const displayMessage = await getDisplayMessage(message._id);
   uiChat.members.forEach((member) => {
     chatNamespace.to(member.uid).emit("chatUpdated", uiChat);
-    chatNamespace.to(member.uid).emit("messageCreated", displayMessage);
+    chatNamespace.to(member.uid).emit("messageCreated", displayMessage, tempId);
   });
 }
 
@@ -107,6 +107,21 @@ async function updateMessageAttachments(
   return updatedMessage;
 }
 
+async function hasMessageDeleteAuth(chatId, messageId, uid) {
+  const chat = await chatsController.getChatById(chatId);
+  const message = await getMessageById(messageId);
+  const user = await usersController.getUserByUID(uid);
+  if (!chat.members.includes(user._id)) {
+    return false;
+  }
+  if (
+    chat.admins.includes(user._id) ||
+    message.sender.toString() === chat._id.toString()
+  ) {
+    return true;
+  }
+}
+
 async function updateMessage(messageId, uid, text, attachments) {
   let message = await getMessageById(messageId);
   const user = await usersController.getUserByUID(uid);
@@ -146,11 +161,14 @@ async function deleteMessage(uid, messageId) {
   const chat = await chatsController.getDisplayChat(message.chat);
   await chatsController.verifyUserChatAccess(uid, message.chat.toString());
 
-  if (
-    message.sender.toString() !== user._id.toString() &&
-    !chat.admins.includes(user._id)
-  ) {
-    throw `Only original or admin can delete chat message!`;
+  let allowed = await hasMessageDeleteAuth(
+    message.chat.toString(),
+    messageId,
+    uid
+  );
+
+  if (!allowed) {
+    throw `Only original sender or admin can delete chat message!`;
   }
 
   await Message.deleteOne({ _id: message._id, sender: user._id });
@@ -190,4 +208,5 @@ export default {
   getMessageById,
   deleteMessage,
   getMessagesByChatId,
+  hasMessageDeleteAuth,
 };

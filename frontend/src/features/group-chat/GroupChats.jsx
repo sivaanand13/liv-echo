@@ -27,8 +27,8 @@ export default function GroupChats() {
     <Box sx={{ display: "flex", height: "calc(100vh - 4rem)" }}>
       <Box
         sx={{
-          minWidth: "25vw",
-          width: "fit-content",
+          flex: 1,
+          minWidth: "fit-content",
           borderRight: 1,
           borderColor: "divider",
         }}
@@ -41,7 +41,7 @@ export default function GroupChats() {
           CreateChat={CreateGroupChat}
         />
       </Box>
-      <Box sx={{ flexGrow: 1, p: 2 }}>
+      <Box sx={{ flex: 4, p: 2 }}>
         <MessageDisplay />
       </Box>
     </Box>

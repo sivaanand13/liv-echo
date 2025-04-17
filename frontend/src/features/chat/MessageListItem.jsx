@@ -66,7 +66,7 @@ export default function MessageListItem({ msg, admins }) {
             <Typography variant="body1">{msg.text}</Typography>
           </Stack>
           {(auth.currentUser.uid == msg.sender.uid ||
-            admins.includes(auth.currentUser.uid)) && (
+            admins.find((admin) => admin.uid == auth.currentUser.uid)) && (
             <>
               <IconButton
                 onClick={handleOpen}

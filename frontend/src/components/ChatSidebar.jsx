@@ -31,7 +31,7 @@ export default function ChatSidebar({
   const theme = useTheme();
   console.log(theme.palette.background.default);
   return (
-    <Paper sx={{ height: "100%" }}>
+    <Paper sx={{ minWidth: "fit-content", height: "100%" }}>
       <Stack
         direction="row"
         alignItems="center"

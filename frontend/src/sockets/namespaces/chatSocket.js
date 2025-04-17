@@ -31,13 +31,9 @@ const connect = async () => {
     }
   });
 
-  socket.on("messageCreated", (message) => {
-    console.log("recived message: ", message);
-    if (message.type == "dm") {
-      chatStore.getState().addCurrentChatMessages(message);
-    } else {
-      chatStore.getState().addCurrentChatMessages(message);
-    }
+  socket.on("messageCreated", (message, tempId) => {
+    console.log("recived message: ", message, tempId);
+    chatStore.getState().addCurrentChatMessages(message, tempId);
   });
 
   socket.on("messageUpdated", (message) => {

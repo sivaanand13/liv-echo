@@ -46,7 +46,7 @@ async function createChat(uid, chat) {
     if (await getDM(members[0], members[1])) {
       throw `A DM already exists between ${members[0]} and ${members[1]}`;
     }
-    admins = members;
+    admins = [];
   } else {
     admins = [adminUser._id];
   }
@@ -143,11 +143,11 @@ async function verifyUserChatAccess(uid, chatId) {
 async function verifyUserAdminAccess(uid, chatId) {
   const user = await userController.getUserByUID(uid);
   const chat = await getChatById(chatId);
-  if (!chat.members.includes(uid)) {
+  if (!chat.members.includes(user.id)) {
     throw `User (${uid}) does not have access to chat ${chatId}`;
   }
 
-  if (!chat.admins.includes(uid)) {
+  if (!chat.admins.includes(user._id)) {
     throw `User (${uid}) does not have admin access to chat ${chatId}`;
   }
   return chat;
