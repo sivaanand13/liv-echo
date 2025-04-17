@@ -26,6 +26,7 @@ import CustomList from "../../components/CustomList";
 import Profile from "../../components/Profile";
 import MessageListItem from "./MessageListItem";
 import CloseIcon from "@mui/icons-material/Close";
+import CurrentChatMembers from "./CurrentChatMembers";
 
 export default function MessageDisplay({ chat }) {
   const [messageText, setMessageText] = useState("");
@@ -95,8 +96,6 @@ export default function MessageDisplay({ chat }) {
     <Stack
       height="100%"
       spacing={1}
-      alignItems={"center"}
-      justifyContent={"center"}
       textAlign={"center"}
       bgcolor={"white"}
       direction="column"
@@ -115,7 +114,8 @@ export default function MessageDisplay({ chat }) {
               </Typography>
             </Box>
           )}
-          <Box
+          <Stack
+            direction="row"
             sx={{
               flex: 1,
               overflowY: "auto",
@@ -123,18 +123,41 @@ export default function MessageDisplay({ chat }) {
               pb: 2,
             }}
           >
-            <Stack spacing={1}>
-              {currentChatMessages && (
-                <CustomList
-                  sx={{ width: "60vw" }}
-                  listData={currentChatMessages}
-                  mappingFunction={(msg) => {
-                    return <MessageListItem msg={msg} />;
-                  }}
-                />
-              )}
-            </Stack>
-          </Box>
+            <Box
+              sx={{
+                flex: 1,
+                overflowY: "auto",
+              }}
+            >
+              <Stack spacing={1}>
+                {currentChatMessages && (
+                  <CustomList
+                    listData={currentChatMessages}
+                    mappingFunction={(msg) => {
+                      return (
+                        <MessageListItem
+                          msg={msg}
+                          admins={currentChat.admins}
+                        />
+                      );
+                    }}
+                  />
+                )}
+              </Stack>
+            </Box>
+            <Box
+              sx={{
+                overflowY: "auto",
+                border: "1em",
+                position: "sticky",
+                top: "5rem",
+                padding: "1rem",
+              }}
+            >
+              <Typography variant="h5">Members</Typography>
+              <CurrentChatMembers />
+            </Box>
+          </Stack>
           {attachments && attachments.length > 0 && (
             <ImageList
               cols={attachments.length}

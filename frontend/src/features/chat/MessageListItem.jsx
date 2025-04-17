@@ -16,7 +16,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import chatUtils from "./chatUtils";
-export default function MessageListItem({ msg }) {
+export default function MessageListItem({ msg, admins }) {
   const auth = useContext(AuthContext);
   const [menuOpen, setMenuOpen] = useState(false);
   const [ancor, setAncor] = useState(null);
@@ -65,7 +65,8 @@ export default function MessageListItem({ msg }) {
 
             <Typography variant="body1">{msg.text}</Typography>
           </Stack>
-          {auth.currentUser.uid == msg.sender.uid && (
+          {(auth.currentUser.uid == msg.sender.uid ||
+            admins.includes(auth.currentUser.uid)) && (
             <>
               <IconButton
                 onClick={handleOpen}

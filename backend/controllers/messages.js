@@ -146,8 +146,11 @@ async function deleteMessage(uid, messageId) {
   const chat = await chatsController.getDisplayChat(message.chat);
   await chatsController.verifyUserChatAccess(uid, message.chat.toString());
 
-  if (message.sender.toString() !== user._id.toString()) {
-    throw `Only original user can attach items to this message!`;
+  if (
+    message.sender.toString() !== user._id.toString() &&
+    !chat.admins.includes(user._id)
+  ) {
+    throw `Only original or admin can delete chat message!`;
   }
 
   await Message.deleteOne({ _id: message._id, sender: user._id });

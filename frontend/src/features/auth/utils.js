@@ -1,6 +1,11 @@
 import { get, post } from "../../utils/requests/axios.js";
 import firebaseUtils from "../../firebase/utils.js";
-import { getAuth, updateProfile, updateEmail, updatePassword } from "firebase/auth";
+import {
+  getAuth,
+  updateProfile,
+  updateEmail,
+  updatePassword,
+} from "firebase/auth";
 import validation from "../../utils/validation.js";
 async function signUpUser(name, email, username, dob, password) {
   try {
@@ -48,7 +53,7 @@ async function signUpUser(name, email, username, dob, password) {
   }
 }
 
-async function signInUser( username, email, password) {
+async function signInUser(username, email, password) {
   try {
     validation.validateEmail(email);
     validation.validateUsername(username);
@@ -68,7 +73,7 @@ async function signInUser( username, email, password) {
   try {
     const auth = getAuth();
     const user = auth.currentUser;
-    await post("users/signin/", { uid: user.uid, email, username});
+    await post("users/signin/", { uid: user.uid, email, username });
   } catch (e) {
     console.log(e);
     throw e.data && e.data.message
@@ -95,8 +100,6 @@ async function editUser(name, email, username, dob, password, oldPassword) {
     if (!user) {
       throw new Error("No user is currently logged in!");
     }
-    //console.log(user);
-    console.log("Hi");
     await post("users/editAccount/", {
       uid: user.uid,
       name,
@@ -108,8 +111,8 @@ async function editUser(name, email, username, dob, password, oldPassword) {
       await updateProfile(user, {
         displayName: name,
       });
-      
-      await firebaseUtils.reauthenticateFirebaseUser(oldPassword)
+
+      await firebaseUtils.reauthenticateFirebaseUser(oldPassword);
       //need to reprompt user
       if (email !== user.email) {
         console.log("EMAIL PLS");
@@ -130,5 +133,5 @@ async function editUser(name, email, username, dob, password, oldPassword) {
 export default {
   signUpUser,
   signInUser,
-  editUser
+  editUser,
 };

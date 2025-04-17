@@ -6,8 +6,8 @@ import {
   ListItemText,
   Stack,
 } from "@mui/material";
-
-export default function UserListItem({ user }) {
+import { AdminPanelSettingsSharp } from "@mui/icons-material";
+export default function UserListItem({ user, admin }) {
   return (
     <Stack direction="row" alignItems="center">
       <ListItemAvatar>
@@ -15,7 +15,17 @@ export default function UserListItem({ user }) {
       </ListItemAvatar>
       <ListItemText
         disableTypography={true}
-        primary={user?.name || "Name not avaliable"}
+        primary={
+          <Stack direction="row" spacing={1}>
+            {admin && (
+              <AdminPanelSettingsSharp
+                fontSize="small"
+                sx={{ color: "primary.main" }}
+              />
+            )}{" "}
+            <Typography> {user?.name || "Name not avaliable"} </Typography>{" "}
+          </Stack>
+        }
         secondary={
           <Stack direction={"column"}>
             <Typography

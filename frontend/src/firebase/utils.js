@@ -6,8 +6,16 @@ import {
   signOut,
   signInWithEmailAndPassword,
   reauthenticateWithCredential,
-  EmailAuthProvider
+  EmailAuthProvider,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from "firebase/auth";
+
+async function createFirebaseUserWithGoogle(email, password, displayName) {
+  const auth = getAuth();
+  const googleProvider = new GoogleAuthProvider();
+  await signInWithPopup(auth, googleProvider);
+}
 
 async function createFirebaseUser(email, password, displayName) {
   const auth = getAuth();
@@ -43,4 +51,5 @@ export default {
   signOutFirebaseUser,
   signInFirebaseUser,
   reauthenticateFirebaseUser,
+  createFirebaseUserWithGoogle,
 };

@@ -187,10 +187,12 @@ router.route("/:chatId/messages/:messageId").delete(async (req, res) => {
   let uid = req.user.uid;
 
   let message;
+  let chat;
   let user;
   try {
     message = await messagesController.getMessageById(messageId);
     user = await usersController.getUserByUID(uid);
+    chat = await chatsController.getChatById(chatId);
   } catch (e) {
     console.log(e);
     return res.status(400).json({ message: e });
@@ -198,8 +200,11 @@ router.route("/:chatId/messages/:messageId").delete(async (req, res) => {
 
   try {
     await chatsController.verifyUserChatAccess(uid, message.chat.toString());
-    if (message.sender.toString() !== user._id.toString()) {
-      throw `Only original sender can delete message!`;
+    if (
+      message.sender.toString() !== user._id.toString() &&
+      !chat.admins.includes(user._id)
+    ) {
+      throw `Only original sender or admin can delete chat message!`;
     }
   } catch (e) {
     return res.status(403).json({ message: e });
