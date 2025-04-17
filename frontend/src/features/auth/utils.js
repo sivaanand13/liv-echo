@@ -84,11 +84,11 @@ async function signInUser(username, email, password) {
 async function editUser(name, email, username, dob, password, oldPassword) {
   try {
     validation.validateString(name);
-    validation.validateString(email);
+    validation.validateEmail(email);
     validation.validateUsername(username);
     validation.validateDob(dob);
-    validation.validatePassword(password);
-    validation.validatePassword(oldPassword);
+    if(password) validation.validatePassword(password);
+    if(oldPassword) validation.validatePassword(oldPassword);
   } catch (e) {
     console.log(e);
     throw "Fix errors before submitting!";
@@ -102,17 +102,19 @@ async function editUser(name, email, username, dob, password, oldPassword) {
     }
     await post("users/editAccount/", {
       uid: user.uid,
-      name,
-      email,
-      username,
-      dob,
+      name: name || user.displayName,
+      email: email || user.email,
+      username: username,
+      dob: dob || user.dob,
     });
     if (user) {
       await updateProfile(user, {
         displayName: name,
       });
 
-      await firebaseUtils.reauthenticateFirebaseUser(oldPassword);
+      if(oldPassword){
+        await firebaseUtils.reauthenticateFirebaseUser(oldPassword)
+      }
       //need to reprompt user
       if (email !== user.email) {
         console.log("EMAIL PLS");
