@@ -4,6 +4,9 @@ import {
   updateProfile,
   deleteUser,
   signOut,
+  signInWithEmailAndPassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider
 } from "firebase/auth";
 
 async function createFirebaseUser(email, password, displayName) {
@@ -21,5 +24,23 @@ async function signOutFirebaseUser() {
   const auth = getAuth();
   await signOut(auth);
 }
+async function signInFirebaseUser(email, password) {
+  const auth = getAuth();
+  await signInWithEmailAndPassword(auth, email, password);
+}
 
-export default { createFirebaseUser, deleteFirebaseUser, signOutFirebaseUser };
+async function reauthenticateFirebaseUser(oldPassword) {
+  const auth = getAuth();
+  let credential = EmailAuthProvider.credential(
+    auth.currentUser.email,
+    oldPassword
+  );
+  await reauthenticateWithCredential(auth.currentUser, credential);
+}
+export default {
+  createFirebaseUser,
+  deleteFirebaseUser,
+  signOutFirebaseUser,
+  signInFirebaseUser,
+  reauthenticateFirebaseUser,
+};
