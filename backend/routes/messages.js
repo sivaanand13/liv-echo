@@ -187,18 +187,19 @@ router.route("/:chatId/messages/:messageId").delete(async (req, res) => {
   let uid = req.user.uid;
 
   let message;
-
+  let user;
   try {
     message = await messagesController.getMessageById(messageId);
     user = await usersController.getUserByUID(uid);
   } catch (e) {
+    console.log(e);
     return res.status(400).json({ message: e });
   }
 
   try {
     await chatsController.verifyUserChatAccess(uid, message.chat.toString());
-    if (message.sender.toString() !== uid) {
-      throw `Only original sender can attach items to this message!`;
+    if (message.sender.toString() !== user._id.toString()) {
+      throw `Only original sender can delete message!`;
     }
   } catch (e) {
     return res.status(403).json({ message: e });

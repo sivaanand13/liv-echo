@@ -16,7 +16,7 @@ export function validateCloudinaryObject(asset) {
 
 export async function uploadMedia(file, folder) {
   const res = await cloudinary.uploader.upload(file, {
-    folder,
+    folder: `chats/${folder}`,
     resource_type: "auto",
   });
 

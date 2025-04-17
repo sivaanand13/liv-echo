@@ -58,6 +58,22 @@ export const post = async (endpoint, body = {}) => {
   }
 };
 
+export const del = async (endpoint, body = {}) => {
+  try {
+    const { status, data } = await axiosInstance.delete(url(endpoint), body);
+    return {
+      status,
+      data,
+    };
+  } catch (e) {
+    console.log(`DELETE request failed for ${url(endpoint)}`, body, e);
+    throw {
+      status: e.response ? e.response.status : null,
+      data: e.response ? e.response.data : null,
+    };
+  }
+};
+
 export const uploadAttachments = async (files) => {
   const body = new FormData();
   if (!Array.isArray(files)) {
@@ -74,5 +90,6 @@ export const uploadAttachments = async (files) => {
 export default {
   get,
   post,
+  del,
   uploadAttachments,
 };

@@ -6,9 +6,15 @@ import {
   TextField,
   IconButton,
   Divider,
+  Avatar,
   ListItem,
   ListItemAvatar,
   ListItemText,
+  Alert,
+  ImageList,
+  ImageListItem,
+  ImageListItemBar,
+  CardMedia,
 } from "@mui/material";
 import chatStore from "../../stores/chatStore";
 import { useEffect, useState } from "react";
@@ -18,6 +24,8 @@ import validation from "../../utils/validation";
 import chatUtils from "./chatUtils";
 import CustomList from "../../components/CustomList";
 import Profile from "../../components/Profile";
+import MessageListItem from "./MessageListItem";
+import CloseIcon from "@mui/icons-material/Close";
 
 export default function MessageDisplay({ chat }) {
   const [messageText, setMessageText] = useState("");
@@ -102,7 +110,9 @@ export default function MessageDisplay({ chat }) {
         <>
           {currentChat?.type == "group" && (
             <Box>
-              <Typography variant="h3">{currentChat.name}</Typography>
+              <Typography variant="h3" margin="2rem">
+                {currentChat.name}
+              </Typography>
             </Box>
           )}
           <Box
@@ -119,47 +129,67 @@ export default function MessageDisplay({ chat }) {
                   sx={{ width: "60vw" }}
                   listData={currentChatMessages}
                   mappingFunction={(msg) => {
-                    return (
-                      <ListItem
-                        sx={{
-                          backgroundColor: "rgba(255, 255, 255, 0.8)",
-                          backdropFilter: "blur(10px)",
-                          borderRadius: "0.5em",
-                          marginBottom: "2em",
-                          boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-                        }}
-                      >
-                        <ListItemAvatar>
-                          <Profile user={msg.sender} />
-                        </ListItemAvatar>
-                        <ListItemText
-                          disableTypography
-                          primary={
-                            <Typography variant="body1">{msg.text}</Typography>
-                          }
-                          secondary={
-                            <Stack direction="row" spacing={3}>
-                              <Typography variant="caption">
-                                {new Date(msg.createdAt).toLocaleString()}
-                              </Typography>
-                              <Typography variant="caption">
-                                {msg.sender?.username || "Unknown"}
-                              </Typography>
-                            </Stack>
-                          }
-                        />
-                      </ListItem>
-                    );
+                    return <MessageListItem msg={msg} />;
                   }}
                 />
               )}
             </Stack>
           </Box>
+          {attachments && attachments.length > 0 && (
+            <ImageList
+              cols={attachments.length}
+              sx={{
+                position: "relative",
+                maxHeight: "20vh",
+                borderRadius: "0.5rem",
+                flexWrap: "flex",
+                overflowX: "auto",
+                overflowY: "hidden",
+                boxShadow: 1,
+              }}
+            >
+              {attachments.map((attachment, index) => {
+                console.log(attachment);
+                return (
+                  <ImageListItem key={index} sx={{ maxHeight: "15vh" }}>
+                    <img
+                      alt={`Attachment ${index + 1}`}
+                      src={URL.createObjectURL(attachment)}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                      }}
+                    />
+                    <ImageListItemBar
+                      position="top"
+                      title={attachment.name}
+                      actionIcon={
+                        <IconButton
+                          sx={{ color: "red" }}
+                          aria-label={`remove ${attachment.name}`}
+                          onClick={() => {
+                            setAttachments((prev) =>
+                              prev.filter((file, i) => index != i)
+                            );
+                          }}
+                        >
+                          <CloseIcon />
+                        </IconButton>
+                      }
+                      actionPosition="left"
+                    />
+                  </ImageListItem>
+                );
+              })}
+            </ImageList>
+          )}
           <Box
             sx={{
               display: "flex",
               justifyContent: "center",
               width: "100%",
+              margin: "2rem",
             }}
           >
             <Paper
@@ -168,6 +198,7 @@ export default function MessageDisplay({ chat }) {
                 alignItems: "center",
                 width: "100%",
                 padding: "1em",
+                marginBottom: "2rem",
               }}
             >
               <TextField
@@ -189,16 +220,23 @@ export default function MessageDisplay({ chat }) {
                   }
                 }}
               />
-              <IconButton type="button">
+              <IconButton component="label">
                 <AddIcon />
                 <input
                   accept="image/*"
                   id="profile"
                   name="profile"
-                  multiple={true}
+                  multiple
                   type="file"
-                  onChange={(e) => setAttachments(e.target.files)}
-                  hidden={true}
+                  hidden
+                  onChange={(e) => {
+                    let files = Array.from(e.target.files);
+                    if (files.length > 5) {
+                      alert("Please limit attachments to five!");
+                      files = files.slice(0, 5);
+                    }
+                    setAttachments(Array.from(files));
+                  }}
                 />
               </IconButton>
               <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />

@@ -110,14 +110,13 @@ function Account() {
       setOldPasswordError
     );
 
-
     const invalidFields = [
       nameError,
       emailError,
       usernameError,
       dobError,
       passwordError,
-      oldPasswordError
+      oldPasswordError,
     ].some((e) => e != "");
 
     if (invalidFields) {
@@ -125,7 +124,14 @@ function Account() {
       return;
     } else {
       try {
-        await authUtils.editUser(name, email, username, dob, password, oldPassword);
+        await authUtils.editUser(
+          name,
+          email,
+          username,
+          dob,
+          password,
+          oldPassword
+        );
       } catch (e) {
         console.log("Account.jsx", e);
         setError(e.message);
@@ -144,12 +150,12 @@ function Account() {
         justifyContent: "center",
         alignItems: "center",
         minHeight: "100vh",
-        paddingTop: "80px"
+        paddingTop: "80px",
       }}
     >
       <Card sx={{ minWidth: "40%", maxWidth: "50%", padding: "2rem" }}>
         <Stack spacing={2} width="100%">
-           {/* Welcome Message */}
+          {/* Welcome Message */}
           <Typography variant="h5" sx={{ textAlign: "center" }}>
             Welcome, {currentUser.displayName}!
           </Typography>
@@ -267,7 +273,9 @@ function Account() {
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
-                        aria-label={showOldPassword ? "Hide password" : "Show password"}
+                        aria-label={
+                          showOldPassword ? "Hide password" : "Show password"
+                        }
                         onClick={toggleShowOldPassword}
                         edge="end"
                       >

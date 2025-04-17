@@ -17,7 +17,7 @@ export default function Profile({ user }) {
       alt={user?.name}
       sx={{
         bgcolor: colorHsh.hex(user.name),
-        color: "#fff",
+        color: "#fffff",
       }}
     >
       {!user.profile?.url && extractInitials()}

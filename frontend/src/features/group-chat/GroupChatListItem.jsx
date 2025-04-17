@@ -21,13 +21,21 @@ export default function GroupChatListItem({ item: chat }) {
         primary={chat?.name || "Name not avaliable"}
         secondary={
           <Stack direction={"column"}>
-            {chat?.latestMessage?.text && (
+            {chat?.latestMessage?.text ? (
               <Typography
                 component="span"
                 variant="body2"
                 sx={{ color: "text.primary", display: "inline" }}
               >
                 {chat.latestMessage.text}
+              </Typography>
+            ) : (
+              <Typography
+                component="span"
+                variant="body2"
+                sx={{ color: "text.primary", display: "inline" }}
+              >
+                No messages yet{" "}
               </Typography>
             )}
           </Stack>

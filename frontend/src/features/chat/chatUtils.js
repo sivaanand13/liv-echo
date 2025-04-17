@@ -23,11 +23,26 @@ async function sendMessage(chat, messageText, attachments) {
     return response.data.data;
   } catch (e) {
     console.log(e);
-    throw `Group chat create failed!`;
+    throw `Message send failed!`;
+  }
+}
+
+async function deleteMessage(msg) {
+  console.log("Attempting to delte message: ", msg._id);
+  try {
+    const response = await axios.del(
+      `chats/${msg.chat}/messages/${msg._id}`,
+      {}
+    );
+    return response.data.data;
+  } catch (e) {
+    console.log(e);
+    throw `Message delte failed!`;
   }
 }
 
 export default {
   getMessages,
   sendMessage,
+  deleteMessage,
 };

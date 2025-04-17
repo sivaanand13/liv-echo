@@ -5,6 +5,7 @@ import { AuthContext } from "../../contexts/AuthContext";
 import ChatListItem from "../../components/ChatListItem";
 
 export default function DMsListItem({ item: chat }) {
+  console.log(chat);
   const auth = useContext(AuthContext);
   const user = chat.members.find((member) => member.uid !== auth.uid);
   return (
@@ -19,13 +20,25 @@ export default function DMsListItem({ item: chat }) {
         })`}
         secondary={
           <Stack direction={"column"}>
-            {chat?.latestMessage?.text && (
+            {chat?.latestMessage?.text ? (
               <Typography
                 component="span"
                 variant="body2"
                 sx={{ color: "text.primary", display: "inline" }}
               >
-                {`${user?.username}: ${chat.latestMessage.text}`}
+                {`${
+                  chat.latestMessage?.sender.username ||
+                  chat.latestMessage?.senderName ||
+                  ""
+                }: ${chat.latestMessage.text}`}
+              </Typography>
+            ) : (
+              <Typography
+                component="span"
+                variant="body2"
+                sx={{ color: "text.primary", display: "inline" }}
+              >
+                No Messages yet
               </Typography>
             )}
           </Stack>

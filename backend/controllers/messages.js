@@ -26,6 +26,7 @@ async function postMessage(chatId, uid, text, attachments) {
     sender: user._id,
     senderName: user.name,
     senderProfile: user.profile,
+    senderUsername: user.username,
     text: text,
     attachments: [],
     chat: chat._id,
@@ -142,18 +143,24 @@ async function updateMessage(messageId, uid, text, attachments) {
 async function deleteMessage(uid, messageId) {
   const message = await getMessageById(messageId);
   const user = await usersController.getUserByUID(uid);
-  const chat = await getChatById(message.chat.toString());
-  chatsController.verifyUserChatAccess(uid, message.chat);
+  const chat = await chatsController.getDisplayChat(message.chat);
+  await chatsController.verifyUserChatAccess(uid, message.chat.toString());
 
   if (message.sender.toString() !== user._id.toString()) {
     throw `Only original user can attach items to this message!`;
   }
 
-  await Message.deleteOne({ _id: message._id, sender: uid });
+  await Message.deleteOne({ _id: message._id, sender: user._id });
+
+  console.log("Emitting to message delete to all members:");
+  chat.members.forEach((member) => {
+    console.log("Sending to " + member);
+    chatNamespace.to(member.uid).emit("messageRemoved", message);
+  });
 }
 
 async function getMessageById(messageId) {
-  messageId = validation.validateString(true, "Message Id", true);
+  messageId = validation.validateString(messageId, "Message Id", true);
   messageId = ObjectId.createFromHexString(messageId);
   const message = await Message.findById(messageId);
   if (!message) {

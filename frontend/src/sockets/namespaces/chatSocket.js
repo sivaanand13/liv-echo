@@ -41,19 +41,12 @@ const connect = async () => {
   });
 
   socket.on("messageUpdated", (message) => {
-    if (message.type == "dm") {
-      chatStore.getState().updateCurrentChatMessages(message);
-    } else {
-      chatStore.getState().updateCurrentChatMessages(message);
-    }
+    chatStore.getState().updateCurrentChatMessages(message);
   });
 
   socket.on("messageRemoved", (message) => {
-    if (message.type == "dm") {
-      chatStore.getState().removeCurrentChatMessages(message);
-    } else {
-      chatStore.getState().removeCurrentChatMessages(message);
-    }
+    console.log("messageRemoved: ", message._id);
+    chatStore.getState().removeCurrentChatMessages(message);
   });
 
   socket.on("disconnect", () => {
