@@ -21,7 +21,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Errors from "../../components/Errors.jsx";
 function Account() {
-  const { currentUser } = useContext(AuthContext);
+  const { currentUser, serverUser } = useContext(AuthContext);
 
   const [error, setError] = useState("");
 
