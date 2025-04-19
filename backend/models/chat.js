@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import settings from "./settings.js";
 import { CloudinaryAssetSchema } from "./cloudinaryAsset.js";
+import Message from "./message.js";
 const ChatSchema = new Schema(
   {
     name: {

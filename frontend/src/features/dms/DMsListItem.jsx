@@ -8,6 +8,12 @@ export default function DMsListItem({ item: chat }) {
   console.log(chat);
   const auth = useContext(AuthContext);
   const user = chat.members.find((member) => member.uid !== auth.uid);
+  let preview = `${
+    chat.latestMessage?.sender.username || chat.latestMessage?.senderName || ""
+  }: ${chat?.latestMessage?.text}`;
+  if (preview.length > 30) {
+    preview = preview.slice(0, 30) + "...";
+  }
   return (
     <ChatListItem item={chat} key={chat._id.toString()}>
       <ListItemAvatar>
@@ -26,11 +32,7 @@ export default function DMsListItem({ item: chat }) {
                 variant="body2"
                 sx={{ color: "text.primary", display: "inline" }}
               >
-                {`${
-                  chat.latestMessage?.sender.username ||
-                  chat.latestMessage?.senderName ||
-                  ""
-                }: ${chat.latestMessage.text}`}
+                {preview}
               </Typography>
             ) : (
               <Typography

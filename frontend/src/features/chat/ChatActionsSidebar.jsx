@@ -4,11 +4,17 @@ import { useContext, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import chatStore from "../../stores/chatStore";
 import LeaveChatDialog from "./LeaveChatDialog";
+import DeleteChatDialog from "./DeleteChatDialog";
+import EditChatDialog from "./EditChatDialog";
 export default function ChatActionsSidebar() {
   const [openLeaveChat, setOpenLeaveChat] = useState(false);
+  const [openDeleteChat, setOpenDeleteChat] = useState(false);
+  const [openEditChat, setOpenEditChat] = useState(false);
 
-  function handleCloseLeaveChat() {
+  function handleClose() {
     setOpenLeaveChat(false);
+    setOpenDeleteChat(false);
+    setOpenEditChat(false);
   }
   const auth = useContext(AuthContext);
   const { currentChat } = chatStore();
@@ -20,20 +26,27 @@ export default function ChatActionsSidebar() {
       </Box>
       <Box>
         <Typography variant="h5">Chat Actions</Typography>
-        <Stack direction="column">
-          <Button onClick={() => setOpenLeaveChat(!openLeaveChat)}>
-            Leave Chat
-          </Button>
-          {currentChat?.admins.find(
-            (admin) => admin.uid == auth?.currentUser?.uid
-          ) && <Button>Edit Chat</Button>}
-        </Stack>
+        {currentChat?.admins.find(
+          (admin) => admin.uid == auth?.currentUser?.uid
+        ) ? (
+          <Stack>
+            <Button onClick={() => setOpenDeleteChat(!openDeleteChat)}>
+              Delete Chat
+            </Button>
+            <Button>Edit Chat</Button>
+          </Stack>
+        ) : (
+          <Stack>
+            <Button onClick={() => setOpenLeaveChat(!openLeaveChat)}>
+              Leave Chat
+            </Button>
+          </Stack>
+        )}
       </Box>
 
-      <LeaveChatDialog
-        open={openLeaveChat}
-        handleClose={handleCloseLeaveChat}
-      />
+      <LeaveChatDialog open={openLeaveChat} handleClose={handleClose} />
+      <DeleteChatDialog open={openDeleteChat} handleClose={handleClose} />
+      <EditChatDialog open={openEditChat} handleClose={handleClose} />
     </Stack>
   );
 }

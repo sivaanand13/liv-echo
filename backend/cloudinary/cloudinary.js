@@ -28,6 +28,13 @@ export async function uploadMedia(file, folder) {
   };
 }
 
+export async function deleteMedia(cloudinaryAsset) {
+  const res = await cloudinary.uploader.destroy(cloudinaryAsset.public_id, {
+    invalidate: true,
+  });
+  return res;
+}
+
 export async function uploadBufferedMedia(buffer, folder) {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
@@ -51,4 +58,5 @@ export async function uploadBufferedMedia(buffer, folder) {
 export default {
   validateCloudinaryObject,
   uploadBufferedMedia,
+  deleteMedia,
 };

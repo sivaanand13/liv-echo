@@ -92,10 +92,6 @@ export default function MessageDisplay({ chat }) {
     }
   }
 
-  if (!currentChat) {
-    return <Stack></Stack>;
-  }
-
   return (
     <Stack
       height="100%"
@@ -291,7 +287,18 @@ export default function MessageDisplay({ chat }) {
           </Stack>
         </>
       ) : (
-        <Typography variant="h3">Select a chat to message...</Typography>
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Typography align="center" variant="h3">
+            Select a chat to message...
+          </Typography>
+        </Box>
       )}
     </Stack>
   );
