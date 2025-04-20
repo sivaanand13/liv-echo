@@ -20,6 +20,78 @@ router.route("/").get(authMiddleware, async (req, res) => {
     });
   }
 });
+router.route("/editaccount/email/uniqueCheck/").get(async (req, res) => {
+  let { email, uid} = req.query;
+  console.log("Checking unique email", email);
+  try {
+    email = validation.validateEmail(email);
+  } catch (e) {
+    return res.status(400).json({
+      message: "Unique email check failed!",
+      errors: e,
+    });
+  }
+  try {
+    const existingUser = await userController.getUserByUID(uid); //Retrieve the current user by UID
+    if (existingUser.email === email) {
+      //Email is not changing
+      return res.status(200).json({
+        message: "Email is available",
+      });
+    }
+    const checkEmail = await userController.validateUnqiueEmail(email);
+    if (!checkEmail) {
+      return res.status(400).json({
+        message: "Email is in use by another user!",
+      });
+    }
+    console.log("Email not taken");
+    return res.status(200).json({
+      email: checkEmail,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      message: "Unique email check failed!",
+    });
+  }
+});
+router.route("/editaccount/username/uniqueCheck/").get(async (req, res) => {
+  let { username, uid } = req.query;
+  console.log("Checking unique username", username);
+  try {
+    username = validation.validateUsername(username);
+  } catch (e) {
+    return res.status(400).json({
+      message: "Unique username check failed!",
+      errors: e,
+    });
+  }
+  try {
+    const existingUser = await userController.getUserByUID(uid); //Retrieve the current user by UID
+    if (existingUser.username === username) {
+      //Email is not changing
+      return res.status(200).json({
+        message: "Username is available",
+      });
+    }
+    const checkUsername = await userController.validateUnqiueUsername(username);
+    if (!checkUsername) {
+      return res.status(400).json({
+        message: "Username is in use by another user!",
+      });
+    }
+    console.log("Username free");
+    return res.status(200).json({
+      username: checkUsername,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      message: "Unique username check failed!",
+    });
+  }
+});
 
 router.route("/signup/uniqueCheck/").get(async (req, res) => {
   let { email, username } = req.query;

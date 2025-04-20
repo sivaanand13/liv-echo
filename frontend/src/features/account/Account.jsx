@@ -41,6 +41,14 @@ function Account() {
   const [passwordError, setPasswordError] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
+  const [touchedFields, setTouchedFields] = useState({
+    name: false,
+    email: false,
+    username: false,
+    dob: false,
+    password: false,
+    oldPassword: false,
+  });
   console.log(currentUser);
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
@@ -90,23 +98,35 @@ function Account() {
     setError("");
     const finalName = name.trim() || currentUser.displayName;
     const finalEmail = email.trim() || currentUser.email;
+    const finalUsername = username.trim() || serverUser.username
+    const finalDOB = dob.trim() || serverUser.dob
     const finalPassword = password.trim() || undefined; 
     const finalOldPassword = oldPassword.trim() || undefined;
     if(name.trim()){
       validateField(name, validation.validateString, setName, setNameError);
     }
-    if(email.trim()){
+    if(email.trim() && email.trim() !== currentUser.email){
       validateField(email, validation.validateEmail, setEmail, setEmailError);
+      validateField(
+        oldPassword,
+        validation.validatePassword,
+        setOldPassword,
+        setOldPasswordError
+      );
     }
-    validateField(
-      username,
-      validation.validateUsername,
-      setUsername,
-      setUsernameError
-    );
-    validateField(dob, validation.validateDob, setDob, setDobError);
+    if(username.trim()){
+      validateField(
+        username,
+        validation.validateUsername,
+        setUsername,
+        setUsernameError
+      );
+    }
+    if(dob.trim()){
+      validateField(dob, validation.validateDob, setDob, setDobError);
+    }
     
-    if(password.trim() || oldPassword.trim()){
+    if(password.trim()){
       validateField(
         password,
         validation.validatePassword,
@@ -139,7 +159,11 @@ function Account() {
       return;
     } else {
       try {
-        await authUtils.editUser(finalName, finalEmail, username, dob, finalPassword, finalOldPassword);
+        const result = await authUtils.editUser(finalName, finalEmail, finalUsername, finalDOB, finalPassword, finalOldPassword);
+        if (result?.emailPendingVerification) {
+          setError(result.message);
+          return;
+        }
       } catch (e) {
         console.log("Account.jsx", e);
         setError(e.message);

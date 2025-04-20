@@ -5,6 +5,8 @@ import {
   updateProfile,
   updateEmail,
   updatePassword,
+  sendEmailVerification,
+  verifyBeforeUpdateEmail 
 } from "firebase/auth";
 import validation from "../../utils/validation.js";
 async function signUpUser(name, email, username, dob, password) {
@@ -97,34 +99,71 @@ async function editUser(name, email, username, dob, password, oldPassword) {
   try {
     const auth = getAuth();
     const user = auth.currentUser;
+    let bool = false;
     if (!user) {
       throw new Error("No user is currently logged in!");
+    }
+    const uid = user.uid;
+    if(oldPassword){
+      await firebaseUtils.reauthenticateFirebaseUser(oldPassword)
+    }
+    if(username){
+      await get("users/editaccount/username/uniqueCheck/", { //check username not used
+        username: username,
+        uid:uid,
+      });
+    }
+    if (email !== user.email) {
+      console.log("EMAIL PLS");
+      if (!user.emailVerified) { // User's email is not verified, so send verification email and stop
+        await sendEmailVerification(user);
+        throw new Error(
+          "Please verify your current email address before changing it. We've sent you a verification email."
+        );
+      }
+      if (!oldPassword) {
+        throw new Error("You must enter your current password to update your email.");
+      }
+      try {
+        await firebaseUtils.reauthenticateFirebaseUser(oldPassword)
+      } catch (err) {
+        console.log("Reauthentication failed", err);
+        throw new Error("Reauthentication failed. Please make sure your current password is correct.");
+      }
+      await get("users/editaccount/email/uniqueCheck/", { //check email not used
+        email: email,
+        uid:uid,
+      });
+      try {
+        bool = true;
+        await verifyBeforeUpdateEmail(user, email);
+        
+      } catch (e) {
+        console.log("Failed to send verification email:", e);
+        throw new Error("Could not send verification email. Try again.");
+      }
     }
     await post("users/editAccount/", {
       uid: user.uid,
       name: name || user.displayName,
       email: email || user.email,
-      username: username,
-      dob: dob || user.dob,
+      username: username || server.username,
+      dob: dob || server.dob,
     });
-    if (user) {
-      await updateProfile(user, {
-        displayName: name,
-      });
-
-      if(oldPassword){
-        await firebaseUtils.reauthenticateFirebaseUser(oldPassword)
-      }
-      //need to reprompt user
-      if (email !== user.email) {
-        console.log("EMAIL PLS");
-        await updateEmail(user, email);
-      }
-      if (password) {
-        console.log("Password pls");
-        await updatePassword(user, password);
-      }
+    await updateProfile(user, {
+      displayName: name,
+    });
+    if (password) {
+      console.log("Password pls");
+      await updatePassword(user, password);
     }
+    if(bool){
+      return {
+        emailPendingVerification: true,
+        message: "Verification email sent. Please confirm to apply the new email.",
+      };
+    }
+
   } catch (e) {
     console.log(e);
     throw e.data && e.data.message
