@@ -124,23 +124,25 @@ async function editUser(name, email, username, dob, password, oldPassword) {
       if (!oldPassword) {
         throw new Error("You must enter your current password to update your email.");
       }
+      await get("users/editaccount/email/uniqueCheck/", { //check email not used
+        email: email,
+        uid:uid,
+      });
       try {
         await firebaseUtils.reauthenticateFirebaseUser(oldPassword)
       } catch (err) {
         console.log("Reauthentication failed", err);
         throw new Error("Reauthentication failed. Please make sure your current password is correct.");
       }
-      await get("users/editaccount/email/uniqueCheck/", { //check email not used
-        email: email,
-        uid:uid,
-      });
       try {
-        bool = true;
-        await verifyBeforeUpdateEmail(user, email);
-        
-      } catch (e) {
-        console.log("Failed to send verification email:", e);
-        throw new Error("Could not send verification email. Try again.");
+        const response = await post("users/editaccount/email/update", {
+          uid: uid,
+          newEmail: email,
+        });
+        console.log(response.data.message); // Email updated successfully
+      } catch (err) {
+        console.log("Failed to update email in backend:", err);
+        throw new Error("Failed to update email in backend.");
       }
     }
     await post("users/editAccount/", {
@@ -157,12 +159,10 @@ async function editUser(name, email, username, dob, password, oldPassword) {
       console.log("Password pls");
       await updatePassword(user, password);
     }
-    if(bool){
-      return {
-        emailPendingVerification: true,
-        message: "Verification email sent. Please confirm to apply the new email.",
-      };
-    }
+    return {
+      emailPendingVerification: false, // Since Admin SDK handles the verification automatically
+      message: "Account updated successfully.",
+    };
 
   } catch (e) {
     console.log(e);

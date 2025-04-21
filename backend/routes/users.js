@@ -4,6 +4,7 @@ import validation from "../utils/validation.js";
 import { verifyUserByUID } from "../firebase/firebaseUtils.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import uploadMiddleware from "../middleware/uploadMiddleware.js";
+import admin from 'firebase-admin';
 const router = express.Router();
 
 router.route("/").get(authMiddleware, async (req, res) => {
@@ -17,6 +18,38 @@ router.route("/").get(authMiddleware, async (req, res) => {
     console.log(e);
     return res.status(500).json({
       message: "User details fetch failed",
+    });
+  }
+});
+router.route("/editaccount/email/update").post(async (req, res) => {
+  const { uid, newEmail } = req.body;
+  
+  if (!uid || !newEmail) {
+    return res.status(400).json({
+      message: "Missing required parameters (uid, newEmail).",
+    });
+  }
+  try {
+    validation.validateEmail(newEmail); // Assuming this will throw if invalid
+  } catch (e) {
+    return res.status(400).json({
+      message: "Invalid email format.",
+      errors: e,
+    });
+  }
+
+  try {
+    await admin.auth().updateUser(uid, { email: newEmail });
+    res.status(200).json({
+      message: "Email successfully updated in Firebase.",
+    });
+
+    await userController.updateUserEmail(uid, newEmail);
+  } catch (error) {
+    console.error("Error updating user email:", error);
+    res.status(500).json({
+      message: "Failed to update user email.",
+      error: error.message,
     });
   }
 });
