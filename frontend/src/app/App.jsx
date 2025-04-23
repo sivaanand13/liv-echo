@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import NavBar from "../features/navigation/NavBar";
 import AppRoutes from "../routes/AppRoutes";
 import { Container, Box } from "@mui/material";
-import { AuthProvider } from "../contexts/AuthContext";
+import AuthProvider from "../contexts/AuthContext";
+import CssBaseline from "@mui/material/CssBaseline";
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
     <Box
       sx={{
@@ -16,13 +15,17 @@ function App() {
         flexDirection: "column",
       }}
     >
+      <CssBaseline />
       <AuthProvider>
         <NavBar />
         <Box
           sx={{
+            pt: "4rem",
             flexGrow: 1,
             margin: 0,
             padding: 0,
+            flexGrow: 1,
+            overflow: "auto",
           }}
         >
           <AppRoutes />
