@@ -67,7 +67,7 @@ export default function ChatSidebar({
       </Stack>
 
       {showCreateModal && (
-        <Modal isOpen={showCreateModal} label={`Create ${type} Modal`}>
+        <Modal isOpen={showCreateModal} handleClose={handleCloseModal}>
           {" "}
           <CreateChat handleCloseModal={handleCloseModal} />{" "}
         </Modal>

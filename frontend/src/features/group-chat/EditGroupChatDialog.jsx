@@ -15,38 +15,53 @@ import {
   Button,
   ListItem,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import UserListItem from "../../components/UserListItem";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import groupChatUtils from "./groupChatUtils";
+import { AuthContext } from "../../contexts/AuthContext";
 
-export default function EditChatDialog({ open, handleClose }) {
+export default function EditGroupChatDialog({ open, handleClose }) {
+  const { serverUser } = useContext(AuthContext);
   const currentChat = chatStore((state) => state.currentChat);
   const theme = useTheme();
   const [name, setName] = useState("");
   const [members, setMembers] = useState([]);
+  const [currProfile, setCurProfile] = useState("");
   const [profile, setProfile] = useState(null);
   const [users, setUsers] = useState([]);
   const [error, setError] = useState(null);
 
+  function fillInFields() {
+    setName(currentChat.name);
+    const userMembers = currentChat.members.filter(
+      (m) => m.uid !== serverUser.uid
+    );
+    setMembers(userMembers);
+    setCurProfile(currentChat.profile.secure_url);
+    setProfile("");
+  }
+
   useEffect(() => {
+    fillInFields();
     async function fetchAvaliableUsers() {
       try {
         const users = await groupChatUtils.getAvaliableUsers();
-        console.log("aval users:", users);
         setUsers(users);
       } catch (e) {
         setError(e);
       }
     }
-    //fetchAvaliableUsers();
-  }, []);
+    fetchAvaliableUsers();
+  }, [currentChat, open]);
 
   function handleCancel() {
-    setError(null);
     handleClose();
+    fillInFields();
+    setError(null);
   }
 
-  async function handleCreate(e) {
+  async function handleEdit(e) {
     e.preventDefault();
 
     setError("");
@@ -63,22 +78,22 @@ export default function EditChatDialog({ open, handleClose }) {
     }
 
     try {
-      console.log("cur fields: ", curMembers, curName);
+      console.log("call editChat with fields: ", curMembers, curName);
 
-      const chat = await groupChatUtils.createGroupChat(
+      const chat = await groupChatUtils.editGroupChat(
+        currentChat,
         curName,
         curProfile,
         curMembers
       );
-      console.log(chat);
-      handleCloseModal();
+      handleCancel();
     } catch (e) {
       setError(e);
     }
   }
 
   return (
-    <Dialog open={open}>
+    <Dialog open={open} onClose={handleCancel}>
       <Card
         sx={{
           minWidth: "40vw",
@@ -90,8 +105,8 @@ export default function EditChatDialog({ open, handleClose }) {
         }}
       >
         <Stack spacing={2} width="100%">
-          <Typography variant="h4" sx={{ width: "100%" }}>
-            Create Group Chat
+          <Typography textAlign="center" variant="h4" sx={{ width: "100%" }}>
+            Update Group Chat
           </Typography>
 
           <FormControl>
@@ -110,7 +125,7 @@ export default function EditChatDialog({ open, handleClose }) {
           </FormControl>
           <Box display="flex" justifyContent="center">
             <Avatar
-              src={profile ? URL.createObjectURL(profile) : ""}
+              src={profile ? URL.createObjectURL(profile) : currProfile}
               sx={{ width: 100, height: 100 }}
             />
           </Box>
@@ -126,7 +141,7 @@ export default function EditChatDialog({ open, handleClose }) {
                 accept="image/*"
                 id="profile"
                 name="profile"
-                required="false"
+                required={false}
                 type="file"
                 onChange={(e) => setProfile(e.target.files[0])}
                 hidden={true}
@@ -135,10 +150,13 @@ export default function EditChatDialog({ open, handleClose }) {
           </FormControl>
           {users && users.length != 0 && (
             <FormControl>
-              <FormLabel htmlFor="members">Add Members</FormLabel>
+              <FormLabel htmlFor="members">Edit Members</FormLabel>
               <Autocomplete
                 multiple
-                options={users}
+                options={users.filter(
+                  (user) =>
+                    !members.some((curMemer) => curMemer.uid == user.uid)
+                )}
                 getOptionLabel={(user) => user.username}
                 value={members}
                 onChange={(e, newMembers) => setMembers(newMembers)}
@@ -169,9 +187,9 @@ export default function EditChatDialog({ open, handleClose }) {
                 backgroundColor: theme.palette.primary.main,
                 color: theme.palette.primary.contrastText,
               }}
-              onClick={handleCreate}
+              onClick={handleEdit}
             >
-              Create
+              Edit
             </Button>
             <Button
               size="large"

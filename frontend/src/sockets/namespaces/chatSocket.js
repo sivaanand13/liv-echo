@@ -16,6 +16,7 @@ const connect = async () => {
   });
 
   socket.on("chatUpdated", (chat) => {
+    console.log("Updating chat:", chat._id, chat);
     if (chat.type == "dm") {
       chatStore.getState().updateDirectMessageChat(chat);
     } else {
@@ -24,6 +25,7 @@ const connect = async () => {
   });
 
   socket.on("chatRemoved", (chat) => {
+    console.log("chatRemoved", chat);
     if (chat.type == "dm") {
       chatStore.getState().removeDirectMessageChat(chat);
     } else {

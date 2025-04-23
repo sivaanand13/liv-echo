@@ -1,6 +1,8 @@
 import mongoose, { Schema } from "mongoose";
 import settings from "./settings.js";
 import { CloudinaryAssetSchema } from "./cloudinaryAsset.js";
+import messages from "../controllers/messages.js";
+import cloudinary from "../cloudinary/cloudinary.js";
 const MessageSchema = new Schema(
   {
     sender: {
@@ -32,6 +34,28 @@ const MessageSchema = new Schema(
   },
   {
     timestamps: true,
+  }
+);
+
+MessageSchema.pre(
+  "deleteMany",
+  { document: false, query: true },
+  async function () {
+    const deleteFilter = this.getFilter();
+
+    const messages = await this.model.find(deleteFilter);
+    for (const message of messages) {
+      if (message.attachments) {
+        for (const image of message.attachments) {
+          if (image.public_id) {
+            cloudinary.deleteMedia(image).catch((e) => {
+              console.log("Error deleting image: ", image);
+              console.log(e);
+            });
+          }
+        }
+      }
+    }
   }
 );
 

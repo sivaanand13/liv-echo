@@ -2,6 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import settings from "./settings.js";
 import { CloudinaryAssetSchema } from "./cloudinaryAsset.js";
 import Message from "./message.js";
+import cloudinary from "../cloudinary/cloudinary.js";
 const ChatSchema = new Schema(
   {
     name: {
@@ -39,10 +40,19 @@ const ChatSchema = new Schema(
 ChatSchema.pre(
   "deleteOne",
   { document: true, query: false },
-  async function (next) {
+  async function () {
     const chatId = this._id;
-    await Message.deleteMany({ chat: chatId });
-    next();
+    const cloudinaryAsset = this.profile;
+    if (this.profile) {
+      cloudinary.deleteMedia(cloudinaryAsset).catch((e) => {
+        console.log("Chat profile delete failed:", cloudinaryAsset);
+        console.log(e);
+      });
+    }
+    Message.deleteMany({ chat: chatId }).catch((e) => {
+      console.log("Messages delete error for: ", chatId);
+      console.log(e);
+    });
   }
 );
 

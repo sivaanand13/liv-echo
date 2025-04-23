@@ -13,7 +13,8 @@ async function getMessages(currentChat) {
 }
 
 async function sendMessage(chat, messageText, attachments, sender) {
-  const { addCurrentChatTempMessages } = chatStore.getState();
+  const { addCurrentChatTempMessages, removeCurrentChatMessages } =
+    chatStore.getState();
   console.log("message sender: ", sender);
   try {
     const tempId = uuidv4();
@@ -45,6 +46,7 @@ async function sendMessage(chat, messageText, attachments, sender) {
     const response = await axios.post(`chats/${chat._id}/messages`, body);
     return response.data.data;
   } catch (e) {
+    removeCurrentChatMessages(newMessage);
     console.log(e);
     throw `Message send failed!`;
   }
@@ -64,8 +66,30 @@ async function deleteMessage(msg) {
   }
 }
 
+async function leaveChat(chat) {
+  try {
+    const response = await axios.patch(`chats/${chat._id}/leave`, {});
+    return response.data.data;
+  } catch (e) {
+    console.log(e);
+    throw `Chat leave failed!`;
+  }
+}
+
+async function deleteChat(chat) {
+  try {
+    const response = await axios.del(`chats/${chat._id}/delete`, {});
+    return response.data.data;
+  } catch (e) {
+    console.log(e);
+    throw `Chat leave failed!`;
+  }
+}
+
 export default {
   getMessages,
   sendMessage,
   deleteMessage,
+  leaveChat,
+  deleteChat,
 };

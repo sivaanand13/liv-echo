@@ -178,6 +178,19 @@ async function deleteMessage(uid, messageId) {
     console.log("Sending to " + member);
     chatNamespace.to(member.uid).emit("messageRemoved", message);
   });
+
+  if (chat.latestMessage && chat.latestMessage._id.toString() === messageId) {
+    const prevMessage = await Message.findOne({ chat: chat._id })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    await Chat.updateOne(
+      { _id: chat._id },
+      { $set: { latestMessage: prevMessage ? prevMessage._id : null } }
+    );
+    const newChat = await chatsController.getDisplayChat(message.chat);
+    await chatsController.emitChatUpdated(chat, newChat);
+  }
 }
 
 async function getMessageById(messageId) {

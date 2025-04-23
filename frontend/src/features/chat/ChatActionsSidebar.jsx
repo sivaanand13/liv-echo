@@ -5,16 +5,19 @@ import { AuthContext } from "../../contexts/AuthContext";
 import chatStore from "../../stores/chatStore";
 import LeaveChatDialog from "./LeaveChatDialog";
 import DeleteChatDialog from "./DeleteChatDialog";
-import EditChatDialog from "./EditChatDialog";
+import EditGroupChatDialog from "../group-chat/EditGroupChatDialog";
+import ChangeAdminDialog from "../group-chat/ChangeAdminDialog";
 export default function ChatActionsSidebar() {
   const [openLeaveChat, setOpenLeaveChat] = useState(false);
   const [openDeleteChat, setOpenDeleteChat] = useState(false);
   const [openEditChat, setOpenEditChat] = useState(false);
+  const [openChangeAdminChat, setOpenChangeAdminChat] = useState(false);
 
   function handleClose() {
     setOpenLeaveChat(false);
     setOpenDeleteChat(false);
     setOpenEditChat(false);
+    setOpenChangeAdminChat(false);
   }
   const auth = useContext(AuthContext);
   const { currentChat } = chatStore();
@@ -33,7 +36,14 @@ export default function ChatActionsSidebar() {
             <Button onClick={() => setOpenDeleteChat(!openDeleteChat)}>
               Delete Chat
             </Button>
-            <Button>Edit Chat</Button>
+            <Button onClick={() => setOpenEditChat(!openEditChat)}>
+              Edit Chat
+            </Button>
+            <Button
+              onClick={() => setOpenChangeAdminChat(!openChangeAdminChat)}
+            >
+              Change Admin
+            </Button>
           </Stack>
         ) : (
           <Stack>
@@ -46,7 +56,8 @@ export default function ChatActionsSidebar() {
 
       <LeaveChatDialog open={openLeaveChat} handleClose={handleClose} />
       <DeleteChatDialog open={openDeleteChat} handleClose={handleClose} />
-      <EditChatDialog open={openEditChat} handleClose={handleClose} />
+      <EditGroupChatDialog open={openEditChat} handleClose={handleClose} />
+      <ChangeAdminDialog open={openChangeAdminChat} handleClose={handleClose} />
     </Stack>
   );
 }

@@ -56,10 +56,63 @@ async function createGroupChat(curName, curProfile, curMembers) {
   }
 }
 
+async function editGroupChat(curChat, name, profile, members) {
+  try {
+    console.log("validationg for edit chat", name, members);
+    const body = {};
+    if (name) {
+      if (name && curChat.name !== name) {
+        body.name = name;
+        console.log("setting edit name:", body.name);
+      }
+    }
+    if (profile) {
+      const images = await axios.uploadAttachments(profile);
+      console.log("upload porfile: ", images);
+      body.profile = images.data[0];
+    }
+    if (members) {
+      const membersList = curChat.members.map((m) => m.uid).sort();
+      if (JSON.stringify(membersList) !== JSON.stringify(members.sort())) {
+        body.members = members;
+        console.log("setting edit name:", body.members);
+      }
+    }
+    console.log(body);
+    if (Object.keys(body).length > 0) {
+      console.log("Trying to edit chat: ", body);
+      const response = await axios.patch(`chats/${curChat._id}/update`, body);
+      return response.data.data;
+    }
+  } catch (e) {
+    console.log("update chat error: ", e);
+    throw `Group chat update failed!`;
+  }
+}
+
+async function changeAdmin(curChat, selectedAdmin) {
+  try {
+    validation.validateString(selectedAdmin);
+
+    const body = { adminUID: selectedAdmin };
+
+    console.log("Trying to change chat admin: ", body);
+    const response = await axios.patch(
+      `chats/${curChat._id}/change-admin`,
+      body
+    );
+  } catch (e) {
+    console.log("change admin error: ", e);
+    throw `Group chat admin change failed!`;
+  }
+}
+
 export default {
   getUserGroupChats,
   getAvaliableUsers,
   createGroupChat,
   validateChatName,
   validateMembers,
+  editGroupChat,
+  changeAdmin,
 };

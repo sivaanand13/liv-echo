@@ -58,6 +58,22 @@ export const post = async (endpoint, body = {}) => {
   }
 };
 
+export const patch = async (endpoint, body = {}) => {
+  try {
+    const { status, data } = await axiosInstance.patch(url(endpoint), body);
+    return {
+      status,
+      data,
+    };
+  } catch (e) {
+    console.log(`PATCH request failed for ${url(endpoint)}`, body, e);
+    throw {
+      status: e.response ? e.response.status : null,
+      data: e.response ? e.response.data : null,
+    };
+  }
+};
+
 export const del = async (endpoint, body = {}) => {
   try {
     const { status, data } = await axiosInstance.delete(url(endpoint), body);
@@ -90,6 +106,7 @@ export const uploadAttachments = async (files) => {
 export default {
   get,
   post,
+  patch,
   del,
   uploadAttachments,
 };

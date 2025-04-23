@@ -11,6 +11,15 @@ const chatStore = create((set, get) => ({
     }));
   },
   updateDirectMessageChat: (updatedChat) => {
+    const currentChat = get().currentChat;
+    if (
+      currentChat != null &&
+      currentChat._id.toString() === updatedChat._id.toString()
+    ) {
+      set({
+        currentChat: updatedChat,
+      });
+    }
     set((state) => ({
       directMessageChats: state.directMessageChats.map((chat) => {
         if (chat._id.toString() === updatedChat._id.toString()) {
@@ -20,10 +29,21 @@ const chatStore = create((set, get) => ({
       }),
     }));
   },
-  removeDirectMessageChat: (newChat) => {
+  removeDirectMessageChat: (targetChat) => {
+    const currentChat = get().currentChat;
+    if (
+      currentChat != null &&
+      currentChat._id.toString() === targetChat._id.toString()
+    ) {
+      set({
+        currentChat: null,
+        currentChatMessages: [],
+      });
+    }
+
     set((state) => ({
       directMessageChats: state.directMessageChats.filter(
-        (chat) => newChat._id.toString() !== chat._id.toString()
+        (chat) => targetChat._id.toString() !== chat._id.toString()
       ),
     }));
   },
@@ -38,6 +58,16 @@ const chatStore = create((set, get) => ({
     }));
   },
   updateGroupChat: (updatedChat) => {
+    const currentChat = get().currentChat;
+    if (
+      currentChat != null &&
+      currentChat._id.toString() === updatedChat._id.toString()
+    ) {
+      set({
+        currentChat: updatedChat,
+      });
+    }
+
     set((state) => ({
       groupChats: state.groupChats.map((chat) => {
         if (chat._id.toString() === updatedChat._id.toString()) {
@@ -47,10 +77,21 @@ const chatStore = create((set, get) => ({
       }),
     }));
   },
-  removeGroupChat: (newChat) => {
+  removeGroupChat: (targetChat) => {
+    const currentChat = get().currentChat;
+    if (
+      currentChat != null &&
+      currentChat._id.toString() === targetChat._id.toString()
+    ) {
+      set({
+        currentChat: null,
+        currentChatMessages: [],
+      });
+    }
+
     set((state) => ({
       groupChats: state.groupChats.filter(
-        (chat) => newChat._id.toString() !== chat._id.toString()
+        (chat) => targetChat._id.toString() !== chat._id.toString()
       ),
     }));
   },

@@ -18,6 +18,7 @@ async function validateUnqiueUsername(username) {
 }
 
 async function getUserById(id) {
+  console.log(id.toString(), id.toString().length);
   if (typeof id == "string") {
     id = ObjectId.createFromHexString(id);
   }

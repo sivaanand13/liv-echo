@@ -1,10 +1,11 @@
 import { useTheme } from "@mui/material";
 import { useState, useContext } from "react";
+import { Dialog } from "@mui/material";
 import ReactModal from "react-modal";
 ReactModal.setAppElement("#root");
 const customStyles = {
   overlay: {
-    backgroundColor: "rgba(255, 125, 200, 0.1)",
+    backgroundColor: "rgba(255, 200, 200, 0.1)",
     zIndex: 1300,
   },
   content: {
@@ -19,12 +20,10 @@ const customStyles = {
   },
 };
 
-export default function Modal({ isOpen, label, children }) {
-  const theme = useTheme();
-
+export default function Modal({ isOpen, handleClose, children }) {
   return (
-    <ReactModal isOpen={isOpen} contentLabel={label} style={customStyles}>
+    <Dialog onClose={handleClose} open={isOpen}>
       {children}
-    </ReactModal>
+    </Dialog>
   );
 }

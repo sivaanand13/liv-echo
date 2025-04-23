@@ -80,13 +80,14 @@ export default function MessageDisplay({ chat }) {
       const sender = currentChat.members.find(
         (member) => member.uid == auth.currentUser.uid
       );
+      reset();
+
       const message = await chatUtils.sendMessage(
         curChat,
         curMessageText,
         curAttachments,
         sender
       );
-      reset();
     } catch (e) {
       return;
     }
