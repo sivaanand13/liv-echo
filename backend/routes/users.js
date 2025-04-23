@@ -4,6 +4,7 @@ import validation from "../utils/validation.js";
 import { verifyUserByUID } from "../firebase/firebaseUtils.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import uploadMiddleware from "../middleware/uploadMiddleware.js";
+import admin from 'firebase-admin';
 const router = express.Router();
 
 router.route("/").get(authMiddleware, async (req, res) => {
@@ -17,6 +18,110 @@ router.route("/").get(authMiddleware, async (req, res) => {
     console.log(e);
     return res.status(500).json({
       message: "User details fetch failed",
+    });
+  }
+});
+router.route("/editaccount/email/update").post(async (req, res) => {
+  const { uid, newEmail } = req.body;
+  
+  if (!uid || !newEmail) {
+    return res.status(400).json({
+      message: "Missing required parameters (uid, newEmail).",
+    });
+  }
+  try {
+    validation.validateEmail(newEmail); // Assuming this will throw if invalid
+  } catch (e) {
+    return res.status(400).json({
+      message: "Invalid email format.",
+      errors: e,
+    });
+  }
+
+  try {
+    await admin.auth().updateUser(uid, { email: newEmail });
+    res.status(200).json({
+      message: "Email successfully updated in Firebase.",
+    });
+
+    await userController.updateUserEmail(uid, newEmail);
+  } catch (error) {
+    console.error("Error updating user email:", error);
+    res.status(500).json({
+      message: "Failed to update user email.",
+      error: error.message,
+    });
+  }
+});
+router.route("/editaccount/email/uniqueCheck/").get(async (req, res) => {
+  let { email, uid} = req.query;
+  console.log("Checking unique email", email);
+  try {
+    email = validation.validateEmail(email);
+  } catch (e) {
+    return res.status(400).json({
+      message: "Unique email check failed!",
+      errors: e,
+    });
+  }
+  try {
+    const existingUser = await userController.getUserByUID(uid); //Retrieve the current user by UID
+    if (existingUser.email === email) {
+      //Email is not changing
+      return res.status(200).json({
+        message: "Email is available",
+      });
+    }
+    const checkEmail = await userController.validateUnqiueEmail(email);
+    if (!checkEmail) {
+      return res.status(400).json({
+        message: "Email is in use by another user!",
+      });
+    }
+    console.log("Email not taken");
+    return res.status(200).json({
+      email: checkEmail,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      message: "Unique email check failed!",
+    });
+  }
+});
+router.route("/editaccount/username/uniqueCheck/").get(async (req, res) => {
+  let { username, uid } = req.query;
+  console.log("Checking unique username", username);
+  try {
+    username = validation.validateUsername(username);
+  } catch (e) {
+    return res.status(400).json({
+      message: "Unique username check failed!",
+      errors: e,
+    });
+  }
+  try {
+    const existingUser = await userController.getUserByUID(uid); //Retrieve the current user by UID
+    if (existingUser.username === username) {
+      //Email is not changing
+      return res.status(200).json({
+        message: "Username is available",
+      });
+    }
+    const checkUsername = await userController.validateUnqiueUsername(username);
+    if (!checkUsername) {
+      return res.status(400).json({
+        message: "Username is in use by another user!",
+      });
+    }
+    console.log("Username free");
+    return res.status(200).json({
+      username: checkUsername,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      message: "Unique username check failed!",
     });
   }
 });
