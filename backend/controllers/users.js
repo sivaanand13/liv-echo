@@ -4,7 +4,7 @@ import { verifyUserByUID } from "../firebase/firebaseUtils.js";
 import { ObjectId } from "mongodb";
 import cloudinary from "../cloudinary/cloudinary.js";
 import sharp from "../imageProcessing/sharp.js";
-
+import { chatNamespace } from "../websockets/index.js";
 async function validateUnqiueEmail(email) {
   email = validation.validateEmail(email);
   const user = await User.findOne({ email: email });
@@ -76,8 +76,8 @@ async function signUpUser(uid, name, email, username, dob) {
     dob: new Date(dob),
   });
 }
-async function editUser(uid, name, email, username, dob) {
-  await verifyUserByUID(uid);
+async function editUser(uid, name, email, username, dob, profile, banner) {
+  let user = await getUserByUID(uid);
   name = validation.validateString(name, "Name");
 
   email = validation.validateEmail(email);
@@ -88,20 +88,49 @@ async function editUser(uid, name, email, username, dob) {
 
   validation.validateDob(dob, "Date of Birth");
 
-  const val = await User.updateMany(
+  const update = {
+    name,
+    email,
+    username,
+    dob: new Date(dob),
+  };
+
+  const val = await User.updateOne(
     { uid },
     {
-      $set: {
-        name,
-        email,
-        username,
-        dob: new Date(dob),
-      },
+      $set: update,
     }
   );
-  let user = await User.findOne({ uid: uid });
-  console.log("Howdy updated user");
-  console.log(val);
+  user = await getUserByUID(user.uid, false);
+
+  return user;
+}
+
+async function updateUser(uid, editObject) {
+  let { profile, banner } = editObject;
+
+  let user = await getUserByUID(uid);
+  let update = {};
+
+  if (profile) {
+    cloudinary.validateCloudinaryObject(profile);
+    update.profile = profile;
+  }
+
+  if (banner) {
+    cloudinary.validateCloudinaryObject(banner);
+    update.banner = banner;
+  }
+
+  await User.updateOne(
+    { uid },
+    {
+      $set: update,
+    }
+  );
+  user = await getUserByUID(user.uid, false);
+  console.log("Edited user", user);
+  chatNamespace.to(user.uid).emit("accountUpdated", user);
   return user;
 }
 
@@ -161,4 +190,5 @@ export default {
   editUser,
   searchUsers,
   uploadFiles,
+  updateUser,
 };

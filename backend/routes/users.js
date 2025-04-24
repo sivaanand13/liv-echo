@@ -4,7 +4,8 @@ import validation from "../utils/validation.js";
 import { verifyUserByUID } from "../firebase/firebaseUtils.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import uploadMiddleware from "../middleware/uploadMiddleware.js";
-import admin from 'firebase-admin';
+import admin from "firebase-admin";
+import cloudinary from "../cloudinary/cloudinary.js";
 const router = express.Router();
 
 router.route("/").get(authMiddleware, async (req, res) => {
@@ -21,9 +22,34 @@ router.route("/").get(authMiddleware, async (req, res) => {
     });
   }
 });
+
+router.route("/profile/:userUID").get(authMiddleware, async (req, res) => {
+  let { userUID } = req.params;
+  let user;
+  try {
+    user = await userController.getUserByUID(userUID, true);
+  } catch (e) {
+    return res.status(400).json({
+      message: "User profile fetch failed",
+      error: e,
+    });
+  }
+
+  try {
+    return res.status(200).json({
+      data: user,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      message: "User details fetch failed",
+    });
+  }
+});
+
 router.route("/editaccount/email/update").post(async (req, res) => {
   const { uid, newEmail } = req.body;
-  
+
   if (!uid || !newEmail) {
     return res.status(400).json({
       message: "Missing required parameters (uid, newEmail).",
@@ -54,7 +80,7 @@ router.route("/editaccount/email/update").post(async (req, res) => {
   }
 });
 router.route("/editaccount/email/uniqueCheck/").get(async (req, res) => {
-  let { email, uid} = req.query;
+  let { email, uid } = req.query;
   console.log("Checking unique email", email);
   try {
     email = validation.validateEmail(email);
@@ -279,18 +305,46 @@ router.route("/signin/").post(async (req, res) => {
     });
   }
 });
-router.route("/editAccount/").post(async (req, res) => {
-  let { uid, name, email, username, dob } = req.body;
-  console.log("Trying editAccount for", uid, name, email, username, dob);
+router.route("/editAccount").patch(authMiddleware, async (req, res) => {
+  let { profile, banner } = req.body;
+  let user;
 
+  let update = {};
   try {
-    await verifyUserByUID(uid);
+    user = await userController.getUserByUID(req.user.uid);
+    if (profile) {
+      cloudinary.validateCloudinaryObject(profile);
+      update.profile = profile;
+    }
+    if (banner) {
+      cloudinary.validateCloudinaryObject(banner);
+      update.banner = banner;
+    }
   } catch (e) {
     return res.status(400).json({
-      message: "Invalid firebase Id",
-      errors: e,
+      message: "Account update failed",
+      error: e,
     });
   }
+
+  try {
+    user = await userController.updateUser(req.user.uid, update);
+    return res.status(200).json({
+      message: "User profile banner updated!",
+      user: user,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      message: "Account update failed",
+      error: e,
+    });
+  }
+});
+router.route("/editAccount/").post(authMiddleware, async (req, res) => {
+  let { name, email, username, dob, profile, banner } = req.body;
+  console.log("Trying editAccount for", uid, name, email, username, dob);
+  let uid = req.user.uid;
 
   try {
     name = validation.validateString(name, "Name");
