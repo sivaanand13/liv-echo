@@ -20,7 +20,7 @@ import { Navigate } from "react-router";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Errors from "../../components/Errors.jsx";
-function EditAccount() {
+function EditAccount({ handleClose }) {
   const { currentUser, serverUser } = useContext(AuthContext);
 
   const [error, setError] = useState("");
@@ -186,13 +186,13 @@ function EditAccount() {
         justifyContent: "center",
         display: "flex",
         overflow: "auto",
+        minWidth: "50vw",
         justifyContent: "center",
         alignItems: "center",
         minHeight: "100vh",
-        paddingTop: "80px",
       }}
     >
-      <Card sx={{ minWidth: "40%", maxWidth: "50%", padding: "2rem" }}>
+      <Card sx={{ width: "100%", padding: "2rem" }}>
         <Stack spacing={2} width="100%">
           {/* Welcome Message */}
           <Typography variant="h5" sx={{ textAlign: "center" }}>
@@ -379,6 +379,14 @@ function EditAccount() {
             onClick={handleEditAccount}
           >
             Update Account
+          </Button>
+          <Button
+            type="reset"
+            fullWidth
+            variant="contained"
+            onClick={handleClose}
+          >
+            Cancel
           </Button>
         </Stack>
       </Card>

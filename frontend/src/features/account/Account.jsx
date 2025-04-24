@@ -7,15 +7,20 @@ import {
   Paper,
   IconButton,
   Dialog,
+  Typography,
+  useTheme,
+  Button,
 } from "@mui/material";
 import defaultBanner from "../../assets/landing/landing1.jpg";
 import Profile from "../../components/Profile";
 import EditIcon from "@mui/icons-material/Edit";
 import EditAccount from "./EditAccount";
 import EditBanner from "./EditBanner";
+import EditProfile from "./EditProfile";
 
 export default function Account() {
   const { user } = useContext(AuthContext);
+  const theme = useTheme();
   const [openEditAccount, setOpenEditAccount] = useState(false);
   const [openEditProfile, setOpenEditProfile] = useState(false);
   const [openEditBanner, setOpenEditBanner] = useState(false);
@@ -27,7 +32,13 @@ export default function Account() {
   }
 
   return (
-    <Box sx={{ backgroundColor: "red", height: "calc(100vh - 4rem)" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "calc(100vh - 4rem)",
+      }}
+    >
       <Box
         sx={{
           height: "30vh",
@@ -64,9 +75,9 @@ export default function Account() {
         >
           <Profile
             sx={{
-              width: "10vw",
-              height: "10vw",
-              fontSize: "4vw",
+              width: "20vh",
+              height: "20vh",
+              fontSize: "4vh",
               boxShadow: "1px 1px 10px 1px black",
             }}
             user={user}
@@ -78,7 +89,7 @@ export default function Account() {
               bottom: 1,
               right: 1,
               marginRight: "1em",
-              marginBottom: "0.5em",
+              marginBottom: "1em",
               backgroundColor: "rgba(255,255,255,0.5)",
               "&:hover": { backgroundColor: "rgba(200,255,200,1)" },
             }}
@@ -87,10 +98,24 @@ export default function Account() {
           </IconButton>
         </Box>
       </Box>
-      <Paper>
-        <Card>
-          <CardHeader title={`Welcome, ${user.name}!`} />
-        </Card>
+      <Paper
+        sx={{
+          backgroundColor: theme.palette.background.default,
+          flex: 1,
+          padding: "4rem",
+        }}
+      >
+        <Typography
+          variant="h3"
+          textAlign="center"
+        >{`Welcome, ${user.name}!`}</Typography>
+        <Box>
+          <Typography>{user.bio}</Typography>
+        </Box>
+
+        <Button onClick={() => setOpenEditAccount(!openEditAccount)}>
+          Edit Account
+        </Button>
       </Paper>
 
       {openEditAccount && (
@@ -104,6 +129,13 @@ export default function Account() {
         <Dialog open={openEditBanner} onClose={closeModals}>
           {" "}
           <EditBanner handleClose={closeModals} />
+        </Dialog>
+      )}
+
+      {openEditProfile && (
+        <Dialog open={openEditProfile} onClose={closeModals}>
+          {" "}
+          <EditProfile handleClose={closeModals} />
         </Dialog>
       )}
     </Box>
