@@ -5,6 +5,7 @@ import { ObjectId } from "mongodb";
 import cloudinary from "../cloudinary/cloudinary.js";
 import sharp from "../imageProcessing/sharp.js";
 import { chatNamespace } from "../websockets/index.js";
+import settings from "../models/settings.js";
 async function validateUnqiueEmail(email) {
   email = validation.validateEmail(email);
   const user = await User.findOne({ email: email });
@@ -64,7 +65,7 @@ async function signUpUser(uid, name, email, username, dob) {
   await validateUnqiueEmail(email);
 
   username = validation.validateUsername(username, "Username");
-  await validateUnqiueUsername(username);
+  await validateUnqiueUsername(usernfame);
 
   validation.validateDob(dob, "Date of Birth");
 
@@ -107,7 +108,7 @@ async function editUser(uid, name, email, username, dob, profile, banner) {
 }
 
 async function updateUser(uid, editObject) {
-  let { profile, banner } = editObject;
+  let { profile, banner, bio } = editObject;
 
   let user = await getUserByUID(uid);
   let update = {};
@@ -120,6 +121,14 @@ async function updateUser(uid, editObject) {
   if (banner) {
     cloudinary.validateCloudinaryObject(banner);
     update.banner = banner;
+  }
+
+  if (bio) {
+    bio = validation.validateString(bio, "Bio");
+    if (bio.length > settings.BIO_LENGTH) {
+      throw `Bio length must be less than ${settings.BIO_LENGTH}`;
+    }
+    update.bio = bio;
   }
 
   await User.updateOne(
@@ -156,7 +165,7 @@ async function searchUsers(query) {
       { username: searchRegex },
       { email: searchRegex },
     ],
-  }).select("uid name username email profile role");
+  }).select("uid name username email profile banner bio role");
 }
 
 async function uploadFiles(attachments, uid) {

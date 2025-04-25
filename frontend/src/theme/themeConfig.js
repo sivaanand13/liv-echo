@@ -20,13 +20,13 @@ const theme = createTheme({
     },
     text: {
       primary: "#2c1a00",
-      secondary: "#1e88e5",
+      secondary: "#9c27b0",
       disabled: "rgba(100,100,100,0.4)",
     },
     info: {
-      main: "#2196f3",
-      light: "#6ec6ff",
-      dark: "#0069c0",
+      main: "#9c27b0",
+      light: "#ba68c8",
+      dark: "#7b1fa2",
       contrastText: "#ffffff",
     },
     warning: {

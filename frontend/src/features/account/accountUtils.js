@@ -10,6 +10,9 @@ import {
 } from "firebase/auth";
 import validation from "../../utils/validation.js";
 import axios from "../../utils/requests/axios.js";
+
+const MAX_BIO_LEN = 500;
+
 async function editBanner(banner) {
   let body = {};
   try {
@@ -53,7 +56,38 @@ async function editProfile(profile) {
     throw `Profile update failed!`;
   }
 }
+
+function validateBio(bio) {
+  bio = validation.validateString(bio, "Bio");
+  if (bio.length > MAX_BIO_LEN) {
+    throw `User bio cannot be greater than ${MAX_BIO_LEN} characters!`;
+  }
+  return bio;
+}
+
+async function editBio(bio) {
+  let body = {};
+  try {
+    bio = validateBio(bio);
+    body.bio = bio;
+  } catch (e) {
+    console.log("update account error: ", e);
+    throw e;
+  }
+
+  try {
+    if (Object.keys(body).length > 0) {
+      console.log("Trying to edit bio: ", body);
+      const response = await axios.patch(`users/editAccount`, body);
+      return response.data.data;
+    }
+  } catch (e) {
+    console.log("update account error: ", e);
+    throw e.message || "Update bio failed!";
+  }
+}
 export default {
   editBanner,
   editProfile,
+  editBio,
 };

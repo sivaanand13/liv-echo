@@ -6,6 +6,7 @@ import authMiddleware from "../middleware/authMiddleware.js";
 import uploadMiddleware from "../middleware/uploadMiddleware.js";
 import admin from "firebase-admin";
 import cloudinary from "../cloudinary/cloudinary.js";
+import settings from "../models/settings.js";
 const router = express.Router();
 
 router.route("/").get(authMiddleware, async (req, res) => {
@@ -306,7 +307,7 @@ router.route("/signin/").post(async (req, res) => {
   }
 });
 router.route("/editAccount").patch(authMiddleware, async (req, res) => {
-  let { profile, banner } = req.body;
+  let { profile, banner, bio } = req.body;
   let user;
 
   let update = {};
@@ -320,7 +321,17 @@ router.route("/editAccount").patch(authMiddleware, async (req, res) => {
       cloudinary.validateCloudinaryObject(banner);
       update.banner = banner;
     }
+
+    if (bio) {
+      console.log(bio);
+      bio = validation.validateString(bio, "Bio");
+      if (bio.length > settings.BIO_LENGTH) {
+        throw `Bio length cannot exceed ${settings.BIO_LENGTH}`;
+      }
+      update.bio = bio;
+    }
   } catch (e) {
+    console.log(e);
     return res.status(400).json({
       message: "Account update failed",
       error: e,

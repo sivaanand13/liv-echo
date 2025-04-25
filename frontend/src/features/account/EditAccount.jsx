@@ -189,7 +189,6 @@ function EditAccount({ handleClose }) {
         minWidth: "50vw",
         justifyContent: "center",
         alignItems: "center",
-        minHeight: "100vh",
       }}
     >
       <Card sx={{ width: "100%", padding: "2rem" }}>
