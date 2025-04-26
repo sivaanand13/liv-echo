@@ -10,9 +10,18 @@ import settings from "../models/settings.js";
 const router = express.Router();
 
 router.route("/").get(authMiddleware, async (req, res) => {
+  let user;
   try {
-    const user = await userController.getUserByUID(req.user.uid, false);
+    user = await userController.getUserByUID(req.user.uid, false);
     console.log("Fetched user data: ", user);
+  } catch (e) {
+    console.log(e);
+    return res.status(404).json({
+      message: "User details fetch failed",
+    });
+  }
+
+  try {
     return res.status(200).json({
       data: user,
     });
@@ -256,6 +265,7 @@ router.route("/signup").post(async (req, res) => {
       username,
       dob
     );
+    console.log("Sign up successful for user: ", user.uid);
     return res.status(200).json({
       message: "User Sign Up successful",
       data: user,

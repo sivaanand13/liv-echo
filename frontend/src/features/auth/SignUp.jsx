@@ -20,9 +20,10 @@ import { Navigate } from "react-router";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Errors from "../../components/Errors.jsx";
+import CustomLink from "../../components/CustomLink.jsx";
 
 function SignUp() {
-  const { currentUser } = useContext(AuthContext);
+  const { currentUser, setUser } = useContext(AuthContext);
 
   const [error, setError] = useState("");
 
@@ -131,7 +132,14 @@ function SignUp() {
       return;
     } else {
       try {
-        await authUtils.signUpUser(name, email, username, dob, password);
+        const user = await authUtils.signUpUser(
+          name,
+          email,
+          username,
+          dob,
+          password
+        );
+        setUser(user);
       } catch (e) {
         console.log("SignUp.jsx", e);
         setError(e);
@@ -159,7 +167,6 @@ function SignUp() {
           <Typography variant="h4" sx={{ width: "100%" }}>
             Sign Up
           </Typography>
-
           <FormControl>
             <FormLabel htmlFor="name">Name</FormLabel>
             <TextField
@@ -329,12 +336,35 @@ function SignUp() {
               }}
             />
           </FormControl>
-
           {error && (
             <Typography sx={{ color: "red", textAlign: "center" }}>
               {error}
             </Typography>
           )}
+          <Stack
+            sx={{ textAlign: "center", justifyContent: "center" }}
+            textAlign="center"
+            direction="row"
+          >
+            <Typography>Already have an account? </Typography>
+
+            <CustomLink
+              color={"blue"}
+              sx={{
+                textDecoration: "none",
+                marginLeft: "0.2em",
+                fontWeight: "bold",
+                "&:hover": {
+                  textDecoration: "underline",
+
+                  color: "#0F03FF",
+                },
+              }}
+              to={"/signin"}
+            >
+              {"  "}Sign In
+            </CustomLink>
+          </Stack>
 
           <Button
             type="submit"

@@ -68,7 +68,7 @@ async function signUpUser(uid, name, email, username, dob) {
   await validateUnqiueEmail(email);
 
   username = validation.validateUsername(username, "Username");
-  await validateUnqiueUsername(usernfame);
+  await validateUnqiueUsername(username);
 
   validation.validateDob(dob, "Date of Birth");
 
@@ -79,6 +79,7 @@ async function signUpUser(uid, name, email, username, dob) {
     username,
     dob: new Date(dob),
   });
+  return user;
 }
 async function editUser(uid, name, email, username, dob, profile, banner) {
   let user = await getUserByUID(uid);
