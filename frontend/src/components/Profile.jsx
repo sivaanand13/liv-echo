@@ -15,10 +15,10 @@ export default function Profile({ sx, user, Icon }) {
   };
   return (
     <Avatar
-      src={user.profile?.url}
+      src={user.profile?.secure_url}
       alt={user?.name}
       sx={{
-        bgcolor: colorHsh.hex(user.displayName || user.username),
+        bgcolor: colorHsh.hex(user.displayName || user.name || user.username),
         color: "#fffff",
         ...sx,
       }}
