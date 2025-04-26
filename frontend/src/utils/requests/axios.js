@@ -4,6 +4,7 @@ import { getAuth } from "firebase/auth";
 let BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
 
 const url = (endpoint) => {
+  console.log("backend uri: ", BACKEND_URI);
   return BACKEND_URI + endpoint;
 };
 
