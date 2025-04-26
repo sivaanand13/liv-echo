@@ -323,7 +323,6 @@ router.route("/editAccount").patch(authMiddleware, async (req, res) => {
     }
 
     if (bio) {
-      console.log(bio);
       bio = validation.validateString(bio, "Bio");
       if (bio.length > settings.BIO_LENGTH) {
         throw `Bio length cannot exceed ${settings.BIO_LENGTH}`;

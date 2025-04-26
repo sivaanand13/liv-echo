@@ -1,13 +1,20 @@
 import { Container, Typography, Box, CardMedia } from "@mui/material";
+import notFoundImage from "../assets/errors/not_found.svg";
+import bgImg from "../assets/landing/landing1.jpg";
+
 function NotFound({ message }) {
   return (
-    <Container
+    <Box
       sx={{
-        width: "100%",
-        height: "100vh",
+        backgroundImage: `url(${bgImg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        overflow: "auto",
+        backgroundAttachment: "fixed",
+        placeItems: "center",
         display: "flex",
-        flexDirection: "column",
         justifyContent: "center",
+        height: "calc(100vh - 4rem)",
         alignItems: "center",
       }}
     >
@@ -31,10 +38,10 @@ function NotFound({ message }) {
         </Typography>
         <CardMedia
           component="img"
-          image={"/not_found.svg"}
+          image={notFoundImage}
           alt={"404 Not Found Icon"}
           sx={{
-            width: "40%",
+            height: "40vh",
             margin: "auto",
             padding: "1em",
             objectFit: "contain",
@@ -45,7 +52,7 @@ function NotFound({ message }) {
           {message}
         </Typography>
       </Box>
-    </Container>
+    </Box>
   );
 }
 

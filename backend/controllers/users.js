@@ -41,10 +41,13 @@ async function getUserByUID(uid, display) {
       { uid: uid },
       {
         _id: 1,
+        uid: 1,
         name: 1,
         username: 1,
         bio: 1,
         role: 1,
+        profile: 1,
+        banner: 1,
       }
     );
   } else {

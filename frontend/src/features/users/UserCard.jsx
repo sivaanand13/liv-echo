@@ -1,4 +1,5 @@
 import defaultBanner from "../../assets/landing/landing1.jpg";
+import CustomLink from "../../components/CustomLink";
 import KeyValDisplay from "../../components/KeyValDisplay";
 import Profile from "../../components/Profile";
 import {
@@ -56,7 +57,12 @@ export default function UserCard({ item: user }) {
       </Box>
       <CardHeader
         sx={{ marginTop: "5vh" }}
-        title={<Typography variant="h4">{user.name}</Typography>}
+        title={
+          <CustomLink to={`/users/${user.uid}`}>
+            {" "}
+            <Typography variant="h4">{user.name}</Typography>
+          </CustomLink>
+        }
       />
       <CardContent
         sx={{ paddingLeft: "2em", paddingRight: "2em", textAlign: "left" }}
