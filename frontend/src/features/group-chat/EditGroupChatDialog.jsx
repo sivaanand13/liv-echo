@@ -38,7 +38,7 @@ export default function EditGroupChatDialog({ open, handleClose }) {
       (m) => m.uid !== serverUser.uid
     );
     setMembers(userMembers);
-    setCurProfile(currentChat.profile.secure_url);
+    setCurProfile(currentChat.profile?.secure_url);
     setProfile("");
   }
 
