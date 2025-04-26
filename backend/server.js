@@ -7,6 +7,7 @@ import configMongoConnection from "./config/dbConnection.js";
 import configFirebaseAdmin from "./firebase/initFirebaseAdmin.js";
 import configCloudinary from "./cloudinary/config.js";
 import configMiddlewares from "./middleware/index.js";
+import http from "http";
 
 dotenv.config();
 
@@ -22,10 +23,12 @@ configCloudinary();
 configMiddlewares(app);
 configRoutes(app);
 
+const server = http.createServer(app);
+
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+configSocketHandlers(server);
+
+server.listen(PORT, () => {
   console.log(`LivEcho server running on port ${PORT}`);
 });
-
-configSocketHandlers(app);
