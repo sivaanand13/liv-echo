@@ -3,10 +3,12 @@ import chatNamespaceHandler from "./chatNamespace.js";
 
 export let chatNamespace;
 
+let corsOrigins = [process.env.FRONTEND_URI];
+
 const configSocketHandlers = (server) => {
   const io = new Server(server, {
     cors: {
-      origin: process.env.FRONTEND_URI,
+      origin: corsOrigins,
     },
   });
 

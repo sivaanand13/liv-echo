@@ -161,7 +161,7 @@ export default function Account() {
           <CardContent>Email: {user.email}</CardContent>
           <CardContent>
             Date of Birth:{" "}
-            {dayjs(user.dob.substring(0, 10)).format("MM/DD/YYYY")}
+            {dayjs(user.dob?.substring(0, 10)).format("MM/DD/YYYY")}
           </CardContent>
           <CardContent>Password: ****************</CardContent>
         </Card>
