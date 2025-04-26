@@ -4,7 +4,8 @@ import { verifyUserByUID } from "../firebase/firebaseUtils.js";
 import { ObjectId } from "mongodb";
 import cloudinary from "../cloudinary/cloudinary.js";
 import sharp from "../imageProcessing/sharp.js";
-
+import { chatNamespace } from "../websockets/index.js";
+import settings from "../models/settings.js";
 async function validateUnqiueEmail(email) {
   email = validation.validateEmail(email);
   const user = await User.findOne({ email: email });
@@ -40,10 +41,13 @@ async function getUserByUID(uid, display) {
       { uid: uid },
       {
         _id: 1,
+        uid: 1,
         name: 1,
         username: 1,
         bio: 1,
         role: 1,
+        profile: 1,
+        banner: 1,
       }
     );
   } else {
@@ -64,7 +68,7 @@ async function signUpUser(uid, name, email, username, dob) {
   await validateUnqiueEmail(email);
 
   username = validation.validateUsername(username, "Username");
-  await validateUnqiueUsername(username);
+  await validateUnqiueUsername(usernfame);
 
   validation.validateDob(dob, "Date of Birth");
 
@@ -76,8 +80,8 @@ async function signUpUser(uid, name, email, username, dob) {
     dob: new Date(dob),
   });
 }
-async function editUser(uid, name, email, username, dob) {
-  await verifyUserByUID(uid);
+async function editUser(uid, name, email, username, dob, profile, banner) {
+  let user = await getUserByUID(uid);
   name = validation.validateString(name, "Name");
 
   email = validation.validateEmail(email);
@@ -88,20 +92,57 @@ async function editUser(uid, name, email, username, dob) {
 
   validation.validateDob(dob, "Date of Birth");
 
-  const val = await User.updateMany(
+  const update = {
+    name,
+    email,
+    username,
+    dob: new Date(dob),
+  };
+
+  const val = await User.updateOne(
     { uid },
     {
-      $set: {
-        name,
-        email,
-        username,
-        dob: new Date(dob),
-      },
+      $set: update,
     }
   );
-  let user = await User.findOne({ uid: uid });
-  console.log("Howdy updated user");
-  console.log(val);
+  user = await getUserByUID(user.uid, false);
+
+  return user;
+}
+
+async function updateUser(uid, editObject) {
+  let { profile, banner, bio } = editObject;
+
+  let user = await getUserByUID(uid);
+  let update = {};
+
+  if (profile) {
+    cloudinary.validateCloudinaryObject(profile);
+    update.profile = profile;
+  }
+
+  if (banner) {
+    cloudinary.validateCloudinaryObject(banner);
+    update.banner = banner;
+  }
+
+  if (bio) {
+    bio = validation.validateString(bio, "Bio");
+    if (bio.length > settings.BIO_LENGTH) {
+      throw `Bio length must be less than ${settings.BIO_LENGTH}`;
+    }
+    update.bio = bio;
+  }
+
+  await User.updateOne(
+    { uid },
+    {
+      $set: update,
+    }
+  );
+  user = await getUserByUID(user.uid, false);
+  console.log("Edited user", user);
+  chatNamespace.to(user.uid).emit("accountUpdated", user);
   return user;
 }
 
@@ -127,7 +168,7 @@ async function searchUsers(query) {
       { username: searchRegex },
       { email: searchRegex },
     ],
-  }).select("uid name username email profile role");
+  }).select("uid name username email profile banner bio role");
 }
 
 async function uploadFiles(attachments, uid) {
@@ -161,4 +202,5 @@ export default {
   editUser,
   searchUsers,
   uploadFiles,
+  updateUser,
 };

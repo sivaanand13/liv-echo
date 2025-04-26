@@ -6,9 +6,10 @@ function AuthNavigation() {
   const auth = useContext(AuthContext);
   return (
     <>
-      <NavBarLink to="/account">Account</NavBarLink>
       <NavBarLink to="/dms">Direct Messages</NavBarLink>
       <NavBarLink to="/group-chats">Group Chats</NavBarLink>
+      <NavBarLink to="/account">Account</NavBarLink>
+      <NavBarLink to="/users/search">Search Users </NavBarLink>
 
       <SignOutButton />
     </>

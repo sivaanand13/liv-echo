@@ -1,7 +1,7 @@
 import { Avatar } from "@mui/material";
 import ColorHash from "color-hash";
 const colorHsh = new ColorHash();
-export default function Profile({ user, Icon }) {
+export default function Profile({ sx, user, Icon }) {
   const extractInitials = () => {
     if (!user.name) {
       return "??";
@@ -18,6 +18,7 @@ export default function Profile({ user, Icon }) {
       sx={{
         bgcolor: colorHsh.hex(user.name),
         color: "#fffff",
+        ...sx,
       }}
     >
       {!user.profile?.url && extractInitials()}

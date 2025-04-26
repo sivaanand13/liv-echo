@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { differenceInYears } from "date-fns";
-
+import xss from "xss";
 export const usernamePolicies = [
   {
     regex: /^.{5,20}$/,
@@ -85,10 +85,11 @@ const validateString = (str, varName, checkObjectId) => {
       } to be of type string, but it is of type ${typeof str}!`,
     ];
   }
-  const trimmedStr = str.trim();
+  let trimmedStr = xss(str.trim());
   if (trimmedStr.length === 0) {
     throw [`String ${varName ? varName : ""} is empty or has only spaces!`];
   }
+
   if (
     checkObjectId &&
     checkObjectId === true &&
