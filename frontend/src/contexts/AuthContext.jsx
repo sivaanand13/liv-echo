@@ -14,6 +14,7 @@ export default function AuthProvider({ children }) {
   const auth = getAuth();
   useEffect(() => {
     let unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setLoadingUser(true);
       if (user) {
         setCurrentUser(user);
         setUser(user);
@@ -24,13 +25,17 @@ export default function AuthProvider({ children }) {
         } catch (e) {
           console.log(e);
         }
+
+        let server = null;
         try {
-          const server = (await axios.get(`users/`, {})).data.data;
+          server = (await axios.get(`users/`, {})).data.data;
+        } catch (e) {
+          console.log("fetch server user failed: ", e);
+        }
+        if (server) {
           setServerUser(server);
           setUser({ ...user, ...server });
           console.log("server user: ", server);
-        } catch (e) {
-          console.log(e);
         }
 
         chatSocketRef?.on("accountUpdated", (newUser) => {
@@ -63,7 +68,7 @@ export default function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ currentUser, serverUser, user }}>
+    <AuthContext.Provider value={{ currentUser, serverUser, user, setUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -6,7 +6,7 @@ import {
   updateEmail,
   updatePassword,
   sendEmailVerification,
-  verifyBeforeUpdateEmail 
+  verifyBeforeUpdateEmail,
 } from "firebase/auth";
 import validation from "../../utils/validation.js";
 async function signUpUser(name, email, username, dob, password) {
@@ -43,9 +43,12 @@ async function signUpUser(name, email, username, dob, password) {
 
   try {
     const auth = getAuth();
-    const user = auth.currentUser;
-    console.log(user);
-    await post("users/signup/", { uid: user.uid, name, email, username, dob });
+    let user = auth.currentUser;
+    let serverUser = (
+      await post("users/signup/", { uid: user.uid, name, email, username, dob })
+    ).data.data;
+    console.log("signed up user", serverUser);
+    return { ...user, ...serverUser };
   } catch (e) {
     await firebaseUtils.deleteFirebaseUser();
     console.log(e);
@@ -89,8 +92,8 @@ async function editUser(name, email, username, dob, password, oldPassword) {
     validation.validateEmail(email);
     validation.validateUsername(username);
     validation.validateDob(dob);
-    if(password) validation.validatePassword(password);
-    if(oldPassword) validation.validatePassword(oldPassword);
+    if (password) validation.validatePassword(password);
+    if (oldPassword) validation.validatePassword(oldPassword);
   } catch (e) {
     console.log(e);
     throw "Fix errors before submitting!";
@@ -104,35 +107,42 @@ async function editUser(name, email, username, dob, password, oldPassword) {
       throw new Error("No user is currently logged in!");
     }
     const uid = user.uid;
-    if(oldPassword){
-      await firebaseUtils.reauthenticateFirebaseUser(oldPassword)
+    if (oldPassword) {
+      await firebaseUtils.reauthenticateFirebaseUser(oldPassword);
     }
-    if(username){
-      await get("users/editaccount/username/uniqueCheck/", { //check username not used
+    if (username) {
+      await get("users/editaccount/username/uniqueCheck/", {
+        //check username not used
         username: username,
-        uid:uid,
+        uid: uid,
       });
     }
     if (email !== user.email) {
       console.log("EMAIL PLS");
-      if (!user.emailVerified) { // User's email is not verified, so send verification email and stop
+      if (!user.emailVerified) {
+        // User's email is not verified, so send verification email and stop
         await sendEmailVerification(user);
         throw new Error(
           "Please verify your current email address before changing it. We've sent you a verification email."
         );
       }
       if (!oldPassword) {
-        throw new Error("You must enter your current password to update your email.");
+        throw new Error(
+          "You must enter your current password to update your email."
+        );
       }
-      await get("users/editaccount/email/uniqueCheck/", { //check email not used
+      await get("users/editaccount/email/uniqueCheck/", {
+        //check email not used
         email: email,
-        uid:uid,
+        uid: uid,
       });
       try {
-        await firebaseUtils.reauthenticateFirebaseUser(oldPassword)
+        await firebaseUtils.reauthenticateFirebaseUser(oldPassword);
       } catch (err) {
         console.log("Reauthentication failed", err);
-        throw new Error("Reauthentication failed. Please make sure your current password is correct.");
+        throw new Error(
+          "Reauthentication failed. Please make sure your current password is correct."
+        );
       }
       try {
         const response = await post("users/editaccount/email/update", {
@@ -163,7 +173,6 @@ async function editUser(name, email, username, dob, password, oldPassword) {
       emailPendingVerification: false, // Since Admin SDK handles the verification automatically
       message: "Account updated successfully.",
     };
-
   } catch (e) {
     console.log(e);
     throw e.data && e.data.message

@@ -11,14 +11,17 @@ export default function Profile({ sx, user, Icon }) {
     return name
       .split(" ")
       .map((word) => word[0])
-      .join("");
+      .join("")
+      .toUpperCase();
   };
   return (
     <Avatar
       src={user.profile?.secure_url}
       alt={user?.name}
       sx={{
-        bgcolor: colorHsh.hex(user.displayName || user.name || user.username),
+        bgcolor: colorHsh.hex(
+          user.displayName || user.name || user.username || "red"
+        ),
         color: "#fffff",
         ...sx,
       }}
