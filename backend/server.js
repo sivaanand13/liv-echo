@@ -1,5 +1,4 @@
 import express from "express";
-import https from "https";
 import cors from "cors";
 import dotenv from "dotenv";
 import configRoutes from "./routes/index.js";
@@ -8,8 +7,6 @@ import configMongoConnection from "./config/dbConnection.js";
 import configFirebaseAdmin from "./firebase/initFirebaseAdmin.js";
 import configCloudinary from "./cloudinary/config.js";
 import configMiddlewares from "./middleware/index.js";
-import { Server } from "socket.io";
-import configSSL from "./ssl/configSSL.js";
 
 dotenv.config();
 
