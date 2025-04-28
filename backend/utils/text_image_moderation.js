@@ -17,7 +17,18 @@ const openai = new OpenAi({
   apiKey: OPEN_AI_KEY,
 });
 
+/**
+ * Moderates a given text or image content using OpenAI's Moderation API.
+ *
+ * @param {string} content - The text content or image URL to be moderated.
+ * @param {string} [type="text"] - The type of content to moderate ("text" or "image").
+ * @returns {Promise<Object>} - An object containing the flagged status and matched categories with scores.
+ * @throws {Error} - Throws error if content or type is invalid, or if moderation API fails.
+ */
+
 export async function moderationFunction(content, type = "text") {
+  // Return data schema {flagged: Boolean, categories: [{category_name: category_score:int}]}
+
   try {
     console.log(`Moderating... Type: ${type} & Content: ${content}`);
 
