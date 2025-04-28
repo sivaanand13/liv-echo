@@ -50,6 +50,8 @@ const connect = async () => {
   socket.on("disconnect", () => {
     console.log("Disconnected from chat namespace");
   });
+
+  return socket;
 };
 
 const disconnect = async () => {

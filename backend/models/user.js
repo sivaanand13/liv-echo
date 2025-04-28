@@ -39,6 +39,7 @@ const UserSchema = new Schema(
     dob: { type: Date, required: true },
     bio: { type: String, trim: true, maxlength: settings.BIO_LENGTH },
     profile: { type: CloudinaryAssetSchema, required: false },
+    banner: { type: CloudinaryAssetSchema, required: false },
     friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
     settings: {
       notifications: {
