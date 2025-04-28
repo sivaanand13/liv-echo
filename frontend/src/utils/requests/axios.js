@@ -1,14 +1,10 @@
 import axios from "axios";
 import { getAuth } from "firebase/auth";
 
-let BACKEND_URI;
-if (import.meta.env.VITE_ENV_TYPE == "dev") {
-  BACKEND_URI = import.meta.env.VITE_BACKEND_URI_DEV;
-} else {
-  BACKEND_URI = import.meta.env.VITE_BACKEND_URI_PROD;
-}
+let BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
 
 const url = (endpoint) => {
+  console.log("backend uri: ", BACKEND_URI);
   return BACKEND_URI + endpoint;
 };
 

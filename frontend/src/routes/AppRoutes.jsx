@@ -6,6 +6,9 @@ import SignUp from "../features/auth/SignUp";
 import SignIn from "../features/auth/SignIn";
 import DirectMessages from "../features/dms/DirectMessages";
 import GroupChats from "../features/group-chat/GroupChats";
+import UserSearch from "../features/users/UserSearch";
+import NotFound from "../components/NotFound";
+import UserProfile from "../features/users/UserProfile";
 function AppRoutes() {
   return (
     <Routes>
@@ -16,9 +19,11 @@ function AppRoutes() {
         <Route path="/account" element={<Account />} />
         <Route path="/dms" element={<DirectMessages />} />
         <Route path="/group-chats" element={<GroupChats />} />
-
+        <Route path="/users/search" element={<UserSearch />} />
+        <Route path="/users/:userUID" element={<UserProfile />} />
         <Route path="/chats" element={<Account />} />
       </Route>
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

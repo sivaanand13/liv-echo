@@ -10,20 +10,19 @@ import {
   Button,
   InputAdornment,
   IconButton,
-  OutlinedInput,
 } from "@mui/material";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
+import { getAuth } from "firebase/auth";
 import validation from "../../utils/validation.js";
-import authUtils from "./utils.js";
+import authUtils from "../auth/utils.js";
 import { AuthContext } from "../../contexts/AuthContext.jsx";
 import { Navigate } from "react-router";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Errors from "../../components/Errors.jsx";
-import CustomLink from "../../components/CustomLink.jsx";
-
-function SignUp() {
-  const { currentUser, setUser } = useContext(AuthContext);
+import { toDate } from "date-fns";
+function EditAccount({ handleClose }) {
+  const { currentUser, serverUser } = useContext(AuthContext);
 
   const [error, setError] = useState("");
 
@@ -32,25 +31,40 @@ function SignUp() {
   const [username, setUsername] = useState("");
   const [dob, setDob] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [oldPassword, setOldPassword] = useState("");
+  const [oldPasswordError, setOldPasswordError] = useState("");
+  const [showOldPassword, setShowOldPassword] = useState(false);
 
   const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [usernameError, setUsernameError] = useState("");
   const [dobError, setDobError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+  const [touchedFields, setTouchedFields] = useState({
+    name: false,
+    email: false,
+    username: false,
+    dob: false,
+    password: false,
+    oldPassword: false,
+  });
+  console.log(currentUser);
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
   };
-  const toggleShowConfirmPassword = () => {
-    setShowConfirmPassword(!showConfirmPassword);
+  const toggleShowOldPassword = () => {
+    setShowOldPassword(!showOldPassword);
   };
-
+  useEffect(() => {
+    if (currentUser) {
+      setName(currentUser.displayName || "");
+      setEmail(currentUser.email || "");
+      setUsername(currentUser.username || "");
+      setDob(currentUser.dob || "");
+    }
+  }, [currentUser]);
   const validateField = (
     stateVar,
     validationFunc,
@@ -78,45 +92,59 @@ function SignUp() {
       }
     }
   };
-  const validateConfirmPassword = (e) => {
-    if (e) {
-      setConfirmPassword(e.target.value);
-    }
-
-    if (e) {
-      if (password !== e.target.value) {
-        setConfirmPasswordError("Password and Confirm Password are not equal!");
-      } else setConfirmPasswordError("");
-    } else {
-      if (password == "") {
-        setConfirmPasswordError("Password is not filled in!");
-      } else if (password !== confirmPassword) {
-        setConfirmPasswordError("Password and Confirm Password are not equal!");
-      } else setConfirmPasswordError("");
-    }
-  };
-
-  const handleSignUp = async (e) => {
-    console.log("SignUp.jsx", "Handler for sign up");
+  const handleEditAccount = async (e) => {
+    console.log("Account.jsx", "Handler for editing account");
     e.preventDefault();
 
     setError("");
-    validateField(name, validation.validateString, setName, setNameError);
-    validateField(email, validation.validateEmail, setEmail, setEmailError);
-    validateField(
-      username,
-      validation.validateUsername,
-      setUsername,
-      setUsernameError
-    );
-    validateField(dob, validation.validateDob, setDob, setDobError);
-    validateField(
-      password,
-      validation.validatePassword,
-      setPassword,
-      setPasswordError
-    );
-    validateConfirmPassword();
+    const finalName = name.trim() || currentUser.displayName;
+    const finalEmail = email.trim() || currentUser.email;
+    const finalUsername = username.trim() || serverUser.username;
+    const finalDOB = dob.trim() || serverUser.dob;
+    const finalPassword = password.trim() || undefined;
+    const finalOldPassword = oldPassword.trim() || undefined;
+    if (name.trim()) {
+      validateField(name, validation.validateString, setName, setNameError);
+    }
+    if (email.trim() && email.trim() !== currentUser.email) {
+      validateField(email, validation.validateEmail, setEmail, setEmailError);
+      validateField(
+        oldPassword,
+        validation.validatePassword,
+        setOldPassword,
+        setOldPasswordError
+      );
+    }
+    if (username.trim()) {
+      validateField(
+        username,
+        validation.validateUsername,
+        setUsername,
+        setUsernameError
+      );
+    }
+    if (dob.trim()) {
+      validateField(dob, validation.validateDob, setDob, setDobError);
+    }
+
+    if (password.trim()) {
+      validateField(
+        password,
+        validation.validatePassword,
+        setPassword,
+        setPasswordError
+      );
+      validateField(
+        oldPassword,
+        validation.validatePassword,
+        setOldPassword,
+        setOldPasswordError
+      );
+    }
+    if (!name && !password && !oldPassword && !email && !dob && !username) {
+      setError("Must put in 1 field at least before submitting");
+      return;
+    }
 
     const invalidFields = [
       nameError,
@@ -124,7 +152,7 @@ function SignUp() {
       usernameError,
       dobError,
       passwordError,
-      confirmPasswordError,
+      oldPasswordError,
     ].some((e) => e != "");
 
     if (invalidFields) {
@@ -132,41 +160,48 @@ function SignUp() {
       return;
     } else {
       try {
-        const user = await authUtils.signUpUser(
-          name,
-          email,
-          username,
-          dob,
-          password
+        const result = await authUtils.editUser(
+          finalName,
+          finalEmail,
+          finalUsername,
+          finalDOB,
+          finalPassword,
+          finalOldPassword
         );
-        setUser(user);
+        if (result?.emailPendingVerification) {
+          setError(result.message);
+          return;
+        }
       } catch (e) {
-        console.log("SignUp.jsx", e);
-        setError(e);
+        console.log("Account.jsx", e);
+        setError(e.message);
       }
     }
   };
-
-  if (currentUser) {
-    return <Navigate to="/account" />;
+  if (!currentUser) {
+    return <Navigate to="/login" />;
   }
-
   return (
     <Container
       sx={{
         justifyContent: "center",
         display: "flex",
         overflow: "auto",
+        minWidth: "50vw",
         justifyContent: "center",
         alignItems: "center",
-        minHeight: "100vh",
       }}
     >
-      <Card sx={{ minWidth: "40%", maxWidth: "50%", padding: "2rem" }}>
+      <Card sx={{ width: "100%", padding: "2rem" }}>
         <Stack spacing={2} width="100%">
-          <Typography variant="h4" sx={{ width: "100%" }}>
-            Sign Up
+          {/* Welcome Message */}
+          <Typography variant="h5" sx={{ textAlign: "center" }}>
+            Welcome, {currentUser.displayName}!
           </Typography>
+          <Typography variant="h4" sx={{ width: "100%" }}>
+            Edit Account
+          </Typography>
+
           <FormControl>
             <FormLabel htmlFor="name">Name</FormLabel>
             <TextField
@@ -261,6 +296,37 @@ function SignUp() {
             />
           </FormControl>
           <FormControl>
+            <FormLabel htmlFor="old-password">Current Password</FormLabel>
+            <TextField
+              error={oldPasswordError !== ""}
+              helperText={oldPasswordError}
+              id="old-password"
+              type={showOldPassword ? "text" : "password"}
+              name="oldPassword"
+              required
+              fullWidth
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label={
+                          showOldPassword ? "Hide password" : "Show password"
+                        }
+                        onClick={toggleShowOldPassword}
+                        edge="end"
+                      >
+                        {showOldPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+          </FormControl>
+          <FormControl>
             <FormLabel htmlFor="password">Password</FormLabel>
             <TextField
               error={passwordError != ""}
@@ -299,80 +365,28 @@ function SignUp() {
               }}
             />
           </FormControl>
-          <FormControl>
-            <FormLabel htmlFor="confirm-password">Confirm Password</FormLabel>
-            <TextField
-              error={confirmPasswordError != ""}
-              helperText={confirmPasswordError}
-              id="confirm-password"
-              type={showConfirmPassword ? "text" : "password"}
-              name="confirm-password"
-              required
-              fullWidth
-              value={confirmPassword}
-              onChange={validateConfirmPassword}
-              slotProps={{
-                input: {
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label={
-                          showConfirmPassword
-                            ? "Hide confirm password"
-                            : "Show confirm password"
-                        }
-                        onClick={toggleShowConfirmPassword}
-                        edge="end"
-                      >
-                        {showConfirmPassword ? (
-                          <VisibilityOff />
-                        ) : (
-                          <Visibility />
-                        )}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                },
-              }}
-            />
-          </FormControl>
+
           {error && (
             <Typography sx={{ color: "red", textAlign: "center" }}>
               {error}
             </Typography>
           )}
-          <Stack
-            sx={{ textAlign: "center", justifyContent: "center" }}
-            textAlign="center"
-            direction="row"
-          >
-            <Typography>Already have an account? </Typography>
-
-            <CustomLink
-              color={"blue"}
-              sx={{
-                textDecoration: "none",
-                marginLeft: "0.2em",
-                fontWeight: "bold",
-                "&:hover": {
-                  textDecoration: "underline",
-
-                  color: "#0F03FF",
-                },
-              }}
-              to={"/signin"}
-            >
-              {"  "}Sign In
-            </CustomLink>
-          </Stack>
 
           <Button
             type="submit"
             fullWidth
             variant="contained"
-            onClick={handleSignUp}
+            onClick={handleEditAccount}
           >
-            Sign Up
+            Update Account
+          </Button>
+          <Button
+            type="reset"
+            fullWidth
+            variant="contained"
+            onClick={handleClose}
+          >
+            Cancel
           </Button>
         </Stack>
       </Card>
@@ -380,4 +394,4 @@ function SignUp() {
   );
 }
 
-export default SignUp;
+export default EditAccount;

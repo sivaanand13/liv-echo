@@ -7,6 +7,7 @@ import {
   Stack,
 } from "@mui/material";
 import { AdminPanelSettingsSharp } from "@mui/icons-material";
+import CustomLink from "./CustomLink";
 export default function UserListItem({ user, admin }) {
   return (
     <Stack direction="row" alignItems="center">
@@ -23,7 +24,9 @@ export default function UserListItem({ user, admin }) {
                 sx={{ color: "primary.main" }}
               />
             )}{" "}
-            <Typography> {user?.name || "Name not avaliable"} </Typography>{" "}
+            <CustomLink to={`/users/${user.uid}`}>
+              <Typography> {user?.name || "Name not avaliable"} </Typography>
+            </CustomLink>
           </Stack>
         }
         secondary={
