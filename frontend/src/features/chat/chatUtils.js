@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import chatStore from "../../stores/chatStore.js";
 import axios from "../../utils/requests/axios.js";
 import { v4 as uuidv4 } from "uuid";
@@ -9,6 +10,24 @@ async function getMessages(currentChat) {
   } catch (e) {
     console.log(e);
     throw `Chat messages fetch failed!`;
+  }
+}
+
+async function messageModeration(messageText, attachments) {
+  try {
+    const response = await axios.post("chats/messages/moderation", {
+      text: messageText,
+      attachments,
+    });
+
+    if (response.data) {
+      return response.data;
+    } else {
+      throw "No Response!";
+    }
+  } catch (e) {
+    console.error(e);
+    throw `Message Moderation Failed`;
   }
 }
 
@@ -92,4 +111,5 @@ export default {
   deleteMessage,
   leaveChat,
   deleteChat,
+  messageModeration,
 };

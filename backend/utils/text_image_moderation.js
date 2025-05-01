@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-console.log(process.env.OPENAI_API_KEY);
+// console.log(process.env.OPENAI_API_KEY);
 
 const OPEN_AI_KEY = process.env.OPENAI_API_KEY;
 

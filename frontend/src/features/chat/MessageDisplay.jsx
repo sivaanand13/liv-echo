@@ -77,6 +77,25 @@ export default function MessageDisplay({ chat }) {
     }
 
     try {
+      console.log("Current Attachments", curAttachments);
+      const moderationCheck = await chatUtils.messageModeration(
+        curMessageText,
+        curAttachments
+      );
+      console.log(1, moderationCheck);
+      if (moderationCheck.error) throw moderationCheck.message;
+      if (moderationCheck.flagged) {
+        const categoryList = moderationCheck.categories
+          .map((cat) => Object.keys(cat)[0])
+          .join(", ");
+
+        return setMessageError(`${moderationCheck.message}, ${categoryList}`);
+      }
+    } catch (e) {
+      return setMessageError(e);
+    }
+
+    try {
       const sender = currentChat.members.find(
         (member) => member.uid == auth.currentUser.uid
       );
