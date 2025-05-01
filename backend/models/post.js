@@ -28,6 +28,10 @@ const PostSchema = new Schema(
       type: [CloudinaryAssetSchema],
       default: [],
     },
+    isPrivate: {
+      type: Boolean,
+      default: true,
+    },
     likes: [
       {
         type: Schema.Types.ObjectId,

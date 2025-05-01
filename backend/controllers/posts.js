@@ -8,8 +8,9 @@ import usersController from "./users.js";
 // delete post... make sure an admin can do it no matter what!
 
 // post posts, pretty simple
-async function postPost(uid, text, attachments){
+async function postPost(uid, text, attachments, isPrivate){
     let user = await usersController.getUserById(uid);
+    let isPrivate = validation.validateBoolean(isPrivate);
 
     text = validation.validateString(text);
     if(text.length > settings.MESSAGE_LENGTH) throw new Error ("text is too long!");
@@ -21,6 +22,7 @@ async function postPost(uid, text, attachments){
         senderProfile: user.profile,
         text: text,
         attachments: [],
+        isPrivate: isPrivate,
         likes: [],
         comments: [],
         reports: {reporters: [], reportTypes: [], comments: [], reportNum: 0},
@@ -169,8 +171,6 @@ async function reportPost(uid, postId, reportType, comment){
 
     let reportN = post.reports.reportNum;
     reportN += 1;
-
-
 
     post = await Post.findOneAndUpdate(
         {_id: post._id },
