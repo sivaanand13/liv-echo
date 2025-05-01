@@ -98,6 +98,10 @@ async function leaveChat(uid, chatId) {
     console.log("Emitng chat updated to:", member.uid);
     chatNamespace.to(member.uid).emit("chatUpdated", uiChat);
   });
+
+  if (uiChat.members.length == 0) {
+    await Chat.deleteOne({ _id: chat._id });
+  }
   return uiChat;
 }
 

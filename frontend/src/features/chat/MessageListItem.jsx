@@ -16,6 +16,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import chatUtils from "./chatUtils";
+import CustomLink from "../../components/CustomLink";
 export default function MessageListItem({ msg, admins }) {
   const auth = useContext(AuthContext);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -56,7 +57,20 @@ export default function MessageListItem({ msg, admins }) {
           <Stack spacing={1}>
             <Stack direction="row" spacing={1}>
               <Typography variant="caption">
-                {msg.sender?.name || msg.sender?.username || "Unknown"}
+                <CustomLink
+                  to={`/users/${msg.sender?.uid}`}
+                  sx={{
+                    color: "white",
+                    textDecoration: "underline",
+
+                    "&:hover": {
+                      color: "red",
+                      textDecoration: "none",
+                    },
+                  }}
+                >
+                  {msg.sender?.name || msg.sender?.username || "Unknown"}
+                </CustomLink>
               </Typography>
               <Typography variant="caption">
                 {new Date(msg.createdAt).toLocaleString()}

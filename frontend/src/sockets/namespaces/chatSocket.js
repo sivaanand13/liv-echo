@@ -26,11 +26,8 @@ const connect = async () => {
 
   socket.on("chatRemoved", (chat) => {
     console.log("chatRemoved", chat);
-    if (chat.type == "dm") {
-      chatStore.getState().removeDirectMessageChat(chat);
-    } else {
-      chatStore.getState().removeGroupChat(chat);
-    }
+    chatStore.getState().removeDirectMessageChat(chat);
+    chatStore.getState().removeGroupChat(chat);
   });
 
   socket.on("messageCreated", (message, tempId) => {
@@ -50,6 +47,8 @@ const connect = async () => {
   socket.on("disconnect", () => {
     console.log("Disconnected from chat namespace");
   });
+
+  return socket;
 };
 
 const disconnect = async () => {
