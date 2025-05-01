@@ -99,8 +99,7 @@ router.route("/messages/moderation").post(async (req, res) => {
   const { text, attachments } = req.body;
 
   try {
-    if(text && attachments){
-      
+    if (text && attachments) {
     }
     if (text) {
       const validatedText = validation.validateString(text);
@@ -131,6 +130,8 @@ router.route("/messages/moderation").post(async (req, res) => {
     }
 
     if (attachments) {
+      validation.validateArray(attachments);
+      attachments = attachments.map((image) => image.secure_url);
       const moderationResponse = await moderationFunction(attachments, "image");
 
       if (moderationResponse.flagged) {

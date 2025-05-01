@@ -43,6 +43,19 @@ async function sendMessage(chat, messageText, attachments, sender) {
       console.log("upload atttachments: ", images);
       body.attachments = images.data;
     }
+  } catch (e) {
+    console.log(e);
+    throw `Message validation failed!`;
+  }
+
+  try {
+    await messageModeration(messageText, attachments);
+  } catch (e) {
+    console.log(e);
+    throw `Message moderation failed!`;
+  }
+
+  try {
     console.log("Attempting to send message:", body);
 
     let newMessage = {
