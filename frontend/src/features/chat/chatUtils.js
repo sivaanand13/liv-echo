@@ -35,6 +35,7 @@ async function sendMessage(chat, messageText, attachments, sender) {
   const { addCurrentChatTempMessages, removeCurrentChatMessages } =
     chatStore.getState();
   console.log("message sender: ", sender);
+  let newMessage;
   try {
     const tempId = uuidv4();
     const body = { tempId, chatId: chat._id, text: messageText };
@@ -58,7 +59,7 @@ async function sendMessage(chat, messageText, attachments, sender) {
   try {
     console.log("Attempting to send message:", body);
 
-    let newMessage = {
+    newMessage = {
       _id: tempId,
       sender: {
         _id: sender._id,
@@ -80,7 +81,7 @@ async function sendMessage(chat, messageText, attachments, sender) {
   } catch (e) {
     removeCurrentChatMessages(newMessage);
     console.log(e);
-    throw `Message send failed!`;
+    throw e.message || `Message send failed!`;
   }
 }
 
