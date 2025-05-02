@@ -363,7 +363,7 @@ router.route("/editAccount").patch(authMiddleware, async (req, res) => {
 });
 router.route("/editAccount/").post(authMiddleware, async (req, res) => {
   let { name, email, username, dob, profile, banner } = req.body;
-  console.log("Trying editAccount for", uid, name, email, username, dob);
+  console.log("Trying editAccount for", name, email, username, dob);
   let uid = req.user.uid;
 
   try {

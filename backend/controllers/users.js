@@ -107,7 +107,8 @@ async function editUser(uid, name, email, username, dob, profile, banner) {
     }
   );
   user = await getUserByUID(user.uid, false);
-
+  console.log("Edited user", user);
+  chatNamespace.to(user.uid).emit("accountUpdated", user);
   return user;
 }
 
