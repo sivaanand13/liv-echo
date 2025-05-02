@@ -69,6 +69,10 @@ export default function EditBanner({ handleClose }) {
         backgroundColor: theme.palette.background.default,
         justifyContent: "center",
         alignItems: "center",
+        width: "fit-content",
+        height: "fit-content",
+        padding: "2em",
+        maxWidth: "80vw",
       }}
     >
       <Stack spacing={2} width="100%">

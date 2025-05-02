@@ -60,10 +60,13 @@ export default function EditProfile({ handleClose }) {
   return (
     <Card
       sx={{
-        padding: "2rem",
         backgroundColor: theme.palette.background.default,
         justifyContent: "center",
         alignItems: "center",
+        width: "fit-content",
+        height: "fit-content",
+        padding: "2em",
+        maxWidth: "80vw",
       }}
     >
       <Stack spacing={2} width="100%">

@@ -10,6 +10,7 @@ import {
   Button,
   InputAdornment,
   IconButton,
+  DialogContent,
 } from "@mui/material";
 import { useState, useContext, useEffect } from "react";
 import { getAuth } from "firebase/auth";
@@ -183,17 +184,15 @@ function EditAccount({ handleClose }) {
     return <Navigate to="/login" />;
   }
   return (
-    <Container
+    <Box
       sx={{
-        justifyContent: "center",
-        display: "flex",
-        overflow: "auto",
-        minWidth: "50vw",
-        justifyContent: "center",
-        alignItems: "center",
+        width: "fit-content",
+        height: "fit-content",
+        padding: "2em",
+        maxWidth: "80vw",
       }}
     >
-      <Card sx={{ width: "100%", padding: "2rem" }}>
+      <DialogContent sx={{ width: "100%", padding: "2rem" }}>
         <Stack spacing={2} width="100%">
           {/* Welcome Message */}
           <Typography variant="h5" sx={{ textAlign: "center" }}>
@@ -390,8 +389,8 @@ function EditAccount({ handleClose }) {
             Cancel
           </Button>
         </Stack>
-      </Card>
-    </Container>
+      </DialogContent>
+    </Box>
   );
 }
 

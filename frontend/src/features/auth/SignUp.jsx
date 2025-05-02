@@ -156,13 +156,12 @@ function SignUp() {
       sx={{
         justifyContent: "center",
         display: "flex",
-        overflow: "auto",
         justifyContent: "center",
         alignItems: "center",
         minHeight: "100vh",
       }}
     >
-      <Card sx={{ minWidth: "40%", maxWidth: "50%", padding: "2rem" }}>
+      <Card sx={{ minWidth: "50vw", maxWidth: "95vw", padding: "1em" }}>
         <Stack spacing={2} width="100%">
           <Typography variant="h4" sx={{ width: "100%" }}>
             Sign Up
