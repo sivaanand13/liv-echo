@@ -196,3 +196,13 @@ async function getPostById(postId) {
     }
     return post;
 }
+
+export default {
+    postPost,
+    canDeletePost,
+    deletePost,
+    editPost,
+    likePost,
+    reportPost,
+    getPostById,
+};
