@@ -52,8 +52,7 @@ export default function UserProfile() {
       >
         <Box
           sx={{
-            height: "35vh",
-            width: "100vw",
+            minHeight: "35vh",
             backgroundImage: `url(${user.banner?.secure_url || defaultBanner})`,
             backgroundSize: "cover",
             backgroundPosition: "center",

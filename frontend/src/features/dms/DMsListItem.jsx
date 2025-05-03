@@ -5,9 +5,11 @@ import { AuthContext } from "../../contexts/AuthContext";
 import ChatListItem from "../../components/ChatListItem";
 
 export default function DMsListItem({ item: chat }) {
-  console.log(chat);
-  const auth = useContext(AuthContext);
-  const user = chat.members.find((member) => member.uid !== auth.uid);
+  const { user } = useContext(AuthContext);
+  console.log("dm chat: ", chat);
+  let displayUser =
+    chat.members.find((member) => member.uid !== user.uid) || chat.members[0];
+  console.log("DM display: ", displayUser);
   let preview = `${
     chat.latestMessage?.sender.username || chat.latestMessage?.senderName || ""
   }: ${chat?.latestMessage?.text}`;
@@ -17,12 +19,14 @@ export default function DMsListItem({ item: chat }) {
   return (
     <ChatListItem item={chat} key={chat._id.toString()}>
       <ListItemAvatar>
-        <Profile user={user} />
+        <Profile user={displayUser} />
       </ListItemAvatar>
       <ListItemText
         disableTypography={true}
-        primary={`${user?.name || "Name not avaliable"} (${
-          user.username || "Username not avaliable"
+        primary={`${displayUser?.name || "Name not avaliable"} (${
+          chat?.members.length == 1
+            ? "EMPTY"
+            : displayUser?.username || "Username not avaliable"
         })`}
         secondary={
           <Stack direction={"column"}>

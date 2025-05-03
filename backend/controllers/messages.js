@@ -171,7 +171,7 @@ async function deleteMessage(uid, messageId) {
     throw `Only original sender or admin can delete chat message!`;
   }
 
-  await Message.deleteOne({ _id: message._id, sender: user._id });
+  await Message.deleteOne({ _id: message._id });
 
   console.log("Emitting to message delete to all members:");
   chat.members.forEach((member) => {

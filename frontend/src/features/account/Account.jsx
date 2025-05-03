@@ -47,9 +47,8 @@ export default function Account() {
     >
       <Box
         sx={{
-          height: "35vh",
-          width: "100vw",
           backgroundImage: `url(${user.banner?.secure_url || defaultBanner})`,
+          minHeight: "35vh",
           backgroundSize: "cover",
           backgroundPosition: "center",
           position: "relative",
