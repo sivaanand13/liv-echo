@@ -9,6 +9,7 @@ import GroupChats from "../features/group-chat/GroupChats";
 import UserSearch from "../features/users/UserSearch";
 import NotFound from "../components/NotFound";
 import UserProfile from "../features/users/UserProfile";
+import CreatePost from "../features/posts/CreatePost"
 function AppRoutes() {
   return (
     <Routes>
@@ -22,6 +23,7 @@ function AppRoutes() {
         <Route path="/users/search" element={<UserSearch />} />
         <Route path="/users/:userUID" element={<UserProfile />} />
         <Route path="/chats" element={<Account />} />
+        <Route path="/posts/create" element={<CreatePost/>}/>
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
