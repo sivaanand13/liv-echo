@@ -14,7 +14,7 @@ const configRoutes = (app) => {
   app.use("/posts", postsRouter);
   app.use("{0,1}", async (req, res) => {
     res.status(404).json({
-      message: "Invalid Route!",
+      message: `Invalid Route!}`,
     });
   });
 };

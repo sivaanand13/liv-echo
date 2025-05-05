@@ -3,6 +3,7 @@ import usersController from "./users.js";
 import validation from "../utils/validation.js";
 import settings from "../models/settings.js";
 import cloudinary from "../cloudinary/cloudinary.js";
+import Post from "../models/posts.js";
 
 // delete post... make sure an admin can do it no matter what!
 
@@ -35,6 +36,7 @@ async function postPost(uid, text, attachments, isPrivate){
     }
 
     const post = await Post.create(newPost);
+    return post;
 
 }
 
@@ -154,7 +156,7 @@ async function reportPost(uid, postId, reportType, comment){
     if(reporterz.includes(user._id)) throw new Error ("You've already reported this post!");
 
     let reportTypez = post.reports.reportTypes;
-    let reportNum = 0;
+    //let reportNum = 0;
 
     reporterz.push(user._id);
     reportTypez.push(reportType);

@@ -19,7 +19,7 @@ router.use(authMiddleware);
 router.use(uploadMiddleware);
 //console.log("Three!");
 // post creation
-router.route("/posts").post(async (req, res) => {
+router.route("/create").post(async (req, res) => {
   console.log("Hey!");
   let { text, attachments, isPrivate } = req.body;
   let uid = req.user.uid;
@@ -27,18 +27,18 @@ router.route("/posts").post(async (req, res) => {
   let user;
   try {
     console.log("Validating: ", text);
-    user = await usersController.getUserByUID(uid);
+    user = await userController.getUserByUID(uid);
     text = validation.validateString(text);
     if (text.length > settings.MESSAGE_LENGTH) {
       throw "Message length cannot exceed"; //${settings.MESSAGE_LENGTH}`;
     }
   } catch (e) {
     console.log(e);
-    return res.status(400).json({ message: "Invalid inputs", errors: e });
+    return res.status(400).json({ message: "Invalid inputs", error: e });
   }
 
   try {
-    const pos = await postssController.postPost(
+    const pos = await postsController.postPost(
       uid,
       text,
       attachments,
@@ -57,7 +57,7 @@ router.route("/posts").post(async (req, res) => {
 });
 
 // post by ID
-router.route("posts/:postID").get(async (req, res) => {
+router.route("/:postID").get(async (req, res) => {
   let postID = req.params.postID;
   let uid = req.user.uid;
   let post;
@@ -99,7 +99,7 @@ router.route("posts/:postID").get(async (req, res) => {
 
 // edit post by ID
 // you can ONLY do this if you're the POSTER
-router.route("posts/postID").patch(async (req, res) => {
+router.route("/:postID").patch(async (req, res) => {
   let postID = req.params.postID;
   let uid = req.user.uid;
   let post;
@@ -138,7 +138,7 @@ router.route("posts/postID").patch(async (req, res) => {
 
 // delete message by ID
 // you can only do this if you're the poster or an admin
-router.route("posts/postID").delete(async (req, res) => {
+router.route("/:postID").delete(async (req, res) => {
   let postID = req.params.postID;
   let uid = req.user.uid;
   let post;
