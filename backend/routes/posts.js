@@ -13,10 +13,14 @@ import cloudinary, {
 const router = express.Router();
 
 // middleware
+//console.log("One!");
 router.use(authMiddleware);
-
+//console.log("Two!");
+router.use(uploadMiddleware);
+//console.log("Three!");
 // post creation
-router.route("/posts/create").post(async (req, res) => {
+router.route("/posts").post(async (req, res) => {
+  console.log("Hey!");
   let { text, attachments, isPrivate } = req.body;
   let uid = req.user.uid;
 
@@ -26,7 +30,7 @@ router.route("/posts/create").post(async (req, res) => {
     user = await usersController.getUserByUID(uid);
     text = validation.validateString(text);
     if (text.length > settings.MESSAGE_LENGTH) {
-      throw `Message length cannot exceed ${settings.MESSAGE_LENGTH}`;
+      throw "Message length cannot exceed"; //${settings.MESSAGE_LENGTH}`;
     }
   } catch (e) {
     console.log(e);
@@ -73,13 +77,13 @@ router.route("posts/:postID").get(async (req, res) => {
   // if none are the case, they aren't allowed to see this
   try {
     if (post.isPrivate) {
-      if (uid.toString() == post.sender.toString
+      if (uid.toString() == post.sender.toString()
         || poster.friends.includes(uid)
         || user.role == "admin") {
         // they can see the post! Yay!
-        
+
       } else {
-        throw new Error("ew!");
+        throw new Error("You can't see this!");
       }
     }
     const pos = await postsController.getPostById(postID);
@@ -88,7 +92,84 @@ router.route("posts/:postID").get(async (req, res) => {
       data: pos,
     });
   } catch (e) {
-    return res.status(403).json({ message: "you can't see this!" });
+    return res.status(403).json({ message: e});
   }
 });
 
+
+// edit post by ID
+// you can ONLY do this if you're the POSTER
+router.route("posts/postID").patch(async (req, res) => {
+  let postID = req.params.postID;
+  let uid = req.user.uid;
+  let post;
+  let user, poster;
+  let text = req.body;
+  let attachments = req.files;
+
+
+  try {
+    post = await postsController.getPostById(postID);
+    user = await userController.getUserByUID(uid);
+    poster = await userController.getUserByUID(post.sender);
+    validation.validateString(text);
+    validation.validateArray(attachments);
+  } catch (e) {
+    return res.status(400).json({ message: e });
+  }
+
+  // if you aren't the poster, throw an error
+  try {
+    if (uid.toString() == post.sender.toString()) {
+      
+      let pos = await postsController.editPost(uid, postID, text, attachments);
+      return res.status(200).json({
+        message: "Updated post succesfully!",
+        data: pos,
+      });
+    } else {
+      throw new Error("You can't edit this!");
+    }
+  } catch (e) {
+    return res.status(403).json({ message: e });
+  }
+});
+
+
+// delete message by ID
+// you can only do this if you're the poster or an admin
+router.route("posts/postID").delete(async (req, res) => {
+  let postID = req.params.postID;
+  let uid = req.user.uid;
+  let post;
+  let user, poster;
+
+
+  try {
+    post = await postsController.getPostById(postID);
+    user = await userController.getUserByUID(uid);
+    poster = await userController.getUserByUID(post.sender);
+  } catch (e) {
+    return res.status(400).json({ message: e });
+  }
+
+  // checks if you're either an admin or the poster
+  // if you aren't, throw an error
+  try {
+    let candle = await postsController.canDeletePost(uid, postID)
+    if (candle) {
+      
+      let pos = await postsController.deletePost(uid, postID);
+      return res.status(200).json({
+        message: "Deleted post succesfully!",
+        data: pos,
+      });
+    } else {
+      throw new Error("You can't delete this!");
+    }
+  } catch (e) {
+    return res.status(403).json({ message: e });
+  }
+});
+
+export default router;

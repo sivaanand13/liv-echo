@@ -1,16 +1,15 @@
 import { ObjectId } from "mongodb";
 import usersController from "./users.js";
 import validation from "../utils/validation.js";
-import settings from "./settings.js";
+import settings from "../models/settings.js";
 import cloudinary from "../cloudinary/cloudinary.js";
-import usersController from "./users.js";
 
 // delete post... make sure an admin can do it no matter what!
 
 // post posts, pretty simple
 async function postPost(uid, text, attachments, isPrivate){
     let user = await usersController.getUserById(uid);
-    let isPrivate = validation.validateBoolean(isPrivate);
+    isPrivate = validation.validateBoolean(isPrivate);
 
     text = validation.validateString(text);
     if(text.length > settings.MESSAGE_LENGTH) throw new Error ("text is too long!");
