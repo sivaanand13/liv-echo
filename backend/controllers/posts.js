@@ -9,8 +9,8 @@ import Post from "../models/post.js";
 
 // post posts, pretty simple
 async function postPost(uid, text, attachments, isPrivate){
-    let user = await usersController.getUserById(uid);
-    isPrivate = validation.validateBoolean(isPrivate);
+    let user = await usersController.getUserByUID(uid);
+    validation.validateBoolean(isPrivate);
 
     text = validation.validateString(text);
     if(text.length > settings.MESSAGE_LENGTH) throw new Error ("text is too long!");
@@ -69,9 +69,10 @@ async function deletePost(uid, postID){
 
 
 // there's no "canEditPost" function because you can only edit if you're the poster
-async function editPost(uid, postID, text, attachments, updateTimestamps){
+async function editPost(uid, postID, text, isPrivate, updateTimestamps){
     let post = await getPostById(postID.toString());
     let user = await usersController.getUserByUID(uid);
+    validation.validateBoolean(isPrivate);
 
     if(post.sender.toString() != user._id.toString()) throw new Error ("You can't delete this post!");
 
@@ -90,7 +91,7 @@ async function editPost(uid, postID, text, attachments, updateTimestamps){
         );
     }
 
-    if(attachments){
+    /*if(attachments){
         validation.validateArray(attachments, "Post attachments");
         
         let media = [];
@@ -109,7 +110,17 @@ async function editPost(uid, postID, text, attachments, updateTimestamps){
             },
             { new: true , timestamps: updateTimestamps }
         );
-    }
+    }*/
+
+        post = await Post.findOneAndUpdate(
+            {_id: post.id, sender: user._id},
+            {
+                $set: {
+                    isPrivate: isPrivate
+                }
+            },
+            { new: true, timestamps: updateTimestamps }
+        );
 
     return post;
 }

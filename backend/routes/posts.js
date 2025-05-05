@@ -46,7 +46,7 @@ router.route("/create").post(async (req, res) => {
     );
     return res.status(200).json({
       message: "Attached message media!",
-      data: message,
+      data: pos,
     });
   } catch (e) {
     console.log(e);
@@ -66,8 +66,9 @@ router.route("/:postID").get(async (req, res) => {
 
   try {
     post = await postsController.getPostById(postID);
+    console.log("Welp, we made it this far");
     user = await userController.getUserByUID(uid);
-    poster = await userController.getUserByUID(post.sender);
+    poster = await userController.getUserById(post.sender);
   } catch (e) {
     return res.status(400).json({ message: e });
   }
@@ -76,8 +77,12 @@ router.route("/:postID").get(async (req, res) => {
   // if it is, check if the user is a friend of the poster, the poster, or an admin
   // if none are the case, they aren't allowed to see this
   try {
+    console.log("yay");
     if (post.isPrivate) {
-      if (uid.toString() == post.sender.toString()
+      console.log("boo");
+      console.log(uid.toString());
+      console.log(poster.uid.toString());
+      if (uid.toString() == poster.uid.toString()
         || poster.friends.includes(uid)
         || user.role == "admin") {
         // they can see the post! Yay!
@@ -104,25 +109,26 @@ router.route("/:postID").patch(async (req, res) => {
   let uid = req.user.uid;
   let post;
   let user, poster;
-  let text = req.body;
-  let attachments = req.files;
+  let { text, isPrivate } = req.body;
+  //let attachments = req.files;
 
 
   try {
     post = await postsController.getPostById(postID);
     user = await userController.getUserByUID(uid);
-    poster = await userController.getUserByUID(post.sender);
+    poster = await userController.getUserById(post.sender);
     validation.validateString(text);
-    validation.validateArray(attachments);
+    validation.validateBoolean(isPrivate);
+    //validation.validateArray(attachments);
   } catch (e) {
     return res.status(400).json({ message: e });
   }
 
   // if you aren't the poster, throw an error
   try {
-    if (uid.toString() == post.sender.toString()) {
+    if (uid.toString() == poster.uid.toString()) {
       
-      let pos = await postsController.editPost(uid, postID, text, attachments);
+      let pos = await postsController.editPost(uid, postID, text, isPrivate);
       return res.status(200).json({
         message: "Updated post succesfully!",
         data: pos,
@@ -148,7 +154,7 @@ router.route("/:postID").delete(async (req, res) => {
   try {
     post = await postsController.getPostById(postID);
     user = await userController.getUserByUID(uid);
-    poster = await userController.getUserByUID(post.sender);
+    poster = await userController.getUserById(post.sender);
   } catch (e) {
     return res.status(400).json({ message: e });
   }
@@ -157,6 +163,7 @@ router.route("/:postID").delete(async (req, res) => {
   // if you aren't, throw an error
   try {
     let candle = await postsController.canDeletePost(uid, postID)
+    console.log(candle);
     if (candle) {
       
       let pos = await postsController.deletePost(uid, postID);
