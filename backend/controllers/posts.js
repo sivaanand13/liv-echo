@@ -3,7 +3,7 @@ import usersController from "./users.js";
 import validation from "../utils/validation.js";
 import settings from "../models/settings.js";
 import cloudinary from "../cloudinary/cloudinary.js";
-import Post from "../models/posts.js";
+import Post from "../models/post.js";
 
 // delete post... make sure an admin can do it no matter what!
 
