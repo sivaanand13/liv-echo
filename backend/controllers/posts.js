@@ -7,6 +7,15 @@ import Post from "../models/post.js";
 
 // delete post... make sure an admin can do it no matter what!
 
+async function getNPosts(n){
+    //console.log("1");
+    const posts = await Post.find({}).limit(n)
+    .populate("sender", "name username email profile uid")
+    .lean();
+    //console.log("2");
+    return posts;
+}
+
 // post posts, pretty simple
 async function postPost(uid, text, attachments, isPrivate){
     let user = await usersController.getUserByUID(uid);
@@ -210,6 +219,7 @@ async function getPostById(postId) {
 }
 
 export default {
+    getNPosts,
     postPost,
     canDeletePost,
     deletePost,

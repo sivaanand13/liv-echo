@@ -18,6 +18,25 @@ router.use(authMiddleware);
 //console.log("Two!");
 router.use(uploadMiddleware);
 //console.log("Three!");
+
+// get all posts
+router.route("/").get(async (req, res) => {
+  try {
+    //console.log("Yep");
+    const pos = await postsController.getNPosts(10);
+    //console.log("OK");
+    //console.log(pos.length);
+    return res.status(200).json({
+      message: "Attached message media!",
+      data: pos,
+    });
+  }catch (e){
+    return res.status(500).json({
+      message: e,
+    });
+  }
+});
+
 // post creation
 router.route("/create").post(async (req, res) => {
   console.log("Hey!");
@@ -30,7 +49,7 @@ router.route("/create").post(async (req, res) => {
     user = await userController.getUserByUID(uid);
     text = validation.validateString(text);
     if (text.length > settings.MESSAGE_LENGTH) {
-      throw "Message length cannot exceed"; //${settings.MESSAGE_LENGTH}`;
+      throw `Message length cannot exceed ${settings.MESSAGE_LENGTH}`;
     }
   } catch (e) {
     console.log(e);

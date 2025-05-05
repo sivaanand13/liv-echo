@@ -12,7 +12,7 @@ async function createPost(text, attachments, isPrivate = false) {
 
     // If there are attachments, ensure they're valid (optional step)
     let uploaded = [];
-    if (attachments && attachments.length > 0) {
+    if (attachments && attachments.length > 0) { 
       uploaded = await uploadAttachments(attachments);
     }
 
@@ -54,6 +54,28 @@ async function uploadAttachments(attachments) {
   }
 }
 
+async function getPosts() {
+  try {
+    const response = await axios.get(`posts`);
+    return response.data.data;
+  } catch (e) {
+    console.log(e);
+    throw `Post fetch failed!`;
+  }
+}
+
+async function deletePost(pos) {
+  try {
+    const response = await axios.del(`posts/${post._id}`, {});
+    return response.data.data;
+  } catch (e) {
+    console.log(e);
+    throw `Post fetch failed!`;
+  }
+}
+
 export default {
   createPost,
+  getPosts,
+  deletePost,
 };

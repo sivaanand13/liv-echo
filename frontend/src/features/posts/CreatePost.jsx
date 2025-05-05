@@ -1,6 +1,6 @@
 // src/features/posts/CreatePost.jsx
 import React, { useState } from "react";
-import postUtils from "./postUtils";
+import postUtils from "./postUtils"; 
 
 function CreatePost() {
   const [text, setText] = useState("");

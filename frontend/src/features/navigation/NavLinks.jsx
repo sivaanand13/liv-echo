@@ -10,6 +10,7 @@ function AuthNavigation() {
       <NavBarLink to="/group-chats">Group Chats</NavBarLink>
       <NavBarLink to="/account">Account</NavBarLink>
       <NavBarLink to="/users/search">Search Users </NavBarLink>
+      <NavBarLink to="/posts">Feed</NavBarLink>
       <NavBarLink to="/posts/create">Create Post</NavBarLink>
       <SignOutButton />
     </>
