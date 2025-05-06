@@ -11,12 +11,14 @@ import NotFound from "../components/NotFound";
 import UserProfile from "../features/users/UserProfile";
 import CreatePost from "../features/posts/CreatePost";
 import PostFeed from "../features/posts/PostFeed";
+import SearchPosts from "../features/posts/SearchPosts"
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/signin" element={<SignIn />} />
+      <Route path="/posts/search" element={<SearchPosts/>}/>
       <Route element={<PrivateRoute />}>
         <Route path="/account" element={<Account />} />
         <Route path="/dms" element={<DirectMessages />} />

@@ -12,6 +12,7 @@ function AuthNavigation() {
       <NavBarLink to="/users/search">Search Users </NavBarLink>
       <NavBarLink to="/posts">Feed</NavBarLink>
       <NavBarLink to="/posts/create">Create Post</NavBarLink>
+      <NavBarLink to="/posts/search">Search Post</NavBarLink>
       <SignOutButton />
     </>
   );

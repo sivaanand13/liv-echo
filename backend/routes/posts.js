@@ -74,7 +74,21 @@ router.route("/create").post(async (req, res) => {
     });
   }
 });
-
+router.route('/search').get(async (req, res) => {
+  const { query } = req.query;
+  if (!query || query.trim() === "") {
+    console.log("What is my query?", query);
+    return res.status(400).json({ message: "Missing search query" });
+  }
+  try {
+    const results = await postsController.searchPosts(query);
+    res.json({ results });
+  } catch (err) {
+    console.error("Elasticsearch query failed:", err);
+    console.error(err);
+    res.status(500).json({ message: 'Search failed' });
+  }
+});
 // post by ID
 router.route("/:postID").get(async (req, res) => {
   let postID = req.params.postID;

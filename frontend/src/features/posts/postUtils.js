@@ -53,6 +53,19 @@ async function uploadAttachments(attachments) {
     throw new Error("Attachment upload failed");
   }
 }
+async function searchPosts(query) {
+  try {
+    query = validation.validateString(query, "Search Text");
+    console.log("Sending query:", query);
+    const response = await axios.get("posts/search", {
+      query,
+    });
+    return response.data.results;
+  } catch (err) {
+    console.error('Search error:', err);
+    throw err;
+  }
+}
 
 async function getPosts() {
   try {
@@ -78,4 +91,5 @@ export default {
   createPost,
   getPosts,
   deletePost,
+  searchPosts
 };

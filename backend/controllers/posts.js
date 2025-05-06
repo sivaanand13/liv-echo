@@ -4,6 +4,7 @@ import validation from "../utils/validation.js";
 import settings from "../models/settings.js";
 import cloudinary from "../cloudinary/cloudinary.js";
 import Post from "../models/post.js";
+import elasticClient from '../elasticSearch/elasticsearchClient.js';
 
 // delete post... make sure an admin can do it no matter what!
 
@@ -45,6 +46,18 @@ async function postPost(uid, text, attachments, isPrivate){
     }
 
     const post = await Post.create(newPost);
+    await elasticClient.index({
+        index: 'posts',
+        id: post._id.toString(),
+        body: {
+          uid,
+          text,
+          isPrivate,
+          senderUsername: user.username,
+          senderName: user.name,
+          createdAt: new Date().toISOString()
+        }
+      });
     return post;
 
 }
@@ -73,6 +86,10 @@ async function deletePost(uid, postID){
     if(!canDel) throw new Error("You don't have permissions to delete this!");
 
     await Post.deleteOne({_id: post._id});
+    await elasticClient.delete({
+        index: 'posts',
+        id: post._id.toString()
+    });
 
 }
 
@@ -130,13 +147,23 @@ async function editPost(uid, postID, text, isPrivate, updateTimestamps){
             },
             { new: true, timestamps: updateTimestamps }
         );
-
+        await elasticClient.update({
+            index: 'posts',
+            id: post._id.toString(),
+            body: {
+              doc: {
+                text: text,
+                isPrivate: isPrivate,
+                updatedAt: new Date()
+              }
+            }
+          });
     return post;
 }
 
 // you can't like a post multiple times or like your own post
 async function likePost(uid, postId){
-    let post = await getPostById(postID.toString());
+    let post = await getPostById(postId.toString());
     let user = await usersController.getUserByUID(uid);
     
     if(user._id.toString() == post.sender.toString()) throw new Error("you can't like your own post!");
@@ -163,7 +190,7 @@ async function likePost(uid, postId){
 // report the post
 // you can't report your own post or report it multiple times
 async function reportPost(uid, postId, reportType, comment){
-    let post = await getPostById(postID.toString());
+    let post = await getPostById(postId.toString());
     let user = await usersController.getUserByUID(uid);
     let com = "";
     
@@ -217,7 +244,74 @@ async function getPostById(postId) {
     }
     return post;
 }
-
+async function searchPosts(queryText) {
+    queryText = validation.validateString(queryText, "Search Query");
+    if (!queryText || queryText.length < 2) {
+        throw new Error("Search query must be at least 2 characters long.");
+    }
+    //console.log();
+    const  body = await elasticClient.search({
+      index: 'posts',
+      body: {
+        query: {
+            match: {
+                text: queryText
+            }
+        }
+      }
+    });
+    console.log("Elasticsearch Response:", JSON.stringify(body, null, 2));
+    if (body && body.hits && body.hits.hits.length > 0) {
+        console.log("Search Results:", body.hits.hits);
+        return body.hits.hits.map(hit => ({
+          id: hit._id,
+          ...hit._source,
+        }));
+    } else {
+        console.log("No results found");
+        return [];
+    }
+  }
+//   async function deletePostFromElastic(postId) {
+//     try {
+//       const response = await elasticClient.delete({
+//         index: 'posts', // The index name you're using
+//         id: postId, // The ID of the document you want to delete
+//       });
+  
+//       console.log("Document deleted from Elasticsearch:", response);
+//     } catch (error) {
+//       console.error("Error deleting document from Elasticsearch:", error);
+//     }
+//   }
+//   async function searchPostAndDelete(queryText) {
+//     try {
+//       const body = await elasticClient.search({
+//         index: 'posts', // The index name you're using
+//         body: {
+//           query: {
+//             match: {
+//               text: queryText // The search term to find the document
+//             }
+//           }
+//         }
+//       });
+  
+//       // If results are found, delete the document
+//       if (body.hits.hits.length > 0) {
+//         const postId = body.hits.hits[0]._id; // Get the ID of the first matching document
+//         console.log(`Found document ID: ${postId}`);
+//         await deletePostFromElastic(postId); // Delete the document
+//       } else {
+//         console.log('No matching posts found in Elasticsearch');
+//       }
+//     } catch (error) {
+//       console.error('Error during Elasticsearch search:', error);
+//     }
+//   }
+  
+//   // Example usage: Search for the document by a part of the text (e.g., "fun")
+//   searchPostAndDelete("Testing I like wario"); // Adjust the search query as necessary
 export default {
     getNPosts,
     postPost,
@@ -227,4 +321,5 @@ export default {
     likePost,
     reportPost,
     getPostById,
+    searchPosts
 };
