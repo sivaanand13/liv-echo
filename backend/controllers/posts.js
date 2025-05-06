@@ -256,8 +256,9 @@ async function searchPosts(queryText) {
         query: {
             match: {
                 text: {
-                    query: queryText,
-                    fuzziness: "AUTO"  // Optional: Allow fuzzy search to handle typos
+                    query: queryText.toLowerCase(),
+                    fuzziness: "AUTO",  // Optional: Allow fuzzy search to handle typos
+                    operator: "and"
                 }
             }
         }
