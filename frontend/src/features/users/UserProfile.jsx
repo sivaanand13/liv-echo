@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import Loading from "../../components/Loading";
 import ErrorPage from "../../components/ErrorPage";
@@ -14,7 +14,9 @@ import {
 } from "@mui/material";
 import defaultBanner from "../../assets/landing/landing1.jpg";
 import Profile from "../../components/Profile";
+import { AuthContext } from "../../contexts/AuthContext";
 export default function UserProfile() {
+  let { user: currentUser } = useContext(AuthContext);
   const theme = useTheme();
   const { userUID } = useParams();
   const [user, setUser] = useState(null);
