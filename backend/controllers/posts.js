@@ -312,6 +312,16 @@ async function searchPosts(queryText) {
   
 //   // Example usage: Search for the document by a part of the text (e.g., "fun")
 //   searchPostAndDelete("Testing I like wario"); // Adjust the search query as necessary
+// async function testConnection() {
+//     try {
+//       const response = await elasticClient.ping();
+//       console.log('Connected to Elasticsearch:', response);
+//     } catch (error) {
+//       console.error('Error connecting to Elasticsearch:', error);
+//     }
+//   }
+  
+//   testConnection();
 export default {
     getNPosts,
     postPost,
