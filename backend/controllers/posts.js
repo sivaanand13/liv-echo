@@ -5,7 +5,7 @@ import settings from "../models/settings.js";
 import cloudinary from "../cloudinary/cloudinary.js";
 import Post from "../models/post.js";
 import elasticClient from '../elasticSearch/elasticsearchClient.js';
-
+import createIndex from '../elasticSearch/createPostIndex.js';
 // delete post... make sure an admin can do it no matter what!
 
 async function getNPosts(n){
@@ -250,24 +250,33 @@ async function searchPosts(queryText) {
         throw new Error("Search query must be at least 2 characters long.");
     }
     //console.log();
-    const  body = await elasticClient.search({
+    const  {body} = await elasticClient.search({
       index: 'posts',
       body: {
         query: {
             match: {
-                text: queryText
+                text: {
+                    query: queryText,
+                    fuzziness: "AUTO"  // Optional: Allow fuzzy search to handle typos
+                }
             }
         }
-      }
+       }
     });
-    console.log("Elasticsearch Response:", JSON.stringify(body, null, 2));
+    console.log("Raw Elasticsearch Response:", JSON.stringify(body, null, 2));
+    console.log("Values we mentioned", body);
+    console.log("hits", body.hits);
+    console.log("length",body.hits.hits.length)
     if (body && body.hits && body.hits.hits.length > 0) {
         console.log("Search Results:", body.hits.hits);
-        return body.hits.hits.map(hit => ({
+        const results = body.hits.hits.map(hit => ({
           id: hit._id,
           ...hit._source,
         }));
+        console.log("Mapped Search Results:", results);
+        return results
     } else {
+        console.log("I should not be here")
         console.log("No results found");
         return [];
     }
@@ -322,6 +331,9 @@ async function searchPosts(queryText) {
 //   }
   
 //   testConnection();
+createIndex().catch((err) => {
+    console.error("❌ Error ensuring Elasticsearch index exists:", err);
+});
 export default {
     getNPosts,
     postPost,

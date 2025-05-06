@@ -1,15 +1,13 @@
-import { Client } from '@elastic/elasticsearch';
+import { Client } from '@opensearch-project/opensearch';
 import dotenv from "dotenv";
 dotenv.config();
 //const client = new Client({ node: 'http://localhost:9200' });
 const client = new Client({
     node: process.env.ELASTICSEARCH_CLOUD_ID,  // Your cluster URL
     auth: {
-      apiKey: process.env.ELASTICSEARCH_API_KEY,  // The API key generated from the Elastic UI
-    },
-    ssl: {
-      rejectUnauthorized: false,  // Allow self-signed certificates if applicable
-    },
+      username: process.env.ELASTIC_USERNAME,
+      password: process.env.ELASTIC_PASSWORD
+    }
 });
 
 export default client;

@@ -1,5 +1,5 @@
-import client from './elasticsearchClient.js';
-
+// createPostIndex.js
+import client from '../elasticSearch/elasticsearchClient.js';
 async function createIndex() {
   const index = 'posts';
   const exists = await client.indices.exists({ index });
@@ -8,20 +8,42 @@ async function createIndex() {
     await client.indices.create({
       index,
       body: {
+        settings: {
+          analysis: {
+            analyzer: {
+              edge_ngram_analyzer: {
+                type: "custom",
+                tokenizer: "edge_ngram_tokenizer",
+                filter: ["lowercase"]
+              }
+            },
+            tokenizer: {
+              edge_ngram_tokenizer: {
+                type: "edge_ngram",
+                min_gram: 1,
+                max_gram: 20,
+                token_chars: ["letter", "digit"]
+              }
+            }
+          }
+        },
         mappings: {
           properties: {
             uid: { type: 'keyword' },
-            text: { type: 'text' },
+            text: { type: 'text', analyzer: 'edge_ngram_analyzer' },
             isPrivate: { type: 'boolean' },
-            createdAt: { type: 'date' }
+            createdAt: { type: 'date' },
+            senderUsername: { type: 'text' },
+            senderName: { type: 'text' }
           }
         }
       }
     });
-    console.log('Index created.');
+    console.log('✅ Created "posts" index with edge_ngram analyzer');
   } else {
-    console.log('Index already exists.');
+    console.log('ℹ️ Index already exists');
   }
 }
 
-createIndex().catch(console.error);
+
+export default createIndex;
