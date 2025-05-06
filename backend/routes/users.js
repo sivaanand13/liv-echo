@@ -466,5 +466,35 @@ router
       res.status(500).json({ message: e });
     }
   });
-
+router.route('/friends/requests').
+post(authMiddleware, async (req,res) => {
+  const { friendUID } = req.body;
+  const currentUID = req.user?.uid;
+  if (!currentUID || !friendUID) {
+    return res.status(400).json({ message: "Invalid request" });
+  }
+  try {
+    console.log("Step 3")
+    await userController.sendFriendRequest(currentUID, friendUID);
+    return res.status(200).json({ message: "Friend request sent successfully" });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: "Failed to send friend request", error: e });
+  }
+})
+.patch(authMiddleware, async (req,res) => {
+  const { friendUID } = req.body;
+  const currentUID = req.user?.uid;
+  if (!currentUID || !friendUID) {
+    return res.status(400).json({ message: "Invalid request" });
+  }
+  try {
+    console.log("Step 3")
+    await userController.removeFriend(currentUID, friendUID);
+    return res.status(200).json({ message: "Friend successfully removed" });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: "Failed to remove friend", error: e });
+  }
+})
 export default router;
