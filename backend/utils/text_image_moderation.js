@@ -2,6 +2,7 @@ import OpenAi from "openai";
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
+import { text } from "stream/consumers";
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -20,41 +21,38 @@ const openai = new OpenAi({
 /**
  * Moderates a given text or image content using OpenAI's Moderation API.
  *
- * @param {string} content - The text content or image URL to be moderated.
- * @param {string} [type="text"] - The type of content to moderate ("text" or "image").
+ * @param {string} [text=""] - The text content.
+ * @param {string} [urls] - image URLs List to be moderated
  * @returns {Promise<Object>} - An object containing the flagged status and matched categories with scores.
  * @throws {Error} - Throws error if content or type is invalid, or if moderation API fails.
  */
 
-export async function moderationFunction(content, type = "text") {
+export async function moderationFunction(text, urls) {
   // Return data schema {flagged: Boolean, categories: [{category_name: category_score:int}]}
 
   try {
-    console.log(`Moderating... Type: ${type} & Content: ${content}`);
+    console.log(
+      `Moderating... Text: ${text} Image_url: ${JSON.stringify(urls)}`
+    );
 
-    if (!content || content.trim().length < 1) {
-      const error = new Error("Invalid Content Passed");
-      error.status = 400;
-      throw error;
+    const input = [];
+
+    if (text) {
+      input.push({ type: "text", text });
     }
 
-    if (!type || (type !== "text" && type !== "image")) {
-      const error = new Error("Invalid Type Passed");
-      error.status = 400;
-      throw error;
+    if (urls && urls.length > 0) {
+      input.push(
+        ...urls.map((url) => ({
+          type: "image_url",
+          image_url: { url },
+        }))
+      );
     }
-
-    const text_input = content.trim();
-    const image_input = [
-      {
-        type: "image_url",
-        image_url: { url: content.trim() },
-      },
-    ];
 
     const moderation = await openai.moderations.create({
       model: "omni-moderation-latest",
-      input: type === "text" ? text_input : image_input,
+      input,
     });
 
     const response_data = moderation.results[0];
@@ -66,9 +64,13 @@ export async function moderationFunction(content, type = "text") {
       }
     }
 
+    const categoryList = categories
+      .map((cat) => Object.keys(cat)[0])
+      .join(", ");
+
     const return_data = {
       flagged: response_data.flagged,
-      categories,
+      message: categoryList,
     };
 
     console.log(return_data);
@@ -84,4 +86,4 @@ export async function moderationFunction(content, type = "text") {
   }
 }
 
-// await moderationFunction("I want to kill myself", "text");
+// await moderationFunction("I want to kill myself");

@@ -96,61 +96,29 @@ router.route("/:chatId/messages").post(async (req, res) => {
 
 router.route("/messages/moderation").post(async (req, res) => {
   console.log("Moderation Route Accessed");
-  const { text, attachments } = req.body;
+  let { text, attachments } = req.body;
 
   try {
-    if (text && attachments) {
-    }
-    if (text) {
-      const validatedText = validation.validateString(text);
-      if (validatedText.length > settings.MESSAGE_LENGTH) {
-        return res.status(400).json({
-          error: true,
-          message: `Message length cannot exceed ${settings.MESSAGE_LENGTH}`,
-        });
-      }
-
-      const moderationResponse = await moderationFunction(
-        validatedText,
-        "text"
-      );
-
-      if (moderationResponse.flagged) {
-        return res.status(200).json({
-          flagged: true,
-          message: "Your message was flagged by the moderation system.",
-          categories: moderationResponse.categories,
-        });
-      }
-
-      return res.status(200).json({
-        flagged: false,
-        message: "Message passed moderation.",
+    const validatedText = validation.validateString(text);
+    if (validatedText.length > settings.MESSAGE_LENGTH) {
+      return res.status(400).json({
+        error: true,
+        message: `Message length cannot exceed ${settings.MESSAGE_LENGTH}`,
       });
     }
+    validation.validateArray(attachments);
 
-    if (attachments) {
-      validation.validateArray(attachments);
-      attachments = attachments.map((image) => image.secure_url);
-      const moderationResponse = await moderationFunction(attachments, "image");
+    const moderationResponse = await moderationFunction(text, attachments);
 
-      if (moderationResponse.flagged) {
-        return res.status(200).json({
-          flagged: true,
-          message: "Your attachment was flagged by the moderation system.",
-          categories: moderationResponse.categories,
-        });
-      }
-
+    if (moderationResponse.flagged) {
       return res.status(200).json({
-        flagged: false,
-        message: "Attachment passed moderation.",
+        flagged: moderationResponse.flagged,
+        message: `Message got flagged: ${moderationResponse.message}`,
       });
     }
-
-    return res.status(400).json({
-      error: true,
-      message: "No text or attachments provided.",
+    return res.status(200).json({
+      flagged: moderationResponse.flagged,
+      message: "Message did not get flagged",
     });
   } catch (e) {
     console.error("Moderation error:", e);

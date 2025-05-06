@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import chatStore from "../../stores/chatStore.js";
 import axios from "../../utils/requests/axios.js";
 import { v4 as uuidv4 } from "uuid";
@@ -17,7 +16,7 @@ async function messageModeration(messageText, attachments) {
   try {
     const response = await axios.post("chats/messages/moderation", {
       text: messageText,
-      attachments,
+      attachments: attachments,
     });
 
     if (response.data) {
@@ -36,9 +35,9 @@ async function sendMessage(chat, messageText, attachments, sender) {
     chatStore.getState();
   console.log("message sender: ", sender);
   let newMessage;
+  const tempId = uuidv4();
+  const body = { tempId, chatId: chat._id, text: messageText };
   try {
-    const tempId = uuidv4();
-    const body = { tempId, chatId: chat._id, text: messageText };
     if (attachments && Array.isArray(attachments) && attachments.length > 0) {
       const images = await axios.uploadAttachments(attachments);
       console.log("upload atttachments: ", images);
@@ -50,10 +49,20 @@ async function sendMessage(chat, messageText, attachments, sender) {
   }
 
   try {
-    await messageModeration(messageText, attachments);
+    const image_url_list = [];
+    if (body.attachments) {
+      for (let img_obj of body.attachments) {
+        image_url_list.push(img_obj.secure_url);
+      }
+    }
+    const moderationResponse = await messageModeration(
+      messageText,
+      image_url_list
+    );
+    if (moderationResponse.flagged) throw moderationResponse.message;
   } catch (e) {
-    console.log(e);
-    throw `Message moderation failed!`;
+    console.error(e);
+    throw e;
   }
 
   try {
