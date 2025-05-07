@@ -3,6 +3,7 @@ import settings from "./settings.js";
 import { CloudinaryAssetSchema } from "./cloudinaryAsset.js";
 import Message from "./message.js";
 import cloudinary from "../cloudinary/cloudinary.js";
+
 const ChatSchema = new Schema(
   {
     name: {
@@ -33,7 +34,12 @@ const ChatSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Message",
     },
-    
+    flaggedCount: [
+      {
+        userId: { type: Schema.Types.ObjectId, ref: "User" },
+        flagCount: { type: Number },
+      },
+    ],
   },
   { timestamps: true }
 );
