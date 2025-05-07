@@ -30,6 +30,22 @@ async function messageModeration(messageText, attachments) {
   }
 }
 
+async function updateFlagCount(curChat, userId) {
+  try {
+    console.log("Updating Flag Count");
+    const response = await axios.patch(`chats/${curChat._id}/flag-user`, {
+      userId,
+    });
+    if (!response.data.success) {
+      throw response.data.message;
+    }
+    return { success: true };
+  } catch (e) {
+    console.log("Error Occured While Updating Flag Count", e);
+    throw `Error Occured While Updating Flag Count`;
+  }
+}
+
 async function sendMessage(chat, messageText, attachments, sender) {
   const { addCurrentChatTempMessages, removeCurrentChatMessages } =
     chatStore.getState();
@@ -59,7 +75,11 @@ async function sendMessage(chat, messageText, attachments, sender) {
       messageText,
       image_url_list
     );
-    if (moderationResponse.flagged) throw moderationResponse.message;
+    if (moderationResponse.flagged) {
+      const updateFlagResponse = await updateFlagCount(chat, sender._id);
+      if (updateFlagResponse.success) throw moderationResponse.message;
+      throw `Something went wrong during update flag-count`;
+    }
   } catch (e) {
     console.error(e);
     throw e;

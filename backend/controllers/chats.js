@@ -38,6 +38,11 @@ async function createChat(uid, chat) {
   members.push(adminUser._id);
   members = [...new Set(members)];
 
+  const flaggedCount = members.map((memberId) => ({
+    userId: memberId,
+    flagCount: 0,
+  }));
+
   if (type === settings.DM) {
     if (members.length != 2) {
       throw `DM can only have two users`;
@@ -56,6 +61,7 @@ async function createChat(uid, chat) {
     type,
     admins,
     members,
+    flaggedCount,
   };
   if (profile) {
     cloudinary.validateCloudinaryObject(profile);
@@ -103,6 +109,24 @@ async function leaveChat(uid, chatId) {
     await Chat.deleteOne({ _id: chat._id });
   }
   return uiChat;
+}
+
+async function updateFlagCount(chatId, userId) {
+  console.log(`Updating Flag Count for user: ${userId}, chatId: ${chatId}`);
+  let chat = await getDisplayChat(chatId);
+  const result = await Chat.findOneAndUpdate(
+    {
+      _id: chat._id,
+      "flaggedCount.userId": ObjectId.createFromHexString(userId),
+    },
+    { $inc: { "flaggedCount.$.flagCount": 1 } },
+    { new: true }
+  );
+  if (!result) {
+    return { success: false };
+  } else {
+    return { success: true, data: result };
+  }
 }
 
 async function changeAdmin(chatId, uid, newAdmin) {
@@ -373,4 +397,5 @@ export default {
   emitChatUpdated,
   emitChatRemoved,
   changeAdmin,
+  updateFlagCount,
 };
