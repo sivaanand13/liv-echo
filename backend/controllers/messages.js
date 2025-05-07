@@ -22,6 +22,8 @@ async function postMessage(chatId, uid, text, attachments, tempId) {
   chatsController.verifyUserChatAccess(uid, chatId);
   text = chatValidation.validateChatText(text);
 
+  // HERE
+
   let newMessage = {
     sender: user._id,
     senderName: user.name,
@@ -51,6 +53,7 @@ async function postMessage(chatId, uid, text, attachments, tempId) {
   );
   console.log("Emitting to new message to all members:", tempId);
   const uiChat = await chatsController.getDisplayChat(chat._id);
+  console.log("uiChat", uiChat);
   const displayMessage = await getDisplayMessage(message._id);
   uiChat.members.forEach((member) => {
     chatNamespace.to(member.uid).emit("chatUpdated", uiChat);

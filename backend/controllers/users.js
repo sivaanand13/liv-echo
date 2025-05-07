@@ -79,6 +79,8 @@ async function signUpUser(uid, name, email, username, dob) {
     username,
     dob: new Date(dob),
   });
+
+  console.log("Sign Up result", user);
   return user;
 }
 async function editUser(uid, name, email, username, dob, profile, banner) {
