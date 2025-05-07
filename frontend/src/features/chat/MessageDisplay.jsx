@@ -82,13 +82,14 @@ export default function MessageDisplay({ chat }) {
       );
       reset();
 
-      const message = await chatUtils.sendMessage(
+      await chatUtils.sendMessage(
         curChat,
         curMessageText,
         curAttachments,
         sender
       );
     } catch (e) {
+      setMessageError(e);
       return;
     }
   }

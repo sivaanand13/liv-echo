@@ -16,7 +16,9 @@ export default function ChatSidebar({
   type,
   title,
   chatList,
+  // eslint-disable-next-line no-unused-vars
   ChatListItem,
+  // eslint-disable-next-line no-unused-vars
   CreateChat,
 }) {
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -60,7 +62,7 @@ export default function ChatSidebar({
           <CustomList
             listData={chatList}
             mappingFunction={(item) => {
-              return <ChatListItem key={item} item={item} />;
+              return <ChatListItem key={item._id} item={item} />;
             }}
           />
         )}
