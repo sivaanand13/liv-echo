@@ -35,7 +35,7 @@ export default function EditGroupChatDialog({ open, handleClose }) {
   function fillInFields() {
     setName(currentChat.name);
     const userMembers = currentChat.members.filter(
-      (m) => m.uid !== serverUser.uid
+      (m) => m.uid !== serverUser?.uid
     );
     setMembers(userMembers);
     setCurProfile(currentChat.profile?.secure_url);

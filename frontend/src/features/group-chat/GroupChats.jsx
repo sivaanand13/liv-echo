@@ -22,7 +22,7 @@ export default function GroupChats() {
     };
 
     fetchUserGroupChats();
-  }, []);
+  }, [setGroupChats]);
   return (
     <Box sx={{ display: "flex", height: "calc(100vh - 4rem)" }}>
       <Box

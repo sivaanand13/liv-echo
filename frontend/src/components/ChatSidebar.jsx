@@ -16,7 +16,9 @@ export default function ChatSidebar({
   type,
   title,
   chatList,
+  // eslint-disable-next-line no-unused-vars
   ChatListItem,
+  // eslint-disable-next-line no-unused-vars
   CreateChat,
 }) {
   const [showCreateModal, setShowCreateModal] = useState(false);
