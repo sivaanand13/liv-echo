@@ -6,6 +6,7 @@ import cloudinary from "../cloudinary/cloudinary.js";
 import Post from "../models/post.js";
 import elasticClient from '../elasticSearch/elasticsearchClient.js';
 import createIndex from '../elasticSearch/createPostIndex.js';
+import userController from "./users.js";
 // delete post... make sure an admin can do it no matter what!
 
 async function getNPosts(n){
@@ -263,25 +264,74 @@ async function canSeePost(uid, postID){
     return false; // dammit
 }
 
-async function searchPosts(queryText) {
+async function searchPosts(queryText, user) {
     queryText = validation.validateString(queryText, "Search Query");
     if (!queryText || queryText.length < 2) {
         throw new Error("Search query must be at least 2 characters long.");
     }
-    //console.log();
-    const  {body} = await elasticClient.search({
-      index: 'posts',
-      body: {
-        query: {
-            multi_match: {
-                query: queryText.toLowerCase(),
-                fuzziness: "AUTO",  // Optional: Allow fuzzy search to handle typos
-                operator: "and",
-                fields: ["text", "senderUsername"],
-            }
+    let friendIds = (user?.friends || []).map(id => id.toString());
+    let finalArray = []
+    for(let i=0; i<friendIds.length; i++){ //loop through friend to get uids
+        let tmpval = await userController.getUserById(friendIds[i])
+        let tmpFriends = tmpval?.friends || []
+        let mutual = tmpFriends.some(id => id.toString() === user._id.toString());
+        if(mutual === true){
+            finalArray.push(tmpval.uid.toString())
+            console.log("friend", i, friendIds[i])
         }
-       }
-    });
+    }
+    let currentUserId
+    const shouldClauses = [
+        { term: { isPrivate: false } } // Always include public posts
+      ];
+    if (user) {
+        currentUserId = user.uid.toString();
+        shouldClauses.push({ term: { uid: currentUserId } }); 
+        if (finalArray.length > 0) {
+            shouldClauses.push({ terms: { uid: finalArray } }); 
+        }
+    }
+    console.log("Checking friendsIds",friendIds)
+    console.log("Checking UserId",currentUserId);
+    //console.log();
+    // const  {body} = await elasticClient.search({
+    //   index: 'posts',
+    //   body: {
+    //     query: {
+    //         multi_match: {
+    //             query: queryText.toLowerCase(),
+    //             fuzziness: "AUTO",  // Optional: Allow fuzzy search to handle typos
+    //             operator: "and",
+    //             fields: ["text", "senderUsername"],
+    //         }
+    //     }
+    //    }
+    // });
+    const { body } = await elasticClient.search({
+        index: 'posts',
+        body: {
+          query: {
+            bool: {
+              must: [
+                {
+                  multi_match: {
+                    query: queryText.toLowerCase(),
+                    fuzziness: "AUTO",
+                    operator: "and",
+                    fields: ["text", "senderUsername"]
+                  }
+                }
+              ],
+              filter: {
+                bool: {
+                  should: shouldClauses,
+                  minimum_should_match: 1
+                }
+              }
+            }
+          }
+        }
+      });
     console.log("Raw Elasticsearch Response:", JSON.stringify(body, null, 2));
     console.log("Values we mentioned", body);
     console.log("hits", body.hits);

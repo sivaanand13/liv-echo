@@ -76,12 +76,17 @@ router.route("/create").post(async (req, res) => {
 });
 router.route('/search').get(async (req, res) => {
   const { query } = req.query;
+  let uid = req.user.uid;
+  let user = null;
   if (!query || query.trim() === "") {
     console.log("What is my query?", query);
     return res.status(400).json({ message: "Missing search query" });
   }
   try {
-    const results = await postsController.searchPosts(query);
+    if (uid) {
+      user = await userController.getUserByUID(uid);
+    }
+    const results = await postsController.searchPosts(query, user);
     res.json({ results });
   } catch (err) {
     console.error("Elasticsearch query failed:", err);
