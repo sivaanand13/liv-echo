@@ -61,7 +61,6 @@ async function signUpUser(name, email, username, dob, password) {
 async function signInUser(username, email, password) {
   try {
     validation.validateEmail(email);
-    validation.validateUsername(username);
     validation.validatePassword(password);
   } catch (e) {
     console.log(e);
@@ -78,7 +77,7 @@ async function signInUser(username, email, password) {
   try {
     const auth = getAuth();
     const user = auth.currentUser;
-    await post("users/signin/", { uid: user.uid, email, username });
+    await post("users/signin/", { uid: user.uid, email });
   } catch (e) {
     console.log(e);
     throw e.data && e.data.message
