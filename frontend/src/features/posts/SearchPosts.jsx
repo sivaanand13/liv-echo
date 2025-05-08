@@ -1,49 +1,87 @@
-// components/SearchPosts.jsx
-import React, { useState } from 'react';
-import postUtils  from './postUtils';
+import React, { useState } from "react";
+import postUtils from "./postUtils";
+import { Box, Button, TextField, Typography, CircularProgress, Grid } from "@mui/material";
+import PostCard from "./PostCard";
+import searchBg from "../../assets/users/search.jpg"; //Idk make it the same
 
 export default function SearchPosts() {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [query, setQuery] = useState([]); 
+  const [inputQuery, setInputQuery] = useState(""); 
+  const [loading, setLoading] = useState(false); 
+  const [error, setError] = useState(""); 
+  const [searchTriggered, setSearchTriggered] = useState(false);
 
   const handleSearch = async () => {
-    if (!query.trim()) return;
+    if (!inputQuery.trim()) return;
     setLoading(true);
-    setError('');
+    setError("");
+    setSearchTriggered(true);
     try {
-      const res = await postUtils.searchPosts(query);
-      setResults(res);
+      const res = await postUtils.searchPosts(inputQuery);
+      setQuery(res);
     } catch (err) {
-      setError('Search failed. Please try again.');
+      setError("Search failed. Please try again.");
     }
     setLoading(false);
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h2>Search Posts</h2>
-      <input
-        type="text"
-        placeholder="Enter search text..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        style={{ width: '300px', marginRight: '10px' }}
-      />
-      <button onClick={handleSearch} disabled={loading}>
-        {loading ? 'Searching...' : 'Search'}
-      </button>
+    <Box
+      sx={{
+        backgroundImage: `url(${searchBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "20px",
+      }}
+    >
+      <Box sx={{ textAlign: "center", marginBottom: "20px" }}>
+        <Typography variant="h4" sx={{ color: "white", marginBottom: "10px" }}>
+          Search Posts
+        </Typography>
+        <TextField
+          label="Search Posts"
+          variant="outlined"
+          value={inputQuery}
+          onChange={(e) => setInputQuery(e.target.value)}
+          sx={{
+            marginBottom: "10px",
+            width: "300px",
+            backgroundColor: "white",
+            borderRadius: "4px",
+          }}
+        />
+        <Button
+          variant="contained"
+          onClick={handleSearch}
+          disabled={loading}
+          sx={{ marginLeft: "10px" }}
+        >
+          {loading ? <CircularProgress size={24} /> : "Search"}
+        </Button>
+      </Box>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <Typography color="error">{error}</Typography>}
 
-      <ul>
-        {results.map((post) => (
-          <li key={post.id}>
-            <strong>{post.senderName} (@{post.senderUsername}):</strong> {post.text}
-          </li>
-        ))}
-      </ul>
-    </div>
+      {query.length > 0 && !loading && (
+        <Grid container spacing={2} sx={{ maxWidth: "1200px", marginTop: "20px" }}>
+          {query.map((post) => (
+            <Grid key={post._id}>
+              <PostCard item={post} />
+            </Grid>
+          ))}
+        </Grid>
+      )}
+
+      {/* Show no posts message when no results and search was triggered */}
+      {searchTriggered && query.length === 0 && !loading && inputQuery.trim() && (
+        <Typography variant="h6" sx={{ color: "white", marginTop: "20px" }}>
+          There are no posts for the search term "{inputQuery}"
+        </Typography>
+      )}
+    </Box>
   );
 }
