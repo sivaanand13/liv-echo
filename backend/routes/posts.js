@@ -77,7 +77,7 @@ router.route("/create").post(async (req, res) => {
 router.route('/search').get(async (req, res) => {
   const { query } = req.query;
   let uid = req.user.uid;
-  let user;
+  let user = null;
   if (!query || query.trim() === "") {
     console.log("What is my query?", query);
     return res.status(400).json({ message: "Missing search query" });

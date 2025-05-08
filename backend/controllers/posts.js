@@ -261,7 +261,17 @@ async function searchPosts(queryText, user) {
             console.log("friend", i, friendIds[i])
         }
     }
-    const currentUserId = user.uid.toString();
+    let currentUserId
+    const shouldClauses = [
+        { term: { isPrivate: false } } // Always include public posts
+      ];
+    if (user) {
+        currentUserId = user.uid.toString();
+        shouldClauses.push({ term: { uid: currentUserId } }); 
+        if (finalArray.length > 0) {
+            shouldClauses.push({ terms: { uid: finalArray } }); 
+        }
+    }
     console.log("Checking friendsIds",friendIds)
     console.log("Checking UserId",currentUserId);
     //console.log();
@@ -295,11 +305,7 @@ async function searchPosts(queryText, user) {
               ],
               filter: {
                 bool: {
-                  should: [
-                    { term: { uid: currentUserId } }, // Your own posts, regardless of privacy
-                    { terms: { uid: finalArray } }, // Posts from friends (if private or public)
-                    { term: { isPrivate: false } }, // Public posts
-                  ],
+                  should: shouldClauses,
                   minimum_should_match: 1
                 }
               }
