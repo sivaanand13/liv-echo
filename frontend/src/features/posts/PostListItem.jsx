@@ -29,9 +29,18 @@ export default function PostListItem({msg}) {
     setMenuOpen(false);
   }
 
+  async function handleEdit() {
+    try {
+      //await postUtils.deleteMessage(msg);
+    } catch (e) {
+      console.log(e);
+    }
+    handleClose();
+  }
+
   async function handleDelete() {
     try {
-      await postUtils.deleteMessage(msg);
+      await postUtils.deletePost(msg);
     } catch (e) {
       console.log(e);
     }
@@ -99,6 +108,7 @@ export default function PostListItem({msg}) {
                 open={menuOpen}
                 onClose={handleClose}
               >
+                <MenuItem onClick={handleEdit}>Edit</MenuItem>
                 <MenuItem onClick={handleDelete}>Delete</MenuItem>
               </Menu>
             </>

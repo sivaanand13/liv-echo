@@ -182,7 +182,7 @@ router.route("/:postID").delete(async (req, res) => {
   let uid = req.user.uid;
   let post;
   let user, poster;
-
+  console.log("Let's delete something!");
 
   try {
     post = await postsController.getPostById(postID);

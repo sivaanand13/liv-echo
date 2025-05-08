@@ -37,9 +37,8 @@ export default function ChangeAdminDialog({ open, handleClose }) {
   }, [serverUser, currentChat]);
 
   function fillInFields() {
-    console.log(currentChat.members);
     const avalMembers = currentChat.members.filter(
-      (user) => user.uid !== serverUser.uid
+      (user) => user.uid !== serverUser?.uid
     );
     console.log("Aval members for admin access: ", avalMembers);
     setMembers(avalMembers);

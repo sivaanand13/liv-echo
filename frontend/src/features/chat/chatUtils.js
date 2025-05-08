@@ -12,19 +12,80 @@ async function getMessages(currentChat) {
   }
 }
 
+async function messageModeration(messageText, attachments) {
+  try {
+    const response = await axios.post("chats/messages/moderation", {
+      text: messageText,
+      attachments: attachments,
+    });
+
+    if (response.data) {
+      return response.data;
+    } else {
+      throw "No Response!";
+    }
+  } catch (e) {
+    console.error(e);
+    throw `Message Moderation Failed`;
+  }
+}
+
+async function updateFlagCount(curChat, userId) {
+  try {
+    console.log("Updating Flag Count");
+    const response = await axios.patch(`chats/${curChat._id}/flag-user`, {
+      userId,
+    });
+    if (!response.data.success) {
+      throw response.data.message;
+    }
+    return { success: true };
+  } catch (e) {
+    console.log("Error Occured While Updating Flag Count", e);
+    throw `Error Occured While Updating Flag Count`;
+  }
+}
+
 async function sendMessage(chat, messageText, attachments, sender) {
   const { addCurrentChatTempMessages, removeCurrentChatMessages } =
     chatStore.getState();
   console.log("message sender: ", sender);
   let newMessage;
+  const tempId = uuidv4();
+  const body = { tempId, chatId: chat._id, text: messageText };
   try {
-    const tempId = uuidv4();
-    const body = { tempId, chatId: chat._id, text: messageText };
     if (attachments && Array.isArray(attachments) && attachments.length > 0) {
       const images = await axios.uploadAttachments(attachments);
       console.log("upload atttachments: ", images);
       body.attachments = images.data;
     }
+  } catch (e) {
+    console.log(e);
+    throw `Message validation failed!`;
+  }
+
+  try {
+    const image_url_list = [];
+    if (body.attachments) {
+      for (let img_obj of body.attachments) {
+        image_url_list.push(img_obj.secure_url);
+      }
+    }
+    const moderationResponse = await messageModeration(
+      messageText,
+      image_url_list
+    );
+    if (moderationResponse.flagged) {
+      const updateFlagResponse = await updateFlagCount(chat, sender._id);
+      if (updateFlagResponse.success) throw moderationResponse.message;
+      throw `Something went wrong during update flag-count`;
+    }
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+
+  try {
     console.log("Attempting to send message:", body);
 
     newMessage = {
@@ -93,4 +154,5 @@ export default {
   deleteMessage,
   leaveChat,
   deleteChat,
+  messageModeration,
 };

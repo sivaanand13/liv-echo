@@ -2,6 +2,7 @@ import firebaseUtils from "../firebase/firebaseUtils.js";
 import chatsController from "../controllers/chats.js";
 import usersController from "../controllers/users.js";
 import messagesController from "../controllers/messages.js";
+import { moderationFunction } from "../utils/text_image_moderation.js";
 
 const chatNamespaceHandler = (chatNamespace) => {
   chatNamespace.use(async (socket, next) => {
@@ -34,13 +35,44 @@ const chatNamespaceHandler = (chatNamespace) => {
     socket.on("postMessage", async (chatId, message) => {
       try {
         await chatsController.verifyUserChatAccess(uid, chatId);
+
+        // const moderationResult = await moderationFunction(
+        //   message.trim(),
+        //   "text"
+        // );
+
+        // console.log("moderationResult", moderationResult);
+
+        // if (moderationResult.flagged) {
+        //   socket.emit("hiddenMessage", {
+        //     type: "moderation-warning",
+        //     title: "Message Blocked",
+        //     body: "Your message was flagged as inappropriate and was not sent.",
+        //     categories: moderationResult.categories,
+        //   });
+        //   return;
+        // }
+
         const presistedMessage = await messagesController.postMessage(
           chatId,
           uid,
           message.text,
           []
         );
+
         chatNamespace.to(chatId).emit("messagePosted", presistedMessage);
+
+        // const chatMembers = await chatsController.getChatMembers(chatId);
+
+        // chatMembers.forEach((members) => {
+        //   if (members.uid !== uid) {
+        //     chatNamespace.to(members.uid).emit("notification", {
+        //       title: "New Message",
+        //       body: `${socket.user.name} send a message in ${chatId}`,
+        //       link: `/chat/${chatId}`,
+        //     });
+        //   }
+        // });
       } catch (e) {
         socket.emit("error", { message: e });
       }

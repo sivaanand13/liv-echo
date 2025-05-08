@@ -12,8 +12,10 @@ async function createPost(text, attachments, isPrivate = false) {
 
     // If there are attachments, ensure they're valid (optional step)
     let uploaded = [];
-    if (attachments && attachments.length > 0) { 
-      uploaded = await uploadAttachments(attachments);
+    if (attachments && Array.isArray (attachments) && attachments.length > 0) { 
+      let w = await axios.uploadAttachments(attachments);//uploadAttachments(attachments);
+      console.log("Yeah we just sent " + w.length + " attachments");
+      uploaded = w.data;
     }
 
     // Prepare the post data
@@ -37,8 +39,9 @@ async function uploadAttachments(attachments) {
   try {
     // This function should handle the file upload logic (e.g., using axios to upload to Cloudinary)
     const uploadedFiles = [];
-
+    //console.log("EH!");
     for (const attachment of attachments) {
+      //console.log("HEY!");
       const formData = new FormData();
       formData.append("file", attachment);
       formData.append("upload_preset", "your-upload-preset"); // Add your Cloudinary upload preset here
@@ -50,7 +53,7 @@ async function uploadAttachments(attachments) {
     return uploadedFiles;
   } catch (error) {
     console.error("Error uploading attachments", error);
-    throw new Error("Attachment upload failed");
+    throw new Error("Attachment upload failed" + JSON.stringify(error));
   }
 }
 async function searchPosts(query) {
@@ -79,7 +82,8 @@ async function getPosts() {
 
 async function deletePost(pos) {
   try {
-    const response = await axios.del(`posts/${post._id}`, {});
+    const response = await axios.del(`posts/${pos._id}`, {});
+    console.log("Well, I tried!");
     return response.data.data;
   } catch (e) {
     console.log(e);

@@ -24,7 +24,7 @@ function CreatePost() {
       setAttachments([]);
       setIsPrivate(false);
     } catch (err) {
-      setMessage("Failed to create post.");
+      setMessage("Failed to create post." + JSON.stringify(err));
     } finally {
       setLoading(false);
     }

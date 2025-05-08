@@ -8,6 +8,7 @@ import chatValidation from "../utils/chat.validation.js";
 import messagesController from "../controllers/messages.js";
 import usersController from "../controllers/users.js";
 import settings from "../models/settings.js";
+import { moderationFunction } from "../utils/text_image_moderation.js";
 import { set } from "mongoose";
 const router = express.Router();
 
@@ -89,6 +90,41 @@ router.route("/:chatId/messages").post(async (req, res) => {
     console.log(e);
     return res.status(500).json({
       message: e,
+    });
+  }
+});
+
+router.route("/messages/moderation").post(async (req, res) => {
+  console.log("Moderation Route Accessed");
+  let { text, attachments } = req.body;
+
+  try {
+    const validatedText = validation.validateString(text);
+    if (validatedText.length > settings.MESSAGE_LENGTH) {
+      return res.status(400).json({
+        error: true,
+        message: `Message length cannot exceed ${settings.MESSAGE_LENGTH}`,
+      });
+    }
+    validation.validateArray(attachments);
+
+    const moderationResponse = await moderationFunction(text, attachments);
+
+    if (moderationResponse.flagged) {
+      return res.status(200).json({
+        flagged: moderationResponse.flagged,
+        message: `Message got flagged: ${moderationResponse.message}`,
+      });
+    }
+    return res.status(200).json({
+      flagged: moderationResponse.flagged,
+      message: "Message did not get flagged",
+    });
+  } catch (e) {
+    console.error("Moderation error:", e);
+    return res.status(e.status || 500).json({
+      error: true,
+      message: e.message || "Internal Server Error",
     });
   }
 });

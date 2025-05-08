@@ -98,7 +98,7 @@ const chatStore = create((set, get) => ({
 
   currentChat: null,
   setCurrentChat: (chat) => {
-    console.log("setitng current chat: ", chat);
+    console.log("setting current chat: ", chat);
     set({ currentChat: chat });
   },
   unsetCurrentChat: () => {
