@@ -48,6 +48,7 @@ async function getUserByUID(uid, display) {
         role: 1,
         profile: 1,
         banner: 1,
+        friends: 1,
       }
     );
   } else {
@@ -195,7 +196,47 @@ async function uploadFiles(attachments, uid) {
   }
   return media;
 }
+async function sendFriendRequest(userUid, friendUid) {
+  if (userUid === friendUid) throw "You cannot friend yourself.";
 
+  const currUser = await getUserByUID(userUid);
+  const friend = await getUserByUID(friendUid);
+  const friendId = friend._id
+  if (currUser.friends.includes(friendId)) {
+    throw "You are already friends with this user.";
+  }
+
+  await User.updateOne(
+    { uid: userUid },
+    { $addToSet: { friends: friendId } }
+  );
+  console.log("Step 4")
+  let user = await getUserByUID(userUid, false);
+  console.log("Edited user", user);
+  chatNamespace.to(user.uid).emit("accountUpdated", user);
+
+  return { message: "Friend added" };
+}
+async function removeFriend(userUid, friendUid) {
+  if (userUid === friendUid) throw "You cannot friend yourself.";
+
+  const currUser = await getUserByUID(userUid);
+  const friend = await getUserByUID(friendUid);
+  const friendId = friend._id
+  if (!currUser.friends.includes(friendId)) {
+    throw "You are not friends with this user.";
+  }
+
+  await User.updateOne(
+    { uid: userUid },
+    { $pull: { friends: friendId } }
+  );
+  console.log("Step 4")
+  let user = await getUserByUID(userUid, false);
+  console.log("Edited user", user);
+  chatNamespace.to(user.uid).emit("accountUpdated", user);
+  return { message: "Friend added" };
+}
 export default {
   validateUnqiueEmail,
   validateUnqiueUsername,
@@ -207,4 +248,6 @@ export default {
   searchUsers,
   uploadFiles,
   updateUser,
+  sendFriendRequest,
+  removeFriend
 };

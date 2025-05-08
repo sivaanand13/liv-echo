@@ -1,10 +1,12 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext,useEffect, useState } from "react";
 import { useParams } from "react-router";
 import Loading from "../../components/Loading";
 import ErrorPage from "../../components/ErrorPage";
 import userUtils from "./userUtils";
+import { AuthContext } from "../../contexts/AuthContext";
 import {
   Box,
+  Button,
   Typography,
   Card,
   Paper,
@@ -19,16 +21,26 @@ export default function UserProfile() {
   let { user: currentUser } = useContext(AuthContext);
   const theme = useTheme();
   const { userUID } = useParams();
+  const { user : currUser } = useContext(AuthContext);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [isFriend, setIsFriend] = useState(false);
   useEffect(() => {
     async function fetchUser() {
       try {
         setError(null);
         const user = await userUtils.fetchUserByUID(userUID);
         setUser(user);
+        console.log(currUser.friends)
+        if(currUser.friends.includes(user._id)){
+          setIsFriend(true);
+          console.log(currUser.friends)
+        }
+        else{
+          setIsFriend(false)
+          console.log(currUser.friends)
+        }
         setLoading(false);
       } catch (e) {
         setError(e);
@@ -36,6 +48,29 @@ export default function UserProfile() {
     }
     fetchUser();
   }, []);
+ async function onClickAddFriend() {
+    if(isFriend){
+      try{
+        console.log("Step 1")
+        await userUtils.addFriendwithUID(userUID,isFriend)
+        setIsFriend(false)
+      }
+      catch (e){
+        setError(e)
+      }
+    }
+    else{
+      try{
+        console.log("Step 1")
+        await userUtils.addFriendwithUID(userUID,isFriend)
+        setIsFriend(true)
+      }
+      catch (e){
+        setError(e)
+      }
+    }
+
+  }
   if (loading) {
     return <Loading />;
   } else if (error) {
@@ -93,6 +128,13 @@ export default function UserProfile() {
             {user.name}
           </Typography>
 
+          <Box textAlign="center" mt={2}>
+             <Button
+              variant="contained"
+              onClick={onClickAddFriend}> 
+                {isFriend ? "Remove Friend" : "Add Friend"}
+             </Button>
+          </Box>
           <Card
             sx={{
               marginTop: "2rem",
