@@ -11,8 +11,12 @@ import {
   useTheme,
   Button,
   CardContent,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import defaultBanner from "../../assets/landing/landing1.jpg";
+import PaginatedList from "../../components/PaginatedList.jsx";
+import UserCard from "../users/UserCard.jsx";
 import Profile from "../../components/Profile";
 import EditIcon from "@mui/icons-material/Edit";
 import EditAccount from "./EditAccount";
@@ -28,6 +32,15 @@ export default function Account() {
   const [openEditProfile, setOpenEditProfile] = useState(false);
   const [openEditBanner, setOpenEditBanner] = useState(false);
   const [openEditBio, setOpenEditBio] = useState(false);
+  const [tab,setTab] = useState(0);
+
+  const handleTabChange = (_, newValue) => {
+    setTab(newValue);
+  };
+  function getFriends(){
+    console.log(user.friends)
+    return user.friends
+  }
   console.log("Cur user: ", user);
   function closeModals() {
     setOpenEditAccount(false);
@@ -112,6 +125,19 @@ export default function Account() {
           justifyContent: "center",
         }}
       >
+       <Tabs
+          value={tab}
+          onChange={handleTabChange}
+          centered
+          sx={{ mt: 10 }}
+        >
+          <Tab label="About" />
+          <Tab label="Friends" />
+          <Tab label="Posts" />
+        </Tabs>
+        {tab === 0 && (<Box sx={{ p: 2 }}>
+
+        
         <Typography
           variant="h3"
           textAlign="center"
@@ -165,6 +191,28 @@ export default function Account() {
           </CardContent>
           <CardContent>Password: ****************</CardContent>
         </Card>
+        </Box>)}
+
+        {tab === 1 && (
+          <Box sx={{ p: 2 }}>
+                <PaginatedList
+                  title="Friends"
+                  type="users"
+                  dataSource={getFriends}
+                  ListItemComponent={UserCard}
+                />
+          </Box>
+        )}
+                {tab === 2 && (
+          <Box sx={{ p: 2 }}>
+                <PaginatedList
+                  title="Posts"
+                  type="users"
+                  dataSource={getFriends}
+                  ListItemComponent={UserCard}
+                />
+          </Box>
+        )}
       </Paper>
 
       {openEditAccount && (

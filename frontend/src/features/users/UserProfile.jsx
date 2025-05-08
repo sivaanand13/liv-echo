@@ -3,6 +3,7 @@ import { useParams } from "react-router";
 import Loading from "../../components/Loading";
 import ErrorPage from "../../components/ErrorPage";
 import userUtils from "./userUtils";
+import postUtils from "../posts/postUtils";
 import { AuthContext } from "../../contexts/AuthContext";
 import {
   Box,
@@ -17,7 +18,6 @@ import {
 import defaultBanner from "../../assets/landing/landing1.jpg";
 import Profile from "../../components/Profile";
 export default function UserProfile() {
-  let { user: currentUser } = useContext(AuthContext);
   const theme = useTheme();
   const { userUID } = useParams();
   const { user : currUser } = useContext(AuthContext);
@@ -25,12 +25,14 @@ export default function UserProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isFriend, setIsFriend] = useState(false);
+  const [posts, setPosts] = useState([]);
   useEffect(() => {
     async function fetchUser() {
       try {
         setError(null);
         const user = await userUtils.fetchUserByUID(userUID);
         setUser(user);
+        console.log(currUser)
         console.log(currUser.friends)
         if(currUser.friends.includes(user._id)){
           setIsFriend(true);

@@ -23,7 +23,7 @@ async function getUserById(id) {
   if (typeof id == "string") {
     id = ObjectId.createFromHexString(id);
   }
-  const user = User.findOne({ _id: id });
+  const user = User.findOne({ _id: id }).populate("friends","name username email profile uid");
   if (!user) {
     throw `No user with id ${id} exists!`;
   }
@@ -50,9 +50,9 @@ async function getUserByUID(uid, display) {
         banner: 1,
         friends: 1,
       }
-    );
+    ).populate("friends","name username email profile uid");
   } else {
-    user = await User.findOne({ uid: uid });
+    user = await User.findOne({ uid: uid }).populate("friends","name username email profile uid");
   }
 
   if (!user) {
