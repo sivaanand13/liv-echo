@@ -2,6 +2,8 @@ import {
   ListItem,
   Stack,
   ListItemAvatar,
+  ListItemButton,
+  ListItemText,
   Box,
   Typography,
   ImageList,
@@ -139,7 +141,13 @@ export default function PostListItem({msg}) {
             </ImageList>
           </Box>
         )}
+        
+      <ListItemButton>
+          <ListItemText 
+          primary="Like"/>
+        </ListItemButton>
       </Stack>
     </ListItem>
+    
   );
 }

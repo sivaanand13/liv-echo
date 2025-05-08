@@ -34,7 +34,7 @@ export default function PostFeed() {
 
   useEffect(() => {
     async function fetchMessages() {
-        try {
+        try { 
           const pos = await postUtils.getPosts();
           console.log("fetched messages: ", pos);
           setPosts(pos);

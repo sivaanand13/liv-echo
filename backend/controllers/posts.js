@@ -10,9 +10,10 @@ import createIndex from '../elasticSearch/createPostIndex.js';
 
 async function getNPosts(n){
     //console.log("1");
-    const posts = await Post.find({}).limit(n)
-    .populate("sender", "name username email profile uid")
+    const posts = await Post.find({}).limit(n * 2)
+    .populate("sender", "name username email profile friends uid")
     .lean();
+
     //console.log("2");
     return posts;
 }
@@ -66,7 +67,7 @@ async function postPost(uid, text, attachments, isPrivate){
 // probably useful for UI
 async function canDeletePost(uid, postID){
     let post = await getPostById(postID.toString());
-    let user = await usersController.getUserByUID(uid);
+    let user = await usersController.getUserByUID(uid); 
 
     // if the user is an admin we can ignore these checks
     if(!user.role != "admin" && user._id.toString() != post.sender.toString()){
@@ -106,7 +107,7 @@ async function editPost(uid, postID, text, isPrivate, updateTimestamps){
         text = validation.validateString(text);
         if(text.length > settings.MESSAGE_LENGTH) throw new Error ("text is too long!");
 
-        post = await Post.findOneAndUpdate(
+        post = await Post.findOneAndUpdate( 
             {_id: post.id, sender: user._id},
             {
                 $set: {
@@ -244,6 +245,24 @@ async function getPostById(postId) {
     }
     return post;
 }
+
+// if a post is private, you need to be either the user, their friend, or an admin to see it
+async function canSeePost(uid, postID){
+    let post = await getPostById(postId.toString());
+    let user = await usersController.getUserByUID(uid);
+
+    if(!post.isPrivate) return true; // oh cool the post is public
+
+    if(post.sender.toString() == user._id.toString()) return true; // oh cool you're the poster
+
+    if(user.role == "admin") return true; // oh cool you're an admin
+
+    let poster = await usersController.getUserById(post.sender.toString());
+    if(poster.friends.includes(user._id)) return true; // oh cool you're one of their friends
+
+    return false; // dammit
+}
+
 async function searchPosts(queryText) {
     queryText = validation.validateString(queryText, "Search Query");
     if (!queryText || queryText.length < 2) {
@@ -343,5 +362,6 @@ export default {
     likePost,
     reportPost,
     getPostById,
-    searchPosts
+    canSeePost,
+    searchPosts,
 };

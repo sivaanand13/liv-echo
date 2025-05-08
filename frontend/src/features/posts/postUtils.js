@@ -80,6 +80,7 @@ async function getPosts() {
   }
 }
 
+
 async function deletePost(pos) {
   try {
     const response = await axios.del(`posts/${pos._id}`, {});
@@ -95,5 +96,5 @@ export default {
   createPost,
   getPosts,
   deletePost,
-  searchPosts
+  searchPosts,
 };
