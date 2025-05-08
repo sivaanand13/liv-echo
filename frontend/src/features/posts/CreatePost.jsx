@@ -1,6 +1,17 @@
 // src/features/posts/CreatePost.jsx
 import React, { useState } from "react";
-import postUtils from "./postUtils"; 
+import postUtils from "./postUtils";
+import {
+  Box,
+  Button,
+  Checkbox,
+  CircularProgress,
+  FormControlLabel,
+  TextField,
+  Typography,
+  Grid,
+} from "@mui/material";
+import postBg from "../../assets/users/search.jpg";
 
 function CreatePost() {
   const [text, setText] = useState("");
@@ -31,39 +42,95 @@ function CreatePost() {
   };
 
   return (
-    <div className="create-post">
-      <h2>Create Post</h2>
-      <form onSubmit={handleSubmit}>
-        <textarea
+    <Box
+      sx={{
+        backgroundImage: `url(${postBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "20px",
+      }}
+    >
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{
+          backgroundColor: "rgba(255,255,255,0.95)",
+          borderRadius: "8px",
+          padding: "30px",
+          width: "100%",
+          maxWidth: "500px",
+          boxShadow: 3,
+        }}
+      >
+        <Typography variant="h4" sx={{ marginBottom: "20px" }}>
+          Create Post
+        </Typography>
+
+        <TextField
+          label="What's on your mind?"
+          multiline
+          rows={4}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="What's on your mind?"
-          rows={4}
+          fullWidth
           required
+          sx={{ marginBottom: "20px" }}
         />
 
-        <input
-          type="file"
-          onChange={handleFileChange}
-          multiple
-          accept="image/*,video/*"
-        />
-
-        <label>
+        <Button variant="contained" component="label" sx={{ marginBottom: "10px" }}>
+          Upload Attachments
           <input
-            type="checkbox"
-            checked={isPrivate}
-            onChange={(e) => setIsPrivate(e.target.checked)}
+            type="file"
+            hidden
+            multiple
+            accept="image/*,video/*"
+            onChange={handleFileChange}
           />
-          Private Post
-        </label>
+        </Button>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Posting..." : "Post"}
-        </button>
-      </form>
-      {message && <p>{message}</p>}
-    </div>
+        <Box sx={{ marginBottom: "20px" }}>
+          {attachments.length > 0 && (
+            <Typography variant="body2">
+              {attachments.length} file(s) selected
+            </Typography>
+          )}
+        </Box>
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={isPrivate}
+              onChange={(e) => setIsPrivate(e.target.checked)}
+            />
+          }
+          label="Private Post"
+          sx={{ marginBottom: "20px" }}
+        />
+
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          disabled={loading}
+          fullWidth
+        >
+          {loading ? <CircularProgress size={24} /> : "Post"}
+        </Button>
+
+        {message && (
+          <Typography
+            sx={{ marginTop: "20px" }}
+            color={message.includes("success") ? "primary" : "error"}
+          >
+            {message}
+          </Typography>
+        )}
+      </Box>
+    </Box>
   );
 }
 
