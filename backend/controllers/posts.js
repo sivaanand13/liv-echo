@@ -254,12 +254,11 @@ async function searchPosts(queryText) {
       index: 'posts',
       body: {
         query: {
-            match: {
-                text: {
-                    query: queryText.toLowerCase(),
-                    fuzziness: "AUTO",  // Optional: Allow fuzzy search to handle typos
-                    operator: "and"
-                }
+            multi_match: {
+                query: queryText.toLowerCase(),
+                fuzziness: "AUTO",  // Optional: Allow fuzzy search to handle typos
+                operator: "and",
+                fields: ["text", "senderUsername"],
             }
         }
        }
