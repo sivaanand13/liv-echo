@@ -13,6 +13,7 @@ import {
   CardContent,
   Tabs,
   Tab,
+  Grid
 } from "@mui/material";
 import defaultBanner from "../../assets/landing/landing1.jpg";
 import PaginatedList from "../../components/PaginatedList.jsx";
@@ -220,15 +221,31 @@ console.log("posts: " , posts)
            mx={"2rem"}
          >Sorry You Have No Friends</Typography>
         )}
-          {tab === 2 && (
-          <Box sx={{ p: 2 }}>
-                <PaginatedList
-                  title="Posts"
-                  type="users"
-                  dataSource={getFriends}
-                  ListItemComponent={UserCard}
-                />
-          </Box>
+          {tab === 2 && posts.length > 0 && (
+          <Grid container spacing={3}>
+          {posts.map((post) => (
+            <Grid item xs={12} m={12} key={post._id}>
+              <Card elevation={1} sx={{width: "100%",padding: 2}}>
+                <CardHeader title={post.senderUsername} />
+                <CardContent>
+                  <Typography variant="body2" color="text.secondary">
+                    {post.text || "No content provided."}
+                  </Typography>
+                  <Typography variant="caption" display="block" mt={1}>
+                    {new Date(post.createdAt).toLocaleString()}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+        )}
+        {tab === 2 && posts.length === 0 &&(
+           <Typography
+           variant="h3"
+           textAlign="center"
+           mx={"2rem"}
+         >Sorry You Have No Posts</Typography>
         )}
       </Paper>
 
