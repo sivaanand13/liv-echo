@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import {
   Card,
@@ -25,6 +25,7 @@ import EditProfile from "./EditProfile";
 import EditButton from "../../components/EditButton";
 import dayjs from "dayjs";
 import EditBio from "./EditBio";
+import postUtils from "../posts/postUtils.js";
 export default function Account() {
   const { user } = useContext(AuthContext);
   const theme = useTheme();
@@ -33,6 +34,7 @@ export default function Account() {
   const [openEditBanner, setOpenEditBanner] = useState(false);
   const [openEditBio, setOpenEditBio] = useState(false);
   const [tab,setTab] = useState(0);
+  const [posts, setPosts] = useState([])
 
   const handleTabChange = (_, newValue) => {
     setTab(newValue);
@@ -49,6 +51,14 @@ export default function Account() {
     setOpenEditBio(false);
   }
 
+useEffect(() => {
+  async function getPosts() {
+    const postList = await postUtils.getPostsByUID(user.uid) 
+    setPosts(postList);
+  }
+  getPosts();
+},[]);
+console.log("posts: " , posts)
   return (
     <Box
       sx={{
@@ -193,7 +203,7 @@ export default function Account() {
         </Card>
         </Box>)}
 
-        {tab === 1 && (
+        {tab === 1 && user.friends.length > 0 && (
           <Box sx={{ p: 2 }}>
                 <PaginatedList
                   title="Friends"
@@ -203,7 +213,14 @@ export default function Account() {
                 />
           </Box>
         )}
-                {tab === 2 && (
+        {tab === 1 && user.friends.length === 0 && (
+           <Typography
+           variant="h3"
+           textAlign="center"
+           mx={"2rem"}
+         >Sorry You Have No Friends</Typography>
+        )}
+          {tab === 2 && (
           <Box sx={{ p: 2 }}>
                 <PaginatedList
                   title="Posts"

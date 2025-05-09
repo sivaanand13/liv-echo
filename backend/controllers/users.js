@@ -202,7 +202,7 @@ async function sendFriendRequest(userUid, friendUid) {
   const currUser = await getUserByUID(userUid);
   const friend = await getUserByUID(friendUid);
   const friendId = friend._id
-  if (currUser.friends.includes(friendId)) {
+  if (currUser.friends.some(f => f._id.toString() == friendId.toString())) {
     throw "You are already friends with this user.";
   }
 
@@ -223,7 +223,7 @@ async function removeFriend(userUid, friendUid) {
   const currUser = await getUserByUID(userUid);
   const friend = await getUserByUID(friendUid);
   const friendId = friend._id
-  if (!currUser.friends.includes(friendId)) {
+  if (!currUser.friends.some(f => f._id.toString() == friendId.toString())) {
     throw "You are not friends with this user.";
   }
 
@@ -235,7 +235,7 @@ async function removeFriend(userUid, friendUid) {
   let user = await getUserByUID(userUid, false);
   console.log("Edited user", user);
   chatNamespace.to(user.uid).emit("accountUpdated", user);
-  return { message: "Friend added" };
+  return { message: "Friend removed" };
 }
 export default {
   validateUnqiueEmail,

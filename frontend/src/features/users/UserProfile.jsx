@@ -32,11 +32,8 @@ export default function UserProfile() {
         setError(null);
         const user = await userUtils.fetchUserByUID(userUID);
         setUser(user);
-        console.log(currUser)
-        console.log(currUser.friends)
-        if(currUser.friends.includes(user._id)){
+        if(currUser.friends.some(friend => friend._id == user._id)){
           setIsFriend(true);
-          console.log(currUser.friends)
         }
         else{
           setIsFriend(false)

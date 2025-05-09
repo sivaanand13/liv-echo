@@ -216,5 +216,16 @@ router.route("/:postID").delete(async (req, res) => {
     return res.status(403).json({ message: e });
   }
 });
-
+router.route("/user/:userUid").get(async (req,res) => {
+let userUid = req.params.userUid;
+  try{
+    let posts = await postsController.getPostsByUid(userUid);
+    return res.status(200).json({
+      posts
+    })
+  }
+  catch(e){
+    res.status(403).json({message: e});
+  }
+});
 export default router;

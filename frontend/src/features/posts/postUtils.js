@@ -80,6 +80,16 @@ async function getPosts() {
   }
 }
 
+async function getPostsByUID(userUid) {
+  try {
+    const response = await axios.get(`posts/user/${userUid}`);
+    console.log(response.data.posts)
+    return response.data.posts;
+  } catch (e) {
+    console.log(e);
+    throw `Post fetch failed!`;
+  }
+}
 
 async function deletePost(pos) {
   try {
@@ -97,4 +107,5 @@ export default {
   getPosts,
   deletePost,
   searchPosts,
+  getPostsByUID
 };

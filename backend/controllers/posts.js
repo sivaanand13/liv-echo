@@ -400,6 +400,19 @@ async function searchPosts(queryText, user) {
 //   }
   
 //   testConnection();
+async function getPostsByUid(userUid) {
+    let user = await userController.getUserByUID(userUid);
+    if(!user){
+        throw `No user with uid (${userUid})`;
+    }
+    console.log("user: " + user);
+    const posts = await Post.find({sender : user._id});
+    console.log("Posts: ", posts)
+    if (!posts) {
+        throw `No post with id (${posts})!`;
+    }
+    return posts;
+}
 createIndex().catch((err) => {
     console.error("❌ Error ensuring Elasticsearch index exists:", err);
 });
@@ -414,4 +427,5 @@ export default {
     getPostById,
     canSeePost,
     searchPosts,
+    getPostsByUid
 };
