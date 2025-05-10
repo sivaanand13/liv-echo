@@ -34,14 +34,13 @@ export default function PostFeed() {
 
   useEffect(() => {
     async function fetchMessages() {
-        try { 
-          const pos = await postUtils.getPosts();
-          console.log("fetched messages: ", pos);
-          setPosts(pos);
-        } catch (e) {
-          console.log(e);
-        }
-      
+      try {
+        const pos = await postUtils.getPosts();
+        console.log("fetched messages: ", pos);
+        setPosts(pos);
+      } catch (e) {
+        console.log(e);
+      }
     }
     fetchMessages();
     console.log("OK!");
@@ -54,7 +53,6 @@ export default function PostFeed() {
     setMessageText("");
     setAttachments([]);
   }
-
 
   return (
     <Stack
@@ -105,11 +103,7 @@ export default function PostFeed() {
                   <CustomList
                     listData={posts}
                     mappingFunction={(msg) => {
-                      return (
-                        <PostListItem
-                          msg={msg}
-                        />
-                      );
+                      return <PostListItem key={msg._id} msg={msg} />;
                     }}
                   />
                 ) : (
@@ -164,7 +158,8 @@ export default function PostFeed() {
                     );
                   })}
                 </ImageList>
-              )}{/*
+              )}
+              {/*
               <Box
                 sx={{
                   display: "flex",
@@ -201,7 +196,7 @@ export default function PostFeed() {
                 padding: "1rem",
               }}
             >
-             {/* <ChatActionsSidebar />*/}
+              {/* <ChatActionsSidebar />*/}
             </Box>
           </Stack>
         </>
