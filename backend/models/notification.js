@@ -1,12 +1,13 @@
-import mongoose, { mongo, Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import settings from "./settings.js";
 
 const NotificationSchema = new Schema(
   {
-    userId: { typeof: mongoose.Schema.ObjectId, ref: "User", required: true },
-    uid: { typeof: String, required: true },
+    userId: { type: mongoose.Types.ObjectId, ref: "User", required: true },
+    uid: { type: String, required: true },
+    chatId: { type: mongoose.Types.ObjectId, ref: "Chat", required: true },
     type: {
-      typeof: String,
+      type: String,
       enum: [
         "new-message",
         "friend-request",
@@ -21,11 +22,15 @@ const NotificationSchema = new Schema(
     },
     body: {
       type: String,
-      required: true,
+      default: "",
     },
     link: {
       type: String,
       default: null,
+    },
+    read: {
+      type: Boolean,
+      default: false,
     },
   },
   {

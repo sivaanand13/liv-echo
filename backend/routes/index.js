@@ -1,6 +1,7 @@
 import usersRouter from "./users.js";
 import chatsRouter from "./chats.js";
 import messagesRouter from "./messages.js";
+import notificationRouter from "./notifications.js";
 const configRoutes = (app) => {
   app.get("/healthz", (req, res) => {
     return res.status(200).json({
@@ -10,6 +11,7 @@ const configRoutes = (app) => {
   app.use("/users", usersRouter);
   app.use("/chats", chatsRouter);
   app.use("/chats", messagesRouter);
+  app.use("/notifications", notificationRouter);
   app.use("{0,1}", async (req, res) => {
     res.status(404).json({
       message: "Invalid Route!",
