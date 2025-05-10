@@ -27,7 +27,31 @@ async function fetchUserByUID(uid) {
   }
 }
 
+async function addFriendwithUID(uid,isFriend) {
+  try{
+    uid = validation.validateString(uid, "User id");
+    if(isFriend){
+      console.log("Step 2")
+      const response = await axios.patch('users/friends/requests',
+        {friendUID : uid}
+      );
+      return response.data.data;
+    }
+    else{
+      console.log("Step 2")
+      const response = await axios.post('users/friends/requests',
+       {friendUID : uid}
+      );
+      return response.data.data;
+    }
+  }
+  catch (e){
+    throw `Could not add/remove friend`
+  }
+}
+
 export default {
   fetchUsers,
   fetchUserByUID,
+  addFriendwithUID
 };

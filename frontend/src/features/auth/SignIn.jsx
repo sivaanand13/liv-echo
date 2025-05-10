@@ -26,11 +26,9 @@ function SignIn() {
 
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const [emailError, setEmailError] = useState("");
-  const [usernameError, setUsernameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
@@ -71,12 +69,6 @@ function SignIn() {
 
     setError("");
     validateField(
-      username,
-      validation.validateUsername,
-      setUsername,
-      setUsernameError
-    );
-    validateField(
       password,
       validation.validatePassword,
       setPassword,
@@ -84,16 +76,14 @@ function SignIn() {
     );
     validateField(email, validation.validateEmail, setEmail, setEmailError);
 
-    const invalidFields = [usernameError, passwordError, emailError].some(
-      (e) => e != ""
-    );
+    const invalidFields = [passwordError, emailError].some((e) => e != "");
 
     if (invalidFields) {
       setError("Please fix errors before submitting!");
       return;
     } else {
       try {
-        await authUtils.signInUser(username, email, password);
+        await authUtils.signInUser(null, email, password);
       } catch (e) {
         console.log("SignIn.jsx", e);
         setError(e);
@@ -138,29 +128,6 @@ function SignIn() {
                   validation.validateEmail,
                   setEmail,
                   setEmailError,
-                  e
-                )
-              }
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel htmlFor="username">Username</FormLabel>
-            <TextField
-              error={usernameError != ""}
-              helperText={usernameError}
-              id="username"
-              type="text"
-              name="username"
-              autoComplete="username"
-              required
-              fullWidth
-              value={username}
-              onChange={(e) =>
-                validateField(
-                  username,
-                  validation.validateUsername,
-                  setUsername,
-                  setUsernameError,
                   e
                 )
               }

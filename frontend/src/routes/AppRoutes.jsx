@@ -9,12 +9,18 @@ import GroupChats from "../features/group-chat/GroupChats";
 import UserSearch from "../features/users/UserSearch";
 import NotFound from "../components/NotFound";
 import UserProfile from "../features/users/UserProfile";
+import CreatePost from "../features/posts/CreatePost";
+import PostFeed from "../features/posts/PostFeed";
+import SearchPosts from "../features/posts/SearchPosts"
+import SinglePost from "../features/posts/SinglePost";
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/signin" element={<SignIn />} />
+      <Route path="/posts/search" element={<SearchPosts/>}/>
+      <Route path="/posts/:postId" element={<SinglePost />} />
       <Route element={<PrivateRoute />}>
         <Route path="/account" element={<Account />} />
         <Route path="/dms" element={<DirectMessages />} />
@@ -22,6 +28,8 @@ function AppRoutes() {
         <Route path="/users/search" element={<UserSearch />} />
         <Route path="/users/:userUID" element={<UserProfile />} />
         <Route path="/chats" element={<Account />} />
+        <Route path="/posts" element={<PostFeed />} />
+        <Route path="/posts/create" element={<CreatePost/>}/>
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

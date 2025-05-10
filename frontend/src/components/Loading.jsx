@@ -7,7 +7,8 @@ const StyledCircularProgress = styled(CircularProgress)(({ theme }) => ({
   justifyContent: "center",
   alignItems: "center",
   minHeight: "100vh",
-  size: "20%",
+  width: "20%",
+  height: "20%"
 }));
 
 function Loading() {

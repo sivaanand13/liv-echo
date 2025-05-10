@@ -22,7 +22,7 @@ export default function Profile({ sx, user, Icon }) {
         bgcolor: colorHsh.hex(
           user.displayName || user.name || user.username || "red"
         ),
-        color: "#fffff",
+        color: "#ffffff",
         ...sx,
       }}
     >

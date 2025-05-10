@@ -21,39 +21,33 @@ import { useContext, useEffect, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import SendIcon from "@mui/icons-material/Send";
 import validation from "../../utils/validation";
-import chatUtils from "./chatUtils";
+import postUtils from "./postUtils";
 import CustomList from "../../components/CustomList";
-import MessageListItem from "./MessageListItem";
+import PostListItem from "./PostListItem";
 import CloseIcon from "@mui/icons-material/Close";
 import { AuthContext } from "../../contexts/AuthContext";
-import ChatActionsSidebar from "./ChatActionsSidebar";
-export default function MessageDisplay({ chat }) {
-  const [messageText, setMessageText] = useState("");
-  const [attachments, setAttachments] = useState([]);
-  const [messageError, setMessageError] = useState("");
+//import ChatActionsSidebar from "./ChatActionsSidebar";
+export default function PostFeed() {
   const auth = useContext(AuthContext);
-  const {
-    currentChat,
-    currentChatMessages,
-    setCurrentMessages,
-    addCurrentChatMessages,
-  } = chatStore();
+  const attachments = null;
+  let [posts, setPosts] = useState([]);
 
   useEffect(() => {
     async function fetchMessages() {
-      if (currentChat) {
-        try {
-          const messages = await chatUtils.getMessages(currentChat);
-          console.log("fetched messages: ", messages);
-          setCurrentMessages(messages);
+        try { 
+          const pos = await postUtils.getPosts();
+          console.log("fetched messages: ", pos);
+          setPosts(pos);
         } catch (e) {
           console.log(e);
         }
-      }
+      
     }
-    console.log(currentChat);
     fetchMessages();
-  }, [currentChat, setCurrentMessages]);
+    console.log("OK!");
+    console.log(posts.length);
+    //console.log(currentChat);
+  }, []);
 
   function reset() {
     setMessageError("");
@@ -61,38 +55,6 @@ export default function MessageDisplay({ chat }) {
     setAttachments([]);
   }
 
-  async function handleSend(e) {
-    e.preventDefault();
-    setMessageError("");
-    let curChat = currentChat;
-    let curMessageText = messageText;
-    let curAttachments = attachments;
-
-    try {
-      curMessageText = validation.validateString(curMessageText);
-
-      validation.validateArray(curAttachments);
-    } catch (e) {
-      return setMessageError(e);
-    }
-
-    try {
-      const sender = currentChat.members.find(
-        (member) => member.uid == auth.currentUser.uid
-      );
-      reset();
-
-      await chatUtils.sendMessage(
-        curChat,
-        curMessageText,
-        curAttachments,
-        sender
-      );
-    } catch (e) {
-      setMessageError(e);
-      return;
-    }
-  }
 
   return (
     <Stack
@@ -108,7 +70,7 @@ export default function MessageDisplay({ chat }) {
         display: "flex",
       }}
     >
-      {currentChat ? (
+      {posts ? (
         <>
           <Stack
             height="100%"
@@ -129,13 +91,6 @@ export default function MessageDisplay({ chat }) {
                 height: "calc(100vh - 5rem)",
               }}
             >
-              {currentChat?.type == "group" && (
-                <Box>
-                  <Typography variant="h3" marginTop="2rem">
-                    {currentChat.name}
-                  </Typography>
-                </Box>
-              )}
               <Stack
                 spacing={1}
                 sx={{
@@ -146,20 +101,19 @@ export default function MessageDisplay({ chat }) {
                   overflowY: "auto",
                 }}
               >
-                {currentChatMessages && currentChatMessages.length > 0 ? (
+                {posts && posts.length > 0 ? (
                   <CustomList
-                    listData={currentChatMessages}
+                    listData={posts}
                     mappingFunction={(msg) => {
                       return (
-                        <MessageListItem
+                        <PostListItem
                           msg={msg}
-                          admins={currentChat.admins}
                         />
                       );
                     }}
                   />
                 ) : (
-                  <Typography textAlign="center">No messages yet...</Typography>
+                  <Typography textAlign="center">{posts.length}</Typography>
                 )}
               </Stack>
               {attachments && attachments.length > 0 && (
@@ -210,7 +164,7 @@ export default function MessageDisplay({ chat }) {
                     );
                   })}
                 </ImageList>
-              )}
+              )}{/*
               <Box
                 sx={{
                   display: "flex",
@@ -228,53 +182,14 @@ export default function MessageDisplay({ chat }) {
                     marginBottom: "2rem",
                   }}
                 >
-                  <TextField
-                    fullWidth
-                    id="messageInput"
-                    label="Message"
-                    placeholder="Enter term to search!"
-                    variant="standard"
-                    error={messageError != null}
-                    onChange={(e) => {
-                      setMessageText(e.target.value);
-                    }}
-                    value={messageText}
-                    helperText={messageError}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        handleSend(e);
-                      }
-                    }}
-                  />
-                  <label htmlFor="file-upload">
-                    <IconButton component="span">
-                      <AddIcon />
-                    </IconButton>
-                  </label>
-
-                  <input
-                    id="file-upload"
-                    type="file"
-                    hidden
-                    multiple
-                    accept="image/*"
-                    onChange={(e) => {
-                      let files = Array.from(e.target.files);
-                      if (files.length > 5) {
-                        alert("Please limit attachments to five!");
-                        files = files.slice(0, 5);
-                      }
-                      setAttachments(Array.from(files));
-                    }}
-                  />
+                  
                   <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
 
-                  <IconButton type="button" onClick={handleSend}>
+                  {/*<IconButton type="button" onClick={handleSend}>
                     <SendIcon />
-                  </IconButton>
+                  </IconButton>}
                 </Paper>
-              </Box>{" "}
+              </Box>{" "}*/}
             </Box>
 
             <Box
@@ -286,7 +201,7 @@ export default function MessageDisplay({ chat }) {
                 padding: "1rem",
               }}
             >
-              <ChatActionsSidebar />
+             {/* <ChatActionsSidebar />*/}
             </Box>
           </Stack>
         </>
