@@ -46,7 +46,12 @@ export default function SearchPosts() {
           label="Search Posts"
           variant="outlined"
           value={inputQuery}
-          onChange={(e) => setInputQuery(e.target.value)}
+          onChange={(e) => {
+            setInputQuery(e.target.value)
+            setSearchTriggered(false);
+            setError("");
+            setQuery([]);
+          }}
           sx={{
             marginBottom: "10px",
             width: "300px",
