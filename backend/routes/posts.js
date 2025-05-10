@@ -264,7 +264,7 @@ router.route("/:postID/comment").post(async (req, res) =>{
       }
     }
 
-    const pos = await commmentsController.createComment(
+    const pos = await commentsController.createComment(
       postID,
       uid,
       text,
