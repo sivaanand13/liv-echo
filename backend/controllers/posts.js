@@ -269,12 +269,13 @@ async function searchPosts(queryText, user) {
     if (!queryText || queryText.length < 2) {
         throw new Error("Search query must be at least 2 characters long.");
     }
-    let friendIds = (user?.friends || []).map(id => id.toString());
+    let friendIds = (user?.friends || []).map(id => id._id.toString());
     let finalArray = []
     for(let i=0; i<friendIds.length; i++){ //loop through friend to get uids
         let tmpval = await userController.getUserById(friendIds[i])
         let tmpFriends = tmpval?.friends || []
-        let mutual = tmpFriends.some(id => id.toString() === user._id.toString());
+        let mutual = tmpFriends.some(id => id._id.toString() === user._id.toString());
+        //console.log("Checking mutual value", mutual);
         if(mutual === true){
             finalArray.push(tmpval.uid.toString())
             console.log("friend", i, friendIds[i])
