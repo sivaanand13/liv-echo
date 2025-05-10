@@ -38,7 +38,7 @@ async function createComment(postID, uid, text, attachments){
 
     let coms = post.comments;
     coms.push(com._id);
-    post = await Post.findOneAndUpdate( 
+    post = await post.findOneAndUpdate( 
                 {_id: post._id, sender: user._id},
                 {
                     $set: {
@@ -106,7 +106,7 @@ async function deleteComment(uid, commID){
 
     let coms = post.comments.filter((comment) => comment._id.toString() != commID.toString());
 
-    post = await Post.findOneAndUpdate( 
+    post = await post.findOneAndUpdate( 
                 {_id: post._id, sender: user._id},
                 {
                     $set: {
