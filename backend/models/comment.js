@@ -32,7 +32,7 @@ const CommentSchema = new Schema(
       ref: "Post",
     },
     likes: {
-      type: mongoose.Types,ObjectId,
+      type: mongoose.Types.ObjectId,
       ref: "User",
     },
   },
