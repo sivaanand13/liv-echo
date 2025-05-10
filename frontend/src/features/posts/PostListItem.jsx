@@ -13,16 +13,19 @@ import {
   MenuItem,
   IconButton,
 } from "@mui/material";
+import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
+import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 import Profile from "../../components/Profile";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import postUtils from "./postUtils";
 import CustomLink from "../../components/CustomLink";
-export default function PostListItem({msg}) {
+export default function PostListItem({ msg }) {
   const auth = useContext(AuthContext);
   const [menuOpen, setMenuOpen] = useState(false);
   const [ancor, setAncor] = useState(null);
+  const [liked, setLiked] = useState(false);
   function handleOpen(e) {
     setMenuOpen((prev) => !prev);
     setAncor(e.currentTarget);
@@ -141,13 +144,36 @@ export default function PostListItem({msg}) {
             </ImageList>
           </Box>
         )}
-        
-      <ListItemButton>
-          <ListItemText 
-          primary="Like"/>
+
+        <ListItemButton
+          onClick={() => {
+            setLiked((prev) => !prev);
+            console.log(`${!liked ? "Liked" : "Unliked"} post:`, msg._id);
+            // Optional: postUtils.likePost(msg._id, !liked)
+          }}
+          sx={{
+            mt: 1,
+            px: 1.5,
+            py: 0.5,
+            width: "fit-content",
+            borderRadius: "0.5em",
+            backgroundColor: "#ffffff15",
+            color: "white",
+            display: "flex",
+            alignItems: "center",
+            "&:hover": {
+              backgroundColor: "#ffffff25",
+            },
+          }}
+        >
+          {liked ? (
+            <ThumbUpAltIcon fontSize="small" sx={{ mr: 1 }} />
+          ) : (
+            <ThumbUpOffAltIcon fontSize="small" sx={{ mr: 1 }} />
+          )}
+          <Typography variant="body2">{liked ? "Liked" : "Like"}</Typography>
         </ListItemButton>
       </Stack>
     </ListItem>
-    
   );
 }
