@@ -81,7 +81,18 @@ function CreatePost() {
           sx={{ marginBottom: "20px" }}
         />
 
-        <Button variant="contained" component="label" sx={{ marginBottom: "10px" }}>
+        <Box
+          component="label"
+          sx={{
+            display: 'inline-block',
+            padding: '10px 20px',
+            backgroundColor: 'primary.main',
+            color: 'white',
+            cursor: 'pointer',
+            borderRadius: '5px',
+            textAlign: 'center',
+          }}
+        >
           Upload Attachments
           <input
             type="file"
@@ -90,7 +101,7 @@ function CreatePost() {
             accept="image/*,video/*"
             onChange={handleFileChange}
           />
-        </Button>
+        </Box>
 
         <Box sx={{ marginBottom: "20px" }}>
           {attachments.length > 0 && (
