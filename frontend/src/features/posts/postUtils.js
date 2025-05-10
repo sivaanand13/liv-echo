@@ -69,6 +69,15 @@ async function searchPosts(query) {
     throw err;
   }
 }
+async function getPostByPostId (postId) {
+  try {
+    const res = await axios.get(`posts/${postId}`);
+    return res.data.data;
+  } catch (err) {
+    console.error("Failed to fetch post by ID:", err);
+    throw err.response?.data?.message || "Error fetching post.";
+  }
+}
 
 async function getPosts() {
   try {
@@ -107,5 +116,6 @@ export default {
   getPosts,
   deletePost,
   searchPosts,
-  getPostsByUID
+  getPostsByUID,
+  getPostByPostId
 };

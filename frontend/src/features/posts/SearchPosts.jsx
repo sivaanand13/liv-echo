@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import postUtils from "./postUtils";
 import { Box, Button, TextField, Typography, CircularProgress, Grid } from "@mui/material";
+import { Link } from "react-router-dom"
 import PostCard from "./PostCard";
 import searchBg from "../../assets/users/search.jpg"; //Idk make it the same
 
@@ -75,7 +76,9 @@ export default function SearchPosts() {
         <Grid container spacing={2} sx={{ maxWidth: "1200px", marginTop: "20px" }}>
           {query.map((post) => (
             <Grid key={post._id}>
-              <PostCard item={post} />
+              <Link to={`/posts/${post.id}`} style={{ textDecoration: 'none' }}>
+                <PostCard item={post} />
+              </Link>
             </Grid>
           ))}
         </Grid>
