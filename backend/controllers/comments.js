@@ -23,7 +23,7 @@ async function createComment(postID, uid, text, attachments){
         senderProfile: user.profile,
         text: text,
         attachments: [],
-        post: post,
+        post: post._id,
         likes: [],
     };
 
@@ -35,6 +35,18 @@ async function createComment(postID, uid, text, attachments){
     }
 
     const com = await Comment.create(newCom);
+
+    let coms = post.comments;
+    coms.push(com._id);
+    post = await Post.findOneAndUpdate( 
+                {_id: post._id, sender: user._id},
+                {
+                    $set: {
+                        comments: coms
+                    }
+                },
+                { }
+            );
 
     return com;
 }
@@ -82,15 +94,27 @@ async function canDeleteComment(uid, postID){
 }
 
 // the actual deletion
-async function deletePost(uid, commID){
+async function deleteComment(uid, commID){
     let comm = await getCommentById(commID.toString());
     let user = await usersController.getUserByUID(uid);
+    let post = await postsController.getPostById(comm.post.toString());
 
     let canDel = await canDeleteComment(uid, commID);
     if(!canDel) throw new Error("You don't have permissions to delete this!");
 
     await Comment.deleteOne({_id: comm._id});
 
+    let coms = post.comments.filter((comment) => comment._id.toString() != commID.toString());
+
+    post = await Post.findOneAndUpdate( 
+                {_id: post._id, sender: user._id},
+                {
+                    $set: {
+                        comments: coms
+                    }
+                },
+                { }
+            );
 }
 
 // like comment
@@ -107,3 +131,10 @@ async function getCommentById(commID) {
     }
     return comm;
 }
+
+export default {
+    createComment,
+    editComment,
+    deleteComment,
+    getCommentById,
+};

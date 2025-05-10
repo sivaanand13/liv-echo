@@ -109,7 +109,7 @@ async function editPost(uid, postID, text, isPrivate, updateTimestamps){
         if(text.length > settings.MESSAGE_LENGTH) throw new Error ("text is too long!");
 
         post = await Post.findOneAndUpdate( 
-            {_id: post.id, sender: user._id},
+            {_id: post._id.toString(), sender: user._id.toString()},
             {
                 $set: {
                     text: text
@@ -141,7 +141,7 @@ async function editPost(uid, postID, text, isPrivate, updateTimestamps){
     }*/
 
         post = await Post.findOneAndUpdate(
-            {_id: post.id, sender: user._id},
+            {_id: post._id, sender: user._id},
             {
                 $set: {
                     isPrivate: isPrivate
@@ -151,7 +151,7 @@ async function editPost(uid, postID, text, isPrivate, updateTimestamps){
         );
         await elasticClient.update({
             index: 'posts',
-            id: post._id.toString(),
+            id: post._id,
             body: {
               doc: {
                 text: text,
