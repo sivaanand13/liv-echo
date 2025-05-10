@@ -67,6 +67,24 @@ export default function SinglePost() {
             <Typography variant="caption" display="block" color="text.secondary">
               Posted on {new Date(post.createdAt).toLocaleString()}
             </Typography>
+            {post.attachments && post.attachments.length > 0 && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="subtitle1">Attachments:</Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 1 }}>
+                  {post.attachments.map((attachment) =>
+                    attachment.resource_type === "image" ? (
+                      <Box key={attachment._id} sx={{ maxWidth: "100%" }}>
+                        <img
+                          src={attachment.secure_url}
+                          alt="attachment"
+                          style={{ maxWidth: "100%", maxHeight: "400px", borderRadius: "8px" }}
+                        />
+                      </Box>
+                    ) : null
+                  )}
+                </Box>
+              </Box>
+              )}
             {post.isPrivate && (
               <Typography variant="caption" color="warning.main">
                 Private Post
