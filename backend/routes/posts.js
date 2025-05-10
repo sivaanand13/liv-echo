@@ -325,7 +325,7 @@ router.route("/:postID/:commentID").patch(async (req, res) =>{
     // last, make sure that it's the commmentor editing the comment
     if(commentor.uid.toString != uid.toString()) throw "you're not the commentor!";
 
-    const pos = await commmentsController.editComment(
+    const pos = await commentsController.editComment(
       commentID,
       uid,
       text,
@@ -378,7 +378,7 @@ router.route("/:postID/:commentID").delete(async (req, res) =>{
       }
     }
 
-    const pos = await commmentsController.deleteComment(
+    const pos = await commentsController.deleteComment(
       uid,
       commentID,
     );
