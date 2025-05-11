@@ -123,15 +123,17 @@ async function likeComment(commID, uid){
     let comm = await getCommentById(commID.toString());
     let user = await usersController.getUserByUID(uid);
     let licked = false;
-    console.log(comm.sender.toString());
-    console.log(user._id.toString());
+    //console.log(comm.sender.toString());
+    //console.log(user._id.toString());
 
     if (user._id.toString() == comm.sender._id.toString()) return licked;//throw new Error("you can't like your own comment!");
     
       let likez = comm.likes;
     
       if (likez.includes(user._id)){
-        likez = likez.filter((lik) => lik != user._id); 
+        //console.log(likez);
+        likez = likez.filter((lik) => lik.toString() != user._id.toString()); 
+        //console.log(likez);
       }else{
         likez.push(user._id);
         licked = true;
