@@ -6,6 +6,7 @@ import cloudinary from "../cloudinary/cloudinary.js";
 import sharp from "../imageProcessing/sharp.js";
 import { chatNamespace } from "../websockets/index.js";
 import settings from "../models/settings.js";
+import { sendNotification } from "./notification.js";
 async function validateUnqiueEmail(email) {
   email = validation.validateEmail(email);
   const user = await User.findOne({ email: email });
@@ -217,6 +218,12 @@ async function sendFriendRequest(userUid, friendUid) {
   let user = await getUserByUID(userUid, false);
   console.log("Edited user", user);
   chatNamespace.to(user.uid).emit("accountUpdated", user);
+
+  await sendNotification(friendId, friendUid, "", {
+    type: "friend-request",
+    title: `${currUser.name} sent you a friend request`,
+    body: "",
+  });
 
   return { message: "Friend added" };
 }
