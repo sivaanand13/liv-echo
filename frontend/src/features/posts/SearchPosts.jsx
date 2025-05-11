@@ -1,14 +1,22 @@
 import React, { useState } from "react";
 import postUtils from "./postUtils";
-import { Box, Button, TextField, Typography, CircularProgress, Grid } from "@mui/material";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  CircularProgress,
+  Grid,
+  Paper,
+} from "@mui/material";
 import PostCard from "./PostCard";
 import searchBg from "../../assets/users/search.jpg"; //Idk make it the same
 
 export default function SearchPosts() {
-  const [query, setQuery] = useState([]); 
-  const [inputQuery, setInputQuery] = useState(""); 
-  const [loading, setLoading] = useState(false); 
-  const [error, setError] = useState(""); 
+  const [query, setQuery] = useState([]);
+  const [inputQuery, setInputQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [searchTriggered, setSearchTriggered] = useState(false);
 
   const handleSearch = async () => {
@@ -42,18 +50,29 @@ export default function SearchPosts() {
         <Typography variant="h4" sx={{ color: "white", marginBottom: "10px" }}>
           Search Posts
         </Typography>
-        <TextField
-          label="Search Posts"
-          variant="outlined"
-          value={inputQuery}
-          onChange={(e) => setInputQuery(e.target.value)}
+        <Paper
           sx={{
-            marginBottom: "10px",
-            width: "300px",
-            backgroundColor: "white",
-            borderRadius: "4px",
+            display: "flex",
+            alignItems: "center",
+            width: "80%",
+            marginBottom: "2rem",
+            marginTop: "3rem",
+
+            padding: "1em",
           }}
-        />
+        >
+          <TextField
+            label="Search Posts"
+            variant="outlined"
+            value={inputQuery}
+            onChange={(e) => setInputQuery(e.target.value)}
+            sx={{
+              width: "300px",
+              backgroundColor: "white",
+              borderRadius: "4px",
+            }}
+          />
+        </Paper>
         <Button
           variant="contained"
           onClick={handleSearch}
@@ -67,7 +86,11 @@ export default function SearchPosts() {
       {error && <Typography color="error">{error}</Typography>}
 
       {query.length > 0 && !loading && (
-        <Grid container spacing={2} sx={{ maxWidth: "1200px", marginTop: "20px" }}>
+        <Grid
+          container
+          spacing={2}
+          sx={{ maxWidth: "1200px", marginTop: "20px" }}
+        >
           {query.map((post) => (
             <Grid key={post._id}>
               <PostCard item={post} />
@@ -77,11 +100,14 @@ export default function SearchPosts() {
       )}
 
       {/* Show no posts message when no results and search was triggered */}
-      {searchTriggered && query.length === 0 && !loading && inputQuery.trim() && (
-        <Typography variant="h6" sx={{ color: "white", marginTop: "20px" }}>
-          There are no posts for the search term "{inputQuery}"
-        </Typography>
-      )}
+      {searchTriggered &&
+        query.length === 0 &&
+        !loading &&
+        inputQuery.trim() && (
+          <Typography variant="h6" sx={{ color: "white", marginTop: "20px" }}>
+            There are no posts for the search term "{inputQuery}"
+          </Typography>
+        )}
     </Box>
   );
 }
