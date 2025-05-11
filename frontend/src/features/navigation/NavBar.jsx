@@ -53,7 +53,7 @@ function NavBar() {
           <img src={logo} alt="LivEcho Logo" style={{ height: 50 }} />
         </Button>
         <Box sx={{ display: { xs: "none", md: "flex" }, gap: 3 }}>
-          <NotificationCenter />
+          {/* <NotificationCenter /> */}
           <NavBarLinks />
         </Box>
         <IconButton
