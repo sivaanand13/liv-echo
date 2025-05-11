@@ -14,6 +14,11 @@ import {
   CardHeader,
   CardContent,
   useTheme,
+  Tabs,
+  Tab,
+  Grid,
+  CardActionArea,
+  Link
 } from "@mui/material";
 import defaultBanner from "../../assets/landing/landing1.jpg";
 import Profile from "../../components/Profile";
@@ -26,12 +31,18 @@ export default function UserProfile() {
   const [error, setError] = useState(null);
   const [isFriend, setIsFriend] = useState(false);
   const [posts, setPosts] = useState([]);
+  const [tab,setTab] = useState(0);
+  const [mutualFriend, setMutualFriend] = useState(false);
+  const handleTabChange = (_, newValue) => {
+    setTab(newValue);
+  };
   useEffect(() => {
     async function fetchUser() {
       try {
         setError(null);
         const user = await userUtils.fetchUserByUID(userUID);
         setUser(user);
+        console.log("user",user)
         if(currUser.friends.some(friend => friend._id == user._id)){
           setIsFriend(true);
         }
@@ -39,6 +50,11 @@ export default function UserProfile() {
           setIsFriend(false)
           console.log(currUser.friends)
         }
+        const userPosts = await postUtils.getPostsByUID(userUID);
+        setPosts(userPosts)
+        const mutualFriends = (await postUtils.getMutualFriends()) || [];
+        const isMutualFriend = mutualFriends.includes(userUID);
+        setMutualFriend(isMutualFriend);
         setLoading(false);
       } catch (e) {
         setError(e);
@@ -122,10 +138,20 @@ export default function UserProfile() {
             marginTop: "2em",
           }}
         >
+        <Tabs
+          value={tab}
+          onChange={handleTabChange}
+          centered
+          sx={{ mt: 10 }}
+        >
+          <Tab label="About" />
+          <Tab label="Posts" />
+        </Tabs>
           <Typography variant="h3" textAlign="center" mx={"2rem"}>
             {user.name}
           </Typography>
 
+        
           <Box textAlign="center" mt={2}>
              <Button
               variant="contained"
@@ -133,6 +159,7 @@ export default function UserProfile() {
                 {isFriend ? "Remove Friend" : "Add Friend"}
              </Button>
           </Box>
+          {tab === 0 && (<Box sx={{ p: 2 }}>
           <Card
             sx={{
               marginTop: "2rem",
@@ -174,6 +201,111 @@ export default function UserProfile() {
             <CardContent>Username: {user.username}</CardContent>
             <CardContent>Email: {user.email}</CardContent>
           </Card>
+          </Box>)}
+           {tab === 1 && posts.length > 0 && (
+                     <Grid container spacing={3} justifyContent="center" direction={"column"}>
+                          {mutualFriend && (
+                            posts.map((post) => (
+                                  <Box key={post._id} sx={{ mb: 2 }}>
+                                    <Paper elevation={3} sx={{ maxWidth: "800px", mx: "auto", p: 1 }}>
+                                      <Card elevation={1}>
+                                        <CardActionArea component={Link} to={`/posts/${post._id}`}>
+                                        <CardHeader title={post.senderUsername} subheader={post.senderName} />
+                                        <CardContent>
+                                          <Typography variant="body1" gutterBottom>
+                                            {post.text}
+                                          </Typography>
+                                          <Typography variant="caption" display="block" color="text.secondary">
+                                            Posted on {new Date(post.createdAt).toLocaleString()}
+                                          </Typography>
+                                          {post.attachments && post.attachments.length > 0 && (
+                                            <Box sx={{ mt: 2 }}>
+                                              <Typography variant="subtitle1">Attachments:</Typography>
+                                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 1 }}>
+                                                {post.attachments.map((attachment) =>
+                                                  attachment.resource_type === "image" ? (
+                                                    <Box key={attachment._id} sx={{ maxWidth: "100%" }}>
+                                                      <img
+                                                        src={attachment.secure_url}
+                                                        alt="attachment"
+                                                        style={{ maxWidth: "100%", maxHeight: "400px", borderRadius: "8px" }}
+                                                      />
+                                                    </Box>
+                                                  ) : null
+                                                )}
+                                              </Box>
+                                            </Box>
+                                            )}
+                                          {post.isPrivate && (
+                                            <Typography variant="caption" color="warning.main">
+                                              Private Post
+                                            </Typography>
+                                          )}
+                                        </CardContent>
+                                        </CardActionArea>
+                                      </Card>
+                                    </Paper>
+                                    
+                                  </Box>
+                            )))}
+
+                            {!mutualFriend && (
+                            posts.map((post) => (
+                              !post.isPrivate && (
+                                  <Box key={post._id} sx={{ mb: 2 }}>
+                                    <Paper elevation={3} sx={{ maxWidth: "800px", mx: "auto", p: 1 }}>
+                                      <Card elevation={1}>
+                                        <CardActionArea component={Link} to={`/posts/${post._id}`}>
+                                        <CardHeader title={post.senderUsername} subheader={post.senderName} />
+                                        <CardContent>
+                                          <Typography variant="body1" gutterBottom>
+                                            {post.text}
+                                          </Typography>
+                                          <Typography variant="caption" display="block" color="text.secondary">
+                                            Posted on {new Date(post.createdAt).toLocaleString()}
+                                          </Typography>
+                                          {post.attachments && post.attachments.length > 0 && (
+                                            <Box sx={{ mt: 2 }}>
+                                              <Typography variant="subtitle1">Attachments:</Typography>
+                                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 1 }}>
+                                                {post.attachments.map((attachment) =>
+                                                  attachment.resource_type === "image" ? (
+                                                    <Box key={attachment._id} sx={{ maxWidth: "100%" }}>
+                                                      <img
+                                                        src={attachment.secure_url}
+                                                        alt="attachment"
+                                                        style={{ maxWidth: "100%", maxHeight: "400px", borderRadius: "8px" }}
+                                                      />
+                                                    </Box>
+                                                  ) : null
+                                                )}
+                                              </Box>
+                                            </Box>
+                                            )}
+                                        </CardContent>
+                                        </CardActionArea>
+                                      </Card>
+                                    </Paper>
+                                    
+                                  </Box>
+                            ))))}
+                          </Grid>
+                  )}
+                  {tab === 1 && posts.length === 0 &&(
+                     <Typography
+                     variant="h3"
+                     textAlign="center"
+                     mx={"2rem"}
+                   >Sorry {user.username} Has No Posts</Typography>
+                  )}
+                  {tab === 1 && !mutualFriend && posts.filter(post => !post.isPrivate).length === 0 &&(
+                     <Typography
+                     variant="h3"
+                     textAlign="center"
+                     mx={"2rem"}
+                   >Sorry {user.username} Has No Posts</Typography>
+                  )}
+
         </Paper>
       </Box>
     );
