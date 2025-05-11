@@ -127,6 +127,7 @@ async function likeComment(commID, uid){
     //console.log(user._id.toString());
 
     if (user._id.toString() == comm.sender._id.toString()) return licked;//throw new Error("you can't like your own comment!");
+    if (user._id.toString() == comm.sender._id.toString()) return licked;//throw new Error("you can't like your own comment!");
     
       let likez = comm.likes;
     
