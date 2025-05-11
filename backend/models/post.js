@@ -32,12 +32,10 @@ const PostSchema = new Schema(
       type: Boolean,
       default: true,
     },
-    likes: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "User", // store every user that has liked a post
-      }
-    ],
+    likes: [{
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    }],
     comments: [
       {
         type: Schema.Types.ObjectId,

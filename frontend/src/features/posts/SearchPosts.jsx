@@ -1,15 +1,22 @@
 import React, { useState } from "react";
 import postUtils from "./postUtils";
-import { Box, Button, TextField, Typography, CircularProgress, Grid } from "@mui/material";
-import { Link } from "react-router-dom"
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  CircularProgress,
+  Grid,
+} from "@mui/material";
+import { Link } from "react-router-dom";
 import PostCard from "./PostCard";
 import searchBg from "../../assets/users/search.jpg"; //Idk make it the same
 
 export default function SearchPosts() {
-  const [query, setQuery] = useState([]); 
-  const [inputQuery, setInputQuery] = useState(""); 
-  const [loading, setLoading] = useState(false); 
-  const [error, setError] = useState(""); 
+  const [query, setQuery] = useState([]);
+  const [inputQuery, setInputQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [searchTriggered, setSearchTriggered] = useState(false);
 
   const handleSearch = async () => {
@@ -48,7 +55,7 @@ export default function SearchPosts() {
           variant="outlined"
           value={inputQuery}
           onChange={(e) => {
-            setInputQuery(e.target.value)
+            setInputQuery(e.target.value);
             setSearchTriggered(false);
             setError("");
             setQuery([]);
@@ -73,10 +80,14 @@ export default function SearchPosts() {
       {error && <Typography color="error">{error}</Typography>}
 
       {query.length > 0 && !loading && (
-        <Grid container spacing={2} sx={{ maxWidth: "1200px", marginTop: "20px" }}>
+        <Grid
+          container
+          spacing={2}
+          sx={{ maxWidth: "1200px", marginTop: "20px" }}
+        >
           {query.map((post) => (
             <Grid key={post._id}>
-              <Link to={`/posts/${post.id}`} style={{ textDecoration: 'none' }}>
+              <Link to={`/posts/${post.id}`} style={{ textDecoration: "none" }}>
                 <PostCard item={post} />
               </Link>
             </Grid>
@@ -85,11 +96,14 @@ export default function SearchPosts() {
       )}
 
       {/* Show no posts message when no results and search was triggered */}
-      {searchTriggered && query.length === 0 && !loading && inputQuery.trim() && (
-        <Typography variant="h6" sx={{ color: "white", marginTop: "20px" }}>
-          There are no posts for the search term "{inputQuery}"
-        </Typography>
-      )}
+      {searchTriggered &&
+        query.length === 0 &&
+        !loading &&
+        inputQuery.trim() && (
+          <Typography variant="h6" sx={{ color: "white", marginTop: "20px" }}>
+            There are no posts for the search term "{inputQuery}"
+          </Typography>
+        )}
     </Box>
   );
 }

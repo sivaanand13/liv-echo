@@ -9,11 +9,12 @@ import {
   Dialog,
   Typography,
   useTheme,
-  Button,
+  Link,
   CardContent,
   Tabs,
   Tab,
   Grid,
+  CardActionArea
 } from "@mui/material";
 import defaultBanner from "../../assets/landing/landing1.jpg";
 import PaginatedList from "../../components/PaginatedList.jsx";
@@ -27,7 +28,6 @@ import EditButton from "../../components/EditButton";
 import dayjs from "dayjs";
 import EditBio from "./EditBio";
 import postUtils from "../posts/postUtils.js";
-import userUtils from "../users/userUtils.js";
 export default function Account() {
   const { user } = useContext(AuthContext);
   const theme = useTheme();
@@ -226,24 +226,24 @@ export default function Account() {
             Sorry You Have No Friends
           </Typography>
         )}
-        {tab === 2 && posts.length > 0 && (
+          {tab === 2 && posts.length > 0 && (
           <Grid container spacing={3}>
-            {posts.map((post) => (
-              <Grid item xs={12} m={12} key={post._id}>
-                <Card elevation={1} sx={{ width: "100%", padding: 2 }}>
-                  <CardHeader title={post.senderUsername} />
-                  <CardContent>
-                    <Typography variant="body2" color="text.secondary">
-                      {post.text || "No content provided."}
-                    </Typography>
-                    <Typography variant="caption" display="block" mt={1}>
-                      {new Date(post.createdAt).toLocaleString()}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+          {posts.map((post) => (
+            <Grid item xs={12} m={12} key={post._id}>
+              <Card elevation={1} sx={{width: "100%",padding: 2}}>
+                <CardHeader title={post.senderUsername} />
+                <CardContent>
+                  <Typography variant="body2" color="text.secondary">
+                    {post.text || "No content provided."}
+                  </Typography>
+                  <Typography variant="caption" display="block" mt={1}>
+                    {new Date(post.createdAt).toLocaleString()}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
         )}
         {tab === 2 && posts.length === 0 && (
           <Typography variant="h3" textAlign="center" mx={"2rem"}>
