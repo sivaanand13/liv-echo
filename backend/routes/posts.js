@@ -228,6 +228,21 @@ let userUid = req.params.userUid;
     res.status(403).json({message: e});
   }
 });
+router.route("/user/find/mutualFriend").get(async (req,res) => {
+  try {
+    let user
+    console.log("Does this have a value?", req.user.uid);
+    if (req.user && req.user.uid) {
+      user = await userController.getUserByUID(req.user.uid);
+    }
+    const results = await postsController.findMutualFriend(user);
+    res.json({ results });
+  } catch (err) {
+    console.error("Friend finding query failed:", err);
+    console.error(err);
+    res.status(500).json({ message: 'Friend finding failed' });
+  }
+});
 
 // comments start... NOW!
 

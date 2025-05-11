@@ -273,7 +273,24 @@ async function canSeePost(uid, postID) {
 
   return false; // dammit
 }
-
+async function findMutualFriend(user){
+  let friendIds = (user?.friends || []).map((id) => id._id.toString());
+  let finalArray = [];
+  for (let i = 0; i < friendIds.length; i++) {
+    //loop through friend to get uids
+    let tmpval = await userController.getUserById(friendIds[i]);
+    let tmpFriends = tmpval?.friends || [];
+    let mutual = tmpFriends.some(
+      (id) => id._id.toString() === user._id.toString()
+    );
+    //console.log("Checking mutual value", mutual);
+    if (mutual === true) {
+      finalArray.push(tmpval.uid.toString());
+      //console.log("friend", i, friendIds[i]);
+    }
+  }
+  return finalArray;
+}
 async function searchPosts(queryText, user) {
   queryText = validation.validateString(queryText, "Search Query");
   if (!queryText || queryText.length < 2) {
@@ -442,4 +459,5 @@ export default {
   canSeePost,
   searchPosts,
   getPostsByUid,
+  findMutualFriend
 };
