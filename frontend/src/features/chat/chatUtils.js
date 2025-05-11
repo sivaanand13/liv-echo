@@ -14,7 +14,7 @@ async function getMessages(currentChat) {
 
 async function messageModeration(messageText, attachments) {
   try {
-    const response = await axios.post("chats/messages/moderation", {
+    const response = await axios.post("moderation", {
       text: messageText,
       attachments: attachments,
     });
@@ -33,7 +33,7 @@ async function messageModeration(messageText, attachments) {
 async function updateFlagCount(curChat, userId) {
   try {
     console.log("Updating Flag Count");
-    const response = await axios.patch(`chats/${curChat._id}/flag-user`, {
+    const response = await axios.patch(`moderation/${curChat._id}/flag-user`, {
       userId,
     });
     if (!response.data.success) {
