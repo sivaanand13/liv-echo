@@ -42,14 +42,6 @@ function EditAccount({ handleClose }) {
   const [passwordError, setPasswordError] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
-  const [touchedFields, setTouchedFields] = useState({
-    name: false,
-    email: false,
-    username: false,
-    dob: false,
-    password: false,
-    oldPassword: false,
-  });
   console.log(currentUser);
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
@@ -172,10 +164,13 @@ function EditAccount({ handleClose }) {
           setError(result.message);
           return;
         }
+        const auth = getAuth();
+        await auth.currentUser.reload(); // Refresh the user object
+        const updatedUser = auth.currentUser;
         handleClose();
       } catch (e) {
         console.log("Account.jsx", e);
-        setError(e.message || "Edit account failed!");
+        setError(e || "Edit account failed!");
       }
     }
   };
