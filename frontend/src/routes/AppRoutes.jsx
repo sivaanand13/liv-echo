@@ -12,6 +12,7 @@ import UserProfile from "../features/users/UserProfile";
 import CreatePost from "../features/posts/CreatePost";
 import PostFeed from "../features/posts/PostFeed";
 import SearchPosts from "../features/posts/SearchPosts"
+import SinglePost from "../features/posts/SinglePost";
 function AppRoutes() {
   return (
     <Routes>
@@ -19,6 +20,7 @@ function AppRoutes() {
       <Route path="/signup" element={<SignUp />} />
       <Route path="/signin" element={<SignIn />} />
       <Route path="/posts/search" element={<SearchPosts/>}/>
+      <Route path="/posts/:postId" element={<SinglePost />} />
       <Route element={<PrivateRoute />}>
         <Route path="/account" element={<Account />} />
         <Route path="/dms" element={<DirectMessages />} />

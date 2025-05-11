@@ -58,10 +58,11 @@ export default function UserCard({ item: user }) {
       <CardHeader
         sx={{ marginTop: "5vh" }}
         title={
-          <CustomLink to={`/users/${user.uid}`}>
-            {" "}
-            <Typography variant="h4">{user.name}</Typography>
-          </CustomLink>
+          <Typography variant="h4">
+              <CustomLink to={`/users/${user.uid}`}>
+                {user.name}
+              </CustomLink>
+          </Typography>
         }
       />
       <CardContent

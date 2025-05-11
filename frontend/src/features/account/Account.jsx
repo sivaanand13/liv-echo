@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import {
   Card,
@@ -11,8 +11,13 @@ import {
   useTheme,
   Button,
   CardContent,
+  Tabs,
+  Tab,
+  Grid
 } from "@mui/material";
 import defaultBanner from "../../assets/landing/landing1.jpg";
+import PaginatedList from "../../components/PaginatedList.jsx";
+import UserCard from "../users/UserCard.jsx";
 import Profile from "../../components/Profile";
 import EditIcon from "@mui/icons-material/Edit";
 import EditAccount from "./EditAccount";
@@ -21,6 +26,7 @@ import EditProfile from "./EditProfile";
 import EditButton from "../../components/EditButton";
 import dayjs from "dayjs";
 import EditBio from "./EditBio";
+import postUtils from "../posts/postUtils.js";
 export default function Account() {
   const { user } = useContext(AuthContext);
   const theme = useTheme();
@@ -28,6 +34,16 @@ export default function Account() {
   const [openEditProfile, setOpenEditProfile] = useState(false);
   const [openEditBanner, setOpenEditBanner] = useState(false);
   const [openEditBio, setOpenEditBio] = useState(false);
+  const [tab,setTab] = useState(0);
+  const [posts, setPosts] = useState([])
+
+  const handleTabChange = (_, newValue) => {
+    setTab(newValue);
+  };
+  function getFriends(){
+    console.log(user.friends)
+    return user.friends
+  }
   console.log("Cur user: ", user);
   function closeModals() {
     setOpenEditAccount(false);
@@ -36,6 +52,14 @@ export default function Account() {
     setOpenEditBio(false);
   }
 
+useEffect(() => {
+  async function getPosts() {
+    const postList = await postUtils.getPostsByUID(user.uid) 
+    setPosts(postList);
+  }
+  getPosts();
+},[]);
+console.log("posts: " , posts)
   return (
     <Box
       sx={{
@@ -112,6 +136,19 @@ export default function Account() {
           justifyContent: "center",
         }}
       >
+       <Tabs
+          value={tab}
+          onChange={handleTabChange}
+          centered
+          sx={{ mt: 10 }}
+        >
+          <Tab label="About" />
+          <Tab label="Friends" />
+          <Tab label="Posts" />
+        </Tabs>
+        {tab === 0 && (<Box sx={{ p: 2 }}>
+
+        
         <Typography
           variant="h3"
           textAlign="center"
@@ -165,6 +202,51 @@ export default function Account() {
           </CardContent>
           <CardContent>Password: ****************</CardContent>
         </Card>
+        </Box>)}
+
+        {tab === 1 && user.friends.length > 0 && (
+          <Box sx={{ p: 2 }}>
+                <PaginatedList
+                  title="Friends"
+                  type="users"
+                  dataSource={getFriends}
+                  ListItemComponent={UserCard}
+                />
+          </Box>
+        )}
+        {tab === 1 && user.friends.length === 0 && (
+           <Typography
+           variant="h3"
+           textAlign="center"
+           mx={"2rem"}
+         >Sorry You Have No Friends</Typography>
+        )}
+          {tab === 2 && posts.length > 0 && (
+          <Grid container spacing={3}>
+          {posts.map((post) => (
+            <Grid item xs={12} m={12} key={post._id}>
+              <Card elevation={1} sx={{width: "100%",padding: 2}}>
+                <CardHeader title={post.senderUsername} />
+                <CardContent>
+                  <Typography variant="body2" color="text.secondary">
+                    {post.text || "No content provided."}
+                  </Typography>
+                  <Typography variant="caption" display="block" mt={1}>
+                    {new Date(post.createdAt).toLocaleString()}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+        )}
+        {tab === 2 && posts.length === 0 &&(
+           <Typography
+           variant="h3"
+           textAlign="center"
+           mx={"2rem"}
+         >Sorry You Have No Posts</Typography>
+        )}
       </Paper>
 
       {openEditAccount && (

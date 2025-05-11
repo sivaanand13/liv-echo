@@ -69,6 +69,15 @@ async function searchPosts(query) {
     throw err;
   }
 }
+async function getPostByPostId (postId) {
+  try {
+    const res = await axios.get(`posts/${postId}`);
+    return res.data.data;
+  } catch (err) {
+    console.error("Failed to fetch post by ID:", err);
+    throw err.response?.data?.message || "Error fetching post.";
+  }
+}
 
 async function getPosts() {
   try {
@@ -80,6 +89,26 @@ async function getPosts() {
   }
 }
 
+async function getPostsByUID(userUid) {
+  try {
+    const response = await axios.get(`posts/user/${userUid}`);
+    console.log(response.data.posts)
+    return response.data.posts;
+  } catch (e) {
+    console.log(e);
+    throw `Post fetch failed!`;
+  }
+}
+async function getMutualFriends() {
+  try {
+    const response = await axios.get(`posts/user/find/mutualFriend`);
+    console.log(response.data.results)
+    return response.data.results;
+  } catch (e) {
+    console.log(e);
+    throw `Post fetch failed!`;
+  }
+}
 async function deletePost(pos) {
   try {
     const response = await axios.del(`posts/${pos._id}`, {});
@@ -95,5 +124,8 @@ export default {
   createPost,
   getPosts,
   deletePost,
-  searchPosts
+  searchPosts,
+  getPostsByUID,
+  getPostByPostId,
+  getMutualFriends
 };

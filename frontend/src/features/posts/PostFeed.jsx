@@ -1,219 +1,102 @@
-import {
-  Stack,
-  Box,
-  Typography,
-  Paper,
-  TextField,
-  IconButton,
-  Divider,
-  Avatar,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Alert,
-  ImageList,
-  ImageListItem,
-  ImageListItemBar,
-  CardMedia,
-} from "@mui/material";
-import chatStore from "../../stores/chatStore";
-import { useContext, useEffect, useState } from "react";
-import AddIcon from "@mui/icons-material/Add";
-import SendIcon from "@mui/icons-material/Send";
-import validation from "../../utils/validation";
-import postUtils from "./postUtils";
-import CustomList from "../../components/CustomList";
-import PostListItem from "./PostListItem";
-import CloseIcon from "@mui/icons-material/Close";
-import { AuthContext } from "../../contexts/AuthContext";
-//import ChatActionsSidebar from "./ChatActionsSidebar";
-export default function PostFeed() {
-  const auth = useContext(AuthContext);
-  const attachments = null;
-  let [posts, setPosts] = useState([]);
+import React, { useEffect, useState, useContext } from "react";
+import { Box, Grid, Typography, CircularProgress } from "@mui/material";
+import PostCard from "./PostCard";
+import { Link } from "react-router-dom";
+import searchBg from "../../assets/users/search.jpg";
+import postUtils from "./postUtils"; // or wherever getPosts is defined
+import { AuthContext } from "../../contexts/AuthContext.jsx";
+import userUtils from "../users/userUtils.js";
+
+export default function MostCommentedFeed() {
+  const { currentUser, serverUser } = useContext(AuthContext);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    async function fetchMessages() {
+    const fetchPosts = async () => {
       try {
-        const pos = await postUtils.getPosts();
-        console.log("fetched messages: ", pos);
-        setPosts(pos);
-      } catch (e) {
-        console.log(e);
+        const allPosts = await postUtils.getPosts();
+        const mutualFriends = (await postUtils.getMutualFriends()) || []; //returns list of uids as friends
+        console.log("I got friends!", mutualFriends);
+        const filteredPosts = (
+          await Promise.all(
+            allPosts.map(async (post) => {
+              const isPublic = post.isPrivate === false;
+              const senderId = post.sender.uid;
+              // console.log("SenderId", senderId)
+              const isMutualFriend = mutualFriends.includes(senderId);
+              // console.log("Mutual friend", isMutualFriend);
+              // console.log("Data of post", post.text);
+              let isMe = false;
+              if (senderId === currentUser.uid) {
+                isMe = true;
+              }
+              return isPublic || isMe || isMutualFriend ? post : null;
+            })
+          )
+        ).filter(Boolean); // remove nulls
+        console.log("I got these posts as possible", filteredPosts);
+        const sorted = filteredPosts.sort(
+          (a, b) => (b.comments?.length || 0) - (a.comments?.length || 0)
+        );
+        console.log("I got these posts sorted", sorted);
+        setPosts(sorted);
+      } catch (err) {
+        console.error(err);
+        setError("Could not load posts.");
+      } finally {
+        setLoading(false);
       }
-    }
-    fetchMessages();
-    console.log("OK!");
-    console.log(posts.length);
-    //console.log(currentChat);
+    };
+
+    fetchPosts();
   }, []);
 
-  function reset() {
-    setMessageError("");
-    setMessageText("");
-    setAttachments([]);
-  }
-
   return (
-    <Stack
-      height="100%"
-      minWidth="fit-content"
-      spacing={1}
-      textAlign={"center"}
-      bgcolor={"white"}
-      direction="column"
-      flex={1}
+    <Box
       sx={{
-        height: "calc(100vh - 5rem)",
-        display: "flex",
+        backgroundImage: `url(${searchBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        minHeight: "100vh",
+        padding: "20px",
       }}
     >
-      {posts ? (
-        <>
-          <Stack
-            height="100%"
-            direction="row"
-            sx={{
-              flex: 1,
-              overflowY: "auto",
-            }}
-            alignItems="flex-start"
-          >
-            <Box
-              sx={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                overflowY: "auto",
-                padding: "1rem",
-                height: "calc(100vh - 5rem)",
-              }}
-            >
-              <Stack
-                spacing={1}
-                sx={{
-                  marginTop: "2rem",
-                  marginBottom: "1rem",
-                  margin: "1rem",
-                  flex: 1,
-                  overflowY: "auto",
-                }}
-              >
-                {posts && posts.length > 0 ? (
-                  <CustomList
-                    listData={posts}
-                    mappingFunction={(msg) => {
-                      return <PostListItem msg={msg} />;
-                    }}
-                  />
-                ) : (
-                  <Typography textAlign="center">{posts.length}</Typography>
-                )}
-              </Stack>
-              {attachments && attachments.length > 0 && (
-                <ImageList
-                  cols={attachments.length}
-                  sx={{
-                    position: "relative",
-                    maxHeight: "20vh",
-                    borderRadius: "0.5rem",
-                    flexWrap: "nowrap",
-                    overflowX: "auto",
-                    overflowY: "hidden",
-                    boxShadow: 1,
-                  }}
-                >
-                  {attachments.map((attachment, index) => {
-                    console.log(attachment);
-                    return (
-                      <ImageListItem key={index} sx={{ maxHeight: "15vh" }}>
-                        <img
-                          alt={`Attachment ${index + 1}`}
-                          src={URL.createObjectURL(attachment)}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "contain",
-                          }}
-                        />
-                        <ImageListItemBar
-                          position="top"
-                          title={attachment.name}
-                          actionIcon={
-                            <IconButton
-                              sx={{ color: "red" }}
-                              aria-label={`remove ${attachment.name}`}
-                              onClick={() => {
-                                setAttachments((prev) =>
-                                  prev.filter((file, i) => index != i)
-                                );
-                              }}
-                            >
-                              <CloseIcon />
-                            </IconButton>
-                          }
-                          actionPosition="left"
-                        />
-                      </ImageListItem>
-                    );
-                  })}
-                </ImageList>
-              )}
-              {/*
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  width: "100%",
-                  zIndex: 1,
-                }}
-              >
-                <Paper
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    width: "100%",
-                    padding: "1em",
-                    marginBottom: "2rem",
-                  }}
-                >
-                  
-                  <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+      <Typography
+        variant="h4"
+        sx={{ color: "white", marginBottom: "20px", textAlign: "center" }}
+      >
+        Most Commented Posts
+      </Typography>
 
-                  {/*<IconButton type="button" onClick={handleSend}>
-                    <SendIcon />
-                  </IconButton>}
-                </Paper>
-              </Box>{" "}*/}
-            </Box>
-
-            <Box
-              sx={{
-                overflowY: "auto",
-                border: "1em",
-                position: "sticky",
-                top: "5rem",
-                padding: "1rem",
-              }}
-            >
-              {/* <ChatActionsSidebar />*/}
-            </Box>
-          </Stack>
-        </>
-      ) : (
-        <Box
-          sx={{
-            flex: 1,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Typography align="center" variant="h3">
-            Select a chat to message...
-          </Typography>
-        </Box>
+      {loading && (
+        <CircularProgress sx={{ display: "block", margin: "0 auto" }} />
       )}
-    </Stack>
+      {error && <Typography color="error">{error}</Typography>}
+
+      <Grid container spacing={3} justifyContent="center">
+        {posts.map((post) => (
+          <Grid item xs={12} sm={6} md={4} key={post._id}>
+            <Link to={`/posts/${post._id}`} style={{ textDecoration: "none" }}>
+              <PostCard item={post} />
+            </Link>
+          </Grid>
+        ))}
+      </Grid>
+      <Typography
+        variant="h4"
+        sx={{ color: "white", marginBottom: "20px", textAlign: "center" }}
+      >
+        Most Liked Posts
+      </Typography>
+
+      <Typography
+        variant="h4"
+        sx={{ color: "white", marginBottom: "20px", textAlign: "center" }}
+      >
+        Friends Posts
+      </Typography>
+    </Box>
   );
 }

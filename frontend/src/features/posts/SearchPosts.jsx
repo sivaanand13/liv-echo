@@ -7,8 +7,8 @@ import {
   Typography,
   CircularProgress,
   Grid,
-  Paper,
 } from "@mui/material";
+import { Link } from "react-router-dom";
 import PostCard from "./PostCard";
 import searchBg from "../../assets/users/search.jpg"; //Idk make it the same
 
@@ -50,29 +50,23 @@ export default function SearchPosts() {
         <Typography variant="h4" sx={{ color: "white", marginBottom: "10px" }}>
           Search Posts
         </Typography>
-        <Paper
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            width: "80%",
-            marginBottom: "2rem",
-            marginTop: "3rem",
-
-            padding: "1em",
+        <TextField
+          label="Search Posts"
+          variant="outlined"
+          value={inputQuery}
+          onChange={(e) => {
+            setInputQuery(e.target.value);
+            setSearchTriggered(false);
+            setError("");
+            setQuery([]);
           }}
-        >
-          <TextField
-            label="Search Posts"
-            variant="outlined"
-            value={inputQuery}
-            onChange={(e) => setInputQuery(e.target.value)}
-            sx={{
-              width: "300px",
-              backgroundColor: "white",
-              borderRadius: "4px",
-            }}
-          />
-        </Paper>
+          sx={{
+            marginBottom: "10px",
+            width: "300px",
+            backgroundColor: "white",
+            borderRadius: "4px",
+          }}
+        />
         <Button
           variant="contained"
           onClick={handleSearch}
@@ -93,7 +87,9 @@ export default function SearchPosts() {
         >
           {query.map((post) => (
             <Grid key={post._id}>
-              <PostCard item={post} />
+              <Link to={`/posts/${post.id}`} style={{ textDecoration: "none" }}>
+                <PostCard item={post} />
+              </Link>
             </Grid>
           ))}
         </Grid>

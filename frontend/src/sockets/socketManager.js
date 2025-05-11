@@ -4,6 +4,7 @@ let BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
 const curSockets = {};
 
 export const connectSocket = async (namespace) => {
+  console.log(namespace);
   if (!curSockets[namespace]) {
     const auth = getAuth();
     const user = auth.currentUser;

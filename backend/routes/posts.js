@@ -1,5 +1,6 @@
 import express, { json } from "express";
 import postsController from "../controllers/posts.js";
+import commentsController from "../controllers/comments.js";
 import userController from "../controllers/users.js";
 import validation, { usernamePolicies } from "../utils/validation.js";
 import authMiddleware from "../middleware/authMiddleware.js";
@@ -13,11 +14,10 @@ import cloudinary, {
 const router = express.Router();
 
 // middleware
-//console.log("One!");
 router.use(authMiddleware);
-//console.log("Two!");
 router.use(uploadMiddleware);
-//console.log("Three!");
+
+// comments is also handled in here
 
 // get all posts
 router.route("/").get(async (req, res) => {
@@ -76,12 +76,17 @@ router.route("/create").post(async (req, res) => {
 });
 router.route('/search').get(async (req, res) => {
   const { query } = req.query;
+  let uid = req.user.uid;
+  let user = null;
   if (!query || query.trim() === "") {
     console.log("What is my query?", query);
     return res.status(400).json({ message: "Missing search query" });
   }
   try {
-    const results = await postsController.searchPosts(query);
+    if (uid) {
+      user = await userController.getUserByUID(uid);
+    }
+    const results = await postsController.searchPosts(query, user);
     res.json({ results });
   } catch (err) {
     console.error("Elasticsearch query failed:", err);
@@ -99,7 +104,7 @@ router.route("/:postID").get(async (req, res) => {
 
   try {
     post = await postsController.getPostById(postID);
-    console.log("Welp, we made it this far");
+    console.log("Welp, we made it this far?");
     user = await userController.getUserByUID(uid);
     poster = await userController.getUserById(post.sender);
   } catch (e) {
@@ -211,5 +216,237 @@ router.route("/:postID").delete(async (req, res) => {
     return res.status(403).json({ message: e });
   }
 });
+router.route("/user/:userUid").get(async (req,res) => {
+let userUid = req.params.userUid;
+  try{
+    let posts = await postsController.getPostsByUid(userUid);
+    return res.status(200).json({
+      posts
+    })
+  }
+  catch(e){
+    res.status(403).json({message: e});
+  }
+});
+router.route("/user/find/mutualFriend").get(async (req,res) => {
+  try {
+    let user
+    console.log("Does this have a value?", req.user.uid);
+    if (req.user && req.user.uid) {
+      user = await userController.getUserByUID(req.user.uid);
+    }
+    const results = await postsController.findMutualFriend(user);
+    res.json({ results });
+  } catch (err) {
+    console.error("Friend finding query failed:", err);
+    console.error(err);
+    res.status(500).json({ message: 'Friend finding failed' });
+  }
+});
 
+// comments start... NOW!
+
+// create comment on post
+router.route("/:postID/comment").post(async (req, res) =>{
+  let postID = req.params.postID;
+  let { text, attachments } = req.body;
+  let uid = req.user.uid;
+  let post, user, poster;
+
+  try {
+    post = await postsController.getPostById(postID);
+    //console.log("Welp, we made it this far!");
+    user = await userController.getUserByUID(uid);
+    poster = await userController.getUserById(post.sender);
+  } catch (e) {
+    return res.status(400).json({ message: e });
+  }
+// check if the post is private
+  // if it is, check if the user is a friend of the poster, the poster, or an admin
+  // if none are the case, they aren't allowed to see this
+  try {
+    if (post.isPrivate) {
+      console.log("boo");
+      console.log(uid.toString());
+      console.log(poster.uid.toString());
+      if (uid.toString() == poster.uid.toString()
+        || poster.friends.includes(uid)
+        || user.role == "admin") {
+        // they can see the post! Yay!
+
+      } else {
+        throw new Error("You can't see this!");
+      }
+    }
+
+    const pos = await commentsController.createComment(
+      postID,
+      uid,
+      text,
+      attachments
+    );
+    return res.status(200).json({
+      message: "Attached message media!",
+      data: pos,
+    });
+
+  } catch (e) {
+    console.log("huh" + e);
+    return res.status(403).json({ message: e});
+  }
+});
+
+
+// edit comment on post
+// this... could be optimized a lot
+router.route("/:postID/:commentID").patch(async (req, res) =>{
+  let postID = req.params.postID;
+  let commentID = req.params.commentID;
+  let { text } = req.body;
+  let uid = req.user.uid;
+  let post, user, comment, poster, commentor;
+
+  try {
+    post = await postsController.getPostById(postID);
+    user = await userController.getUserByUID(uid);
+    comment = await commentsController.getCommentById(commendID);
+    poster = await userController.getUserById(post.sender);
+    commentor = await userController.getUserById(comment.sender);
+  } catch (e) {
+    return res.status(400).json({ message: e });
+  }
+
+  // there's a lot of checks here actually, so I'll go one-by-one
+  try {
+    // first, let's make sure the comment is actually tied to the post
+    if(!post.comments.includes(commentID)) throw "comment isn't tied to post!";
+
+    // only the commentor can edit this, but we gotta make sure they can see the post to begin with
+    // if a public post was privated, someone who made a comment when it was public shouldn't be able to update it
+    if (post.isPrivate) {
+      console.log("boo");
+      console.log(uid.toString());
+      console.log(poster.uid.toString());
+      if (uid.toString() == poster.uid.toString()
+        || poster.friends.includes(uid)
+        || user.role == "admin") {
+        // they can see the post! Yay!
+
+      } else {
+        throw new Error("You can't see this!");
+      }
+    }
+
+    // last, make sure that it's the commmentor editing the comment
+    if(commentor.uid.toString != uid.toString()) throw "you're not the commentor!";
+
+    const pos = await commentsController.editComment(
+      commentID,
+      uid,
+      text,
+    );
+    return res.status(200).json({
+      message: "Attached message media!",
+      data: pos,
+    });
+
+  } catch (e) {
+    return res.status(403).json({ message: e});
+  }
+});
+
+// delete comment on post
+// pretty similar to edit, you'd be surprised
+router.route("/:postID/:commentID").delete(async (req, res) =>{
+  let postID = req.params.postID;
+  let commentID = req.params.commentID;
+  let uid = req.user.uid;
+  let post, user, poster;
+
+  try {
+    post = await postsController.getPostById(postID);
+    user = await userController.getUserByUID(uid);
+    poster = await userController.getUserById(post.sender);
+  } catch (e) {
+    return res.status(400).json({ message: e });
+  }
+
+  // there's a lot of checks here actually, so I'll go one-by-one
+  try {
+    // first, let's make sure the comment is actually tied to the post
+    if(!post.comments.includes(commentID)) throw "comment isn't tied to post!";
+
+    // we only need to make the first two checks here
+    // it just so happens that the poster, commentor, and admins are the only people that can delete a comment
+    if (post.isPrivate) {
+      console.log("boo");
+      console.log(uid.toString());
+      console.log(poster.uid.toString());
+      if (uid.toString() == poster.uid.toString()
+        || poster.friends.includes(uid)
+        || user.role == "admin") {
+      
+
+      } else {
+        throw new Error("You can't see this!");
+      }
+    }
+
+    const pos = await commentsController.deleteComment(
+      uid,
+      commentID,
+    );
+    return res.status(200).json({
+      message: "Attached message media!",
+      data: pos,
+    });
+
+  } catch (e) {
+    return res.status(403).json({ message: e});
+  }
+});
+
+// get every comment from a post
+router.route("/postID/comment").get(async (req, res) =>{
+  let postID = req.params.postID;
+  let uid = req.user.uid;
+  let post, user, poster;
+
+  try {
+    post = await postsController.getPostById(postID);
+    user = await userController.getUserByUID(uid);
+    poster = await userController.getUserById(post.sender);
+  } catch (e) {
+    return res.status(400).json({ message: e });
+  }
+
+  try {
+    // make sure the user can... actually see the post
+    if (post.isPrivate) {
+      if (uid.toString() == poster.uid.toString()
+        || poster.friends.includes(uid)
+        || user.role == "admin") {
+
+      } else {
+        throw new Error("You can't see this!");
+      }
+    }
+
+    let comments = [];
+
+    for(c in post.comments){
+      let gotCom = await commentsController.getCommentById(c.toString());
+      comments.push(gotCom);
+    }
+
+    return res.status(200).json({
+      message: "Attached message media!",
+      data: comments,
+    });
+
+
+  } catch (e) {
+    return res.status(403).json({ message: e});
+  }
+});
 export default router;

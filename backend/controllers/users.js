@@ -23,7 +23,7 @@ async function getUserById(id) {
   if (typeof id == "string") {
     id = ObjectId.createFromHexString(id);
   }
-  const user = User.findOne({ _id: id });
+  const user = User.findOne({ _id: id }).populate("friends","name username email profile uid");
   if (!user) {
     throw `No user with id ${id} exists!`;
   }
@@ -48,10 +48,11 @@ async function getUserByUID(uid, display) {
         role: 1,
         profile: 1,
         banner: 1,
+        friends: 1,
       }
-    );
+    ).populate("friends","name username email profile uid");
   } else {
-    user = await User.findOne({ uid: uid });
+    user = await User.findOne({ uid: uid }).populate("friends","name username email profile uid");
   }
 
   if (!user) {
@@ -195,7 +196,47 @@ async function uploadFiles(attachments, uid) {
   }
   return media;
 }
+async function sendFriendRequest(userUid, friendUid) {
+  if (userUid === friendUid) throw "You cannot friend yourself.";
 
+  const currUser = await getUserByUID(userUid);
+  const friend = await getUserByUID(friendUid);
+  const friendId = friend._id
+  if (currUser.friends.some(f => f._id.toString() == friendId.toString())) {
+    throw "You are already friends with this user.";
+  }
+
+  await User.updateOne(
+    { uid: userUid },
+    { $addToSet: { friends: friendId } }
+  );
+  console.log("Step 4")
+  let user = await getUserByUID(userUid, false);
+  console.log("Edited user", user);
+  chatNamespace.to(user.uid).emit("accountUpdated", user);
+
+  return { message: "Friend added" };
+}
+async function removeFriend(userUid, friendUid) {
+  if (userUid === friendUid) throw "You cannot friend yourself.";
+
+  const currUser = await getUserByUID(userUid);
+  const friend = await getUserByUID(friendUid);
+  const friendId = friend._id
+  if (!currUser.friends.some(f => f._id.toString() == friendId.toString())) {
+    throw "You are not friends with this user.";
+  }
+
+  await User.updateOne(
+    { uid: userUid },
+    { $pull: { friends: friendId } }
+  );
+  console.log("Step 4")
+  let user = await getUserByUID(userUid, false);
+  console.log("Edited user", user);
+  chatNamespace.to(user.uid).emit("accountUpdated", user);
+  return { message: "Friend removed" };
+}
 export default {
   validateUnqiueEmail,
   validateUnqiueUsername,
@@ -207,4 +248,6 @@ export default {
   searchUsers,
   uploadFiles,
   updateUser,
+  sendFriendRequest,
+  removeFriend
 };

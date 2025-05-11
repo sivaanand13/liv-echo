@@ -247,25 +247,27 @@ export default function MessageDisplay({ chat }) {
                       }
                     }}
                   />
-                  <IconButton component="label">
-                    <AddIcon />
-                    <input
-                      accept="image/*"
-                      id="profile"
-                      name="profile"
-                      multiple
-                      type="file"
-                      hidden
-                      onChange={(e) => {
-                        let files = Array.from(e.target.files);
-                        if (files.length > 5) {
-                          alert("Please limit attachments to five!");
-                          files = files.slice(0, 5);
-                        }
-                        setAttachments(Array.from(files));
-                      }}
-                    />
-                  </IconButton>
+                  <label htmlFor="file-upload">
+                    <IconButton component="span">
+                      <AddIcon />
+                    </IconButton>
+                  </label>
+
+                  <input
+                    id="file-upload"
+                    type="file"
+                    hidden
+                    multiple
+                    accept="image/*"
+                    onChange={(e) => {
+                      let files = Array.from(e.target.files);
+                      if (files.length > 5) {
+                        alert("Please limit attachments to five!");
+                        files = files.slice(0, 5);
+                      }
+                      setAttachments(Array.from(files));
+                    }}
+                  />
                   <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
 
                   <IconButton type="button" onClick={handleSend}>
