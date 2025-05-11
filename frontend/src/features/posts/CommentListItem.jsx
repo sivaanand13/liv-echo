@@ -13,19 +13,37 @@ import {
   MenuItem,
   IconButton,
 } from "@mui/material";
-import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
+import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt"; 
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 import Profile from "../../components/Profile";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import postUtils from "./postUtils";
 import CustomLink from "../../components/CustomLink";
-export default function PostListItem({ msg }) {
+export default function CommentListItem({ item: msg }) {
+  const { currentUser, serverUser } = useContext(AuthContext);
   const auth = useContext(AuthContext);
   const [menuOpen, setMenuOpen] = useState(false);
   const [ancor, setAncor] = useState(null);
   const [liked, setLiked] = useState(false);
+  const [lik, setLik] = useState(false);
+
+  useEffect(() => {
+    async function fetchLiked() {
+          try {
+            let k = msg.likes.includes(serverUser._id);
+            setLiked(k);
+            setLik(!k);
+          } catch (err) {
+            console.error(err);
+            setError("Failed to load post.");
+          }
+          setLoading(false);
+        }
+        fetchLiked();
+  }, [currentUser._id, msg]);
+
   function handleOpen(e) {
     setMenuOpen((prev) => !prev);
     setAncor(e.currentTarget);
@@ -43,9 +61,20 @@ export default function PostListItem({ msg }) {
     handleClose();
   }
 
+  async function handleLike() {
+    try {
+      let n = await postUtils.likeCommentByID(msg.post, msg._id);
+      setLiked(n);
+    } catch (e) {
+      console.log(e);
+    }
+    handleClose();
+  }
+
+
   async function handleDelete() {
     try {
-      await postUtils.deletePost(msg);
+      await postUtils.deleteComment(msg.post, msg._id);
     } catch (e) {
       console.log(e);
     }
@@ -147,7 +176,8 @@ export default function PostListItem({ msg }) {
 
         <ListItemButton
           onClick={() => {
-            setLiked((prev) => !prev);
+            handleLike();
+            //setLiked((prev) => !prev);
             console.log(`${!liked ? "Liked" : "Unliked"} post:`, msg._id);
             // Optional: postUtils.likePost(msg._id, !liked)
           }}
@@ -173,6 +203,7 @@ export default function PostListItem({ msg }) {
           )}
           <Typography variant="body2">{liked ? "Liked" : "Like"}</Typography>
         </ListItemButton>
+        <Typography variant="body1">{msg.likes.length + (lik ? liked : (0 - !liked))}</Typography>
       </Stack>
     </ListItem>
   );

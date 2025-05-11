@@ -13,6 +13,24 @@ import axios from "../../utils/requests/axios.js";
 
 const MAX_BIO_LEN = 500;
 
+async function accountInfoModeration(text, attachments) {
+  try {
+    const response = await axios.post("moderation", {
+      text,
+      attachments,
+    });
+
+    if (response.data) {
+      return response.data;
+    } else {
+      throw "No Response!";
+    }
+  } catch (e) {
+    console.error(e);
+    throw `Message Moderation Failed`;
+  }
+}
+
 async function editBanner(banner) {
   let body = {};
   try {
@@ -22,7 +40,22 @@ async function editBanner(banner) {
       console.log(images);
       body.banner = images.data[0];
     }
+  } catch (e) {
+    console.log("update chat error: ", e);
+    throw `Banner update failed!`;
+  }
 
+  try {
+    console.log(body);
+    const urlList = [body?.banner?.url].filter(Boolean);
+    const moderationResponse = await accountInfoModeration("", urlList);
+    if (moderationResponse.flagged) throw moderationResponse.message;
+  } catch (err) {
+    console.error("Edit Banner Moderation Error", err);
+    throw err;
+  }
+
+  try {
     console.log("uploaded banner:", body);
     if (Object.keys(body).length > 0) {
       console.log("Trying to edit chat: ", body);
@@ -44,7 +77,21 @@ async function editProfile(profile) {
       console.log(images);
       body.profile = images.data[0];
     }
+  } catch (e) {
+    console.log("update chat error: ", e);
+    throw `Profile update failed!`;
+  }
 
+  try {
+    const urlList = [body?.profile?.url].filter(Boolean);
+    const moderationResponse = await accountInfoModeration("", urlList);
+    if (moderationResponse.flagged) throw moderationResponse.message;
+  } catch (err) {
+    console.error("Edit Profile Moderation Error", err);
+    throw err;
+  }
+
+  try {
     console.log("uploaded profile:", body);
     if (Object.keys(body).length > 0) {
       console.log("Trying to edit chat: ", body);
@@ -73,6 +120,16 @@ async function editBio(bio) {
   } catch (e) {
     console.log("update account error: ", e);
     throw e;
+  }
+
+  try {
+    const moderationResponse = await accountInfoModeration(body.bio, []);
+    if (moderationResponse.flagged) {
+      throw moderationResponse.message;
+    }
+  } catch (err) {
+    console.error("Account Info Moderation", err);
+    throw err;
   }
 
   try {

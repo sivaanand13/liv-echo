@@ -6,6 +6,7 @@ import cloudinary from "../cloudinary/cloudinary.js";
 import sharp from "../imageProcessing/sharp.js";
 import { chatNamespace } from "../websockets/index.js";
 import settings from "../models/settings.js";
+import { sendNotification } from "./notification.js";
 async function validateUnqiueEmail(email) {
   email = validation.validateEmail(email);
   const user = await User.findOne({ email: email });
@@ -219,7 +220,7 @@ async function sendFriendRequest(userUid, friendUid) {
   if (currUser.friends.some(f => f._id.toString() == friendId.toString())) {
     throw "You are already friends with this user.";
   }
-
+  console.log("user: ", currUser);
   await User.updateOne(
     { uid: userUid },
     { $addToSet: { friends: friendId } }
@@ -227,8 +228,17 @@ async function sendFriendRequest(userUid, friendUid) {
   console.log("Step 4")
   let user = await getUserByUID(userUid, false);
   console.log("Edited user", user);
+  const updatefriend = await getUserByUID(friendUid);
   chatNamespace.to(user.uid).emit("accountUpdated", user);
 
+  await sendNotification(friendId, friendUid, "", {
+    type: "friend-request",
+    title: `${currUser.name} sent you a friend request`,
+    body: "",
+  });
+
+  if(!updatefriend.friends.some(f => f._id.toString() == user._id.toString()))
+    chatNamespace.to(friendUid).emit("friend-request-sent");
   return { message: "Friend added" };
 }
 async function removeFriend(userUid, friendUid) {
@@ -236,7 +246,7 @@ async function removeFriend(userUid, friendUid) {
 
   const currUser = await getUserByUID(userUid);
   const friend = await getUserByUID(friendUid);
-  const friendId = friend._id
+  const friendId = friend._id;
   if (!currUser.friends.some(f => f._id.toString() == friendId.toString())) {
     throw "You are not friends with this user.";
   }
@@ -249,6 +259,8 @@ async function removeFriend(userUid, friendUid) {
   let user = await getUserByUID(userUid, false);
   console.log("Edited user", user);
   chatNamespace.to(user.uid).emit("accountUpdated", user);
+  if(!user.friends.some(f => f._id.toString() == friend._id.toString()))
+    chatNamespace.to(userUid).emit("friend-request-denied");
   return { message: "Friend removed" };
 }
 export default {

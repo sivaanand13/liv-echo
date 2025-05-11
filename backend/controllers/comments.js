@@ -85,7 +85,7 @@ async function canDeleteComment(uid, postID){
     let user = await usersController.getUserByUID(uid);
 
     // if the user is an admin we can ignore these checks
-    if(!user.role != "admin" && user._id.toString() != comm.sender.toString()){
+    if(user.role != "admin" && user._id.toString() != comm.sender._id.toString()){
         console.log("User isn't poster or admin");
         return false;
     }
@@ -103,9 +103,10 @@ async function deleteComment(uid, commID){
     let canDel = await canDeleteComment(uid, commID);
     if(!canDel) throw new Error("You don't have permissions to delete this!");
 
+    let k = comm._id.toString();
     await Comment.deleteOne({_id: comm._id});
 
-    let coms = post.comments.filter((comment) => comment._id.toString() != commID.toString());
+    let coms = post.comments.filter((comment) => comment.toString() != k);
 
     post = await post.findOneAndUpdate( 
                 {_id: post._id, sender: user._id},
@@ -122,14 +123,22 @@ async function deleteComment(uid, commID){
 async function likeComment(commID, uid){
     let comm = await getCommentById(commID.toString());
     let user = await usersController.getUserByUID(uid);
+    let licked = false;
+    //console.log(comm.sender.toString());
+    //console.log(user._id.toString());
 
-    if (user._id.toString() == comm.sender.toString()) throw new Error("you can't like your own comment!");
+    //if (user._id.toString() == comm.sender._id.toString()) return licked;//throw new Error("you can't like your own comment!");
     
       let likez = comm.likes;
     
-      if (likez.includes(user._id)) throw new Error("you've already liked this comment!");
-      likez.push(user._id);
-    
+      if (likez.includes(user._id)){
+        //console.log(likez);
+        likez = likez.filter((lik) => lik.toString() != user._id.toString()); 
+        //console.log(likez);
+      }else{
+        likez.push(user._id);
+        licked = true;
+      }
       comm = await Comment.findOneAndUpdate(
         { _id: comm._id },
         {
@@ -140,7 +149,7 @@ async function likeComment(commID, uid){
         {}
       );
     
-      return post;
+      return licked;
 }
 
 // get comment by ID
@@ -148,8 +157,9 @@ async function getCommentById(commID) {
     
     commID = validation.validateString(commID, "Comment Id", true);
     commID = ObjectId.createFromHexString(commID);
-    const comm = await Comment.findById(commID);
+    const comm = await Comment.findById(commID).populate("sender", "name username email profile friends uid");
     if (!comm) {
+        console.log("oops");
         throw `No post with id (${comm})!`;
     }
     return comm;

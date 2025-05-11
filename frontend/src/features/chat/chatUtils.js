@@ -12,9 +12,37 @@ async function getMessages(currentChat) {
   }
 }
 
+async function checkBan(currentChat, userId) {
+  if (!currentChat?._id) {
+    console.error("Invalid chat object");
+    // throw new Error("Invalid chat object");
+  }
+
+  try {
+    const { data } = await axios.post(
+      `moderation/${currentChat._id}/check-ban`,
+      {
+        userId,
+      }
+    );
+    if (!data.success) {
+      throw data.message;
+    } else {
+      if (data.message === "warning") {
+        return "User Warned!";
+      } else {
+        return "User Banned!";
+      }
+    }
+  } catch (error) {
+    console.error(error.message || "Something Went Wrong!");
+    return "Error";
+  }
+}
+
 async function messageModeration(messageText, attachments) {
   try {
-    const response = await axios.post("chats/messages/moderation", {
+    const response = await axios.post("moderation", {
       text: messageText,
       attachments: attachments,
     });
@@ -33,7 +61,7 @@ async function messageModeration(messageText, attachments) {
 async function updateFlagCount(curChat, userId) {
   try {
     console.log("Updating Flag Count");
-    const response = await axios.patch(`chats/${curChat._id}/flag-user`, {
+    const response = await axios.patch(`moderation/${curChat._id}/flag-user`, {
       userId,
     });
     if (!response.data.success) {
@@ -77,7 +105,10 @@ async function sendMessage(chat, messageText, attachments, sender) {
     );
     if (moderationResponse.flagged) {
       const updateFlagResponse = await updateFlagCount(chat, sender._id);
-      if (updateFlagResponse.success) throw moderationResponse.message;
+      if (updateFlagResponse.success) {
+        console.log(checkBan(chat, sender._id));
+        throw moderationResponse.message;
+      }
       throw `Something went wrong during update flag-count`;
     }
   } catch (e) {

@@ -49,9 +49,22 @@ async function addFriendwithUID(uid,isFriend) {
     throw `Could not add/remove friend`
   }
 }
-
+async function removeRequest(uid) {
+  try{
+    uid = validation.validateString(uid, "User id");
+      console.log("Step 2")
+      const response = await axios.patch('users/friends/requests/remove',
+        {friendUID : uid}
+      );
+      return response.data.data;
+  }
+  catch (e){
+    throw `Could not add/remove friend`
+  }
+}
 export default {
   fetchUsers,
   fetchUserByUID,
-  addFriendwithUID
+  addFriendwithUID,
+  removeRequest
 };

@@ -84,13 +84,13 @@ function CreatePost() {
         <Box
           component="label"
           sx={{
-            display: 'inline-block',
-            padding: '10px 20px',
-            backgroundColor: 'primary.main',
-            color: 'white',
-            cursor: 'pointer',
-            borderRadius: '5px',
-            textAlign: 'center',
+            display: "inline-block",
+            padding: "10px 20px",
+            backgroundColor: "primary.main",
+            color: "white",
+            cursor: "pointer",
+            borderRadius: "5px",
+            textAlign: "center",
           }}
         >
           Upload Attachments

@@ -186,7 +186,7 @@ router.route("/signup/uniqueCheck/").get(async (req, res) => {
     const checkEmail = await userController.validateUnqiueEmail(email);
     if (!checkEmail) {
       return res.status(400).json({
-        message: "Email check failed!",
+        message: "Email is invalid",
       });
     }
     const checkUsername = await userController.validateUnqiueUsername(username);
@@ -475,7 +475,7 @@ post(authMiddleware, async (req,res) => {
   }
   try {
     console.log("Step 3")
-    await userController.sendFriendRequest(currentUID, friendUID);
+    await userController.sendFriendRequest(currentUID,friendUID);
     return res.status(200).json({ message: "Friend request sent successfully" });
   } catch (e) {
     console.error(e);
@@ -491,6 +491,21 @@ post(authMiddleware, async (req,res) => {
   try {
     console.log("Step 3")
     await userController.removeFriend(currentUID, friendUID);
+    return res.status(200).json({ message: "Friend successfully removed" });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: "Failed to remove friend", error: e });
+  }
+})
+router.route('/friends/requests/remove').patch(authMiddleware, async (req,res) => {
+  const { friendUID } = req.body;
+  const currentUID = req.user?.uid;
+  if (!currentUID || !friendUID) {
+    return res.status(400).json({ message: "Invalid request" });
+  }
+  try {
+    console.log("Step 3")
+    await userController.removeFriend(friendUID, currentUID);
     return res.status(200).json({ message: "Friend successfully removed" });
   } catch (e) {
     console.error(e);
