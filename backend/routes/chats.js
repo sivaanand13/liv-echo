@@ -271,38 +271,6 @@ router.route("/:chatId/change-admin").patch(async (req, res) => {
   }
 });
 
-router.route("/:chatId/flag-user").patch(async (req, res) => {
-  let { chatId } = req.params;
-  let userId = req.body.userId;
-  let userUID = req.user.uid;
-  let chat;
-  let user;
-  try {
-    chat = await chatsController.getChatById(chatId);
-    user = await userController.getUserById(userId);
-    try {
-      await chatsController.verifyUserChatAccess(userUID, chatId);
-    } catch (e) {
-      console.log(e);
-      throw `User does not have chat access`;
-    }
-  } catch (e) {
-    console.log("Flag User Error:", e);
-    return res.status(400).json({ success: false, message: e });
-  }
-  try {
-    const response = await chatsController.updateFlagCount(chatId, userId);
-    if (!response.success) {
-      throw `Could not update flag count`;
-    } else {
-      return res.status(200).json({ success: true, data: response.data });
-    }
-  } catch (e) {
-    console.log(e);
-    return res.status(500).json({ success: false, messages: e });
-  }
-});
-
 router.route("/").get(async (req, res) => {
   try {
     const chats = await chatsController.getUserChats(req.user.uid);

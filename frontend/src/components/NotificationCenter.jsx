@@ -67,11 +67,19 @@ export default function NotificationCenter() {
               width: "100%",
             }}
           >
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography variant="subtitle2" fontWeight="bold">
                 {n.title}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
+                  overflowWrap: "break-word",
+                  wordBreak: "break-word",
+                  whiteSpace: "normal",
+                }}
+              >
                 {n.body}
               </Typography>
             </Box>
