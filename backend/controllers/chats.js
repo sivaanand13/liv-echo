@@ -7,6 +7,7 @@ import settings from "../models/settings.js";
 import { ObjectId } from "mongodb";
 import { chatNamespace } from "../websockets/index.js";
 import cloudinary from "../cloudinary/cloudinary.js";
+import { sendNotification } from "./notification.js";
 
 async function getDisplayChat(id) {
   const chat = await Chat.findById(id)
@@ -75,6 +76,23 @@ async function createChat(uid, chat) {
   uiChat.members.forEach((member) => {
     chatNamespace.to(member.uid).emit("chatCreated", uiChat);
   });
+
+  for (const memeber of uiChat.members) {
+    console.log("Notification Sending System Executed...");
+    if (memeber.uid !== uid) {
+      const result = await sendNotification(
+        memeber._id,
+        memeber.uid,
+        newChat._id,
+        {
+          type: "new-chat",
+          title: `New chat created by ${adminUser.name}`,
+          body: "",
+        }
+      );
+    }
+  }
+
   return newChat;
 }
 
