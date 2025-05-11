@@ -149,7 +149,7 @@ router.route("/:chatId/check-ban").post(async (req, res) => {
   }
   try {
     const flagCount = await chatsController.getFlagCount(chatId, userId);
-    if (flagCount.data === 2) {
+    if (flagCount.data === 4) {
       const response = sendNotification(userId, userUID, chatId, {
         type: "system",
         title: "Warning!!!",
@@ -157,7 +157,7 @@ router.route("/:chatId/check-ban").post(async (req, res) => {
       });
       return res.status(200).json({ success: true, message: "warning" });
     }
-    if (flagCount.data >= 3) {
+    if (flagCount.data >= 5) {
       const response = sendNotification(userId, userUID, chatId, {
         type: "system",
         title: "Banned!",
