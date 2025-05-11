@@ -57,7 +57,7 @@ router.route("/profile/:userUID").get(authMiddleware, async (req, res) => {
   }
 });
 
-router.route("/editaccount/email/update").post(async (req, res) => {
+router.route("/editaccount/email/update").post(authMiddleware, async (req, res) => {
   const { uid, newEmail } = req.body;
 
   if (!uid || !newEmail) {
@@ -89,7 +89,7 @@ router.route("/editaccount/email/update").post(async (req, res) => {
     });
   }
 });
-router.route("/editaccount/email/uniqueCheck/").get(async (req, res) => {
+router.route("/editaccount/email/uniqueCheck/").get(authMiddleware, async (req, res) => {
   let { email, uid } = req.query;
   console.log("Checking unique email", email);
   try {
@@ -125,7 +125,7 @@ router.route("/editaccount/email/uniqueCheck/").get(async (req, res) => {
     });
   }
 });
-router.route("/editaccount/username/uniqueCheck/").get(async (req, res) => {
+router.route("/editaccount/username/uniqueCheck/").get(authMiddleware, async (req, res) => {
   let { username, uid } = req.query;
   console.log("Checking unique username", username);
   try {
