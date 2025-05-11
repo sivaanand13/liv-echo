@@ -450,7 +450,7 @@ router.route("/:postID/:commentID").delete(async (req, res) =>{
   let commentID = req.params.commentID;
   let uid = req.user.uid;
   let post, user, poster;
-
+  console.log("we're here");
   try {
     post = await postsController.getPostById(postID);
     user = await userController.getUserByUID(uid);
@@ -479,7 +479,7 @@ router.route("/:postID/:commentID").delete(async (req, res) =>{
         throw new Error("You can't see this!");
       }
     }
-
+    console.log("we're here");
     const pos = await commentsController.deleteComment(
       uid,
       commentID,

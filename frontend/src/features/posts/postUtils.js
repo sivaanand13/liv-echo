@@ -141,7 +141,7 @@ async function getComments(postID){
 
 async function deleteComment(postID, commID){
   try {
-    const response = await axios.delete(`posts/${postID}/${commID}`);
+    const response = await axios.del(`posts/${postID}/${commID}`);
     return response.data.data;
   } catch (e) {
     console.log(e);

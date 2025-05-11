@@ -85,7 +85,7 @@ async function canDeleteComment(uid, postID){
     let user = await usersController.getUserByUID(uid);
 
     // if the user is an admin we can ignore these checks
-    if(!user.role != "admin" && user._id.toString() != comm.sender.toString()){
+    if(user.role != "admin" && user._id.toString() != comm.sender._id.toString()){
         console.log("User isn't poster or admin");
         return false;
     }
@@ -103,9 +103,10 @@ async function deleteComment(uid, commID){
     let canDel = await canDeleteComment(uid, commID);
     if(!canDel) throw new Error("You don't have permissions to delete this!");
 
+    let k = comm._id.toString();
     await Comment.deleteOne({_id: comm._id});
 
-    let coms = post.comments.filter((comment) => comment._id.toString() != commID.toString());
+    let coms = post.comments.filter((comment) => comment.toString() != k);
 
     post = await post.findOneAndUpdate( 
                 {_id: post._id, sender: user._id},
