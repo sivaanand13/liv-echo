@@ -5,7 +5,7 @@ const NotificationSchema = new Schema(
   {
     userId: { type: mongoose.Types.ObjectId, ref: "User", required: true },
     uid: { type: String, required: true },
-    chatId: { type: mongoose.Types.ObjectId, ref: "Chat", default: "" },
+    chatId: { type: String, ref: "Chat", default: "" }
     type: {
       type: String,
       enum: [
