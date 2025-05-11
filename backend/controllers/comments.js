@@ -5,6 +5,7 @@ import validation from "../utils/validation.js";
 import settings from "../models/settings.js";
 import cloudinary from "../cloudinary/cloudinary.js";
 import Comment from "../models/comment.js";
+import Post from "../models/post.js";
 
 // create comment
 // each comment is tied to a post
@@ -39,7 +40,7 @@ async function createComment(postID, uid, text, attachments){
     let coms = post.comments;
     coms.push(com._id);
     post = await Post.findOneAndUpdate( 
-                {_id: post._id, sender: user._id},
+                {_id: post._id},
                 {
                     $set: {
                         comments: coms
@@ -106,7 +107,7 @@ async function deleteComment(uid, commID){
 
     let coms = post.comments.filter((comment) => comment._id.toString() != commID.toString());
 
-    post = await Post.findOneAndUpdate( 
+    post = await post.findOneAndUpdate( 
                 {_id: post._id, sender: user._id},
                 {
                     $set: {
@@ -118,7 +119,29 @@ async function deleteComment(uid, commID){
 }
 
 // like comment
+async function likeComment(commID, uid){
+    let comm = await getCommentById(commID.toString());
+    let user = await usersController.getUserByUID(uid);
 
+    if (user._id.toString() == comm.sender.toString()) throw new Error("you can't like your own comment!");
+    
+      let likez = comm.likes;
+    
+      if (likez.includes(user._id)) throw new Error("you've already liked this comment!");
+      likez.push(user._id);
+    
+      comm = await Comment.findOneAndUpdate(
+        { _id: comm._id },
+        {
+          $set: {
+            likes: likez,
+          },
+        },
+        {}
+      );
+    
+      return post;
+}
 
 // get comment by ID
 async function getCommentById(commID) {
@@ -136,5 +159,6 @@ export default {
     createComment,
     editComment,
     deleteComment,
+    likeComment,
     getCommentById,
 };

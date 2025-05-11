@@ -129,7 +129,16 @@ async function getPostsByUID(userUid) {
     throw `Post fetch failed!`;
   }
 }
-
+async function getMutualFriends() {
+  try {
+    const response = await axios.get(`posts/user/find/mutualFriend`);
+    console.log(response.data.results)
+    return response.data.results;
+  } catch (e) {
+    console.log(e);
+    throw `Post fetch failed!`;
+  }
+}
 async function deletePost(pos) {
   try {
     const response = await axios.del(`posts/${pos._id}`, {});
@@ -148,4 +157,5 @@ export default {
   searchPosts,
   getPostsByUID,
   getPostByPostId,
+  getMutualFriends
 };

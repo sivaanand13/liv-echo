@@ -31,10 +31,10 @@ const CommentSchema = new Schema(
       type: mongoose.Types.ObjectId,
       ref: "Post",
     },
-    likes: {
-      type: mongoose.Types.ObjectId,
+    likes: [{
+      type: Schema.Types.ObjectId,
       ref: "User",
-    },
+    }],
   },
   {
     timestamps: true,

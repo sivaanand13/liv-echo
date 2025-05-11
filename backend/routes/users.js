@@ -57,7 +57,7 @@ router.route("/profile/:userUID").get(authMiddleware, async (req, res) => {
   }
 });
 
-router.route("/editaccount/email/update").post(async (req, res) => {
+router.route("/editaccount/email/update").post(authMiddleware, async (req, res) => {
   const { uid, newEmail } = req.body;
 
   if (!uid || !newEmail) {
@@ -79,7 +79,7 @@ router.route("/editaccount/email/update").post(async (req, res) => {
     res.status(200).json({
       message: "Email successfully updated in Firebase.",
     });
-
+    //console.log("AM i Here for some reason?");
     await userController.updateUserEmail(uid, newEmail);
   } catch (error) {
     console.error("Error updating user email:", error);
@@ -89,14 +89,14 @@ router.route("/editaccount/email/update").post(async (req, res) => {
     });
   }
 });
-router.route("/editaccount/email/uniqueCheck/").get(async (req, res) => {
+router.route("/editaccount/email/uniqueCheck/").get(authMiddleware, async (req, res) => {
   let { email, uid } = req.query;
   console.log("Checking unique email", email);
   try {
     email = validation.validateEmail(email);
   } catch (e) {
     return res.status(400).json({
-      message: "Unique email check failed!",
+      message: "Email check failed!",
       errors: e,
     });
   }
@@ -111,7 +111,7 @@ router.route("/editaccount/email/uniqueCheck/").get(async (req, res) => {
     const checkEmail = await userController.validateUnqiueEmail(email);
     if (!checkEmail) {
       return res.status(400).json({
-        message: "Email is in use by another user!",
+        message: "Email check failed!",
       });
     }
     console.log("Email not taken");
@@ -121,11 +121,11 @@ router.route("/editaccount/email/uniqueCheck/").get(async (req, res) => {
   } catch (e) {
     console.log(e);
     return res.status(500).json({
-      message: "Unique email check failed!",
+      message: "Email check failed!",
     });
   }
 });
-router.route("/editaccount/username/uniqueCheck/").get(async (req, res) => {
+router.route("/editaccount/username/uniqueCheck/").get(authMiddleware, async (req, res) => {
   let { username, uid } = req.query;
   console.log("Checking unique username", username);
   try {
@@ -169,7 +169,7 @@ router.route("/signup/uniqueCheck/").get(async (req, res) => {
     email = validation.validateEmail(email);
   } catch (e) {
     return res.status(400).json({
-      message: "Unique email check failed!",
+      message: "Email check failed!",
       errors: e,
     });
   }
@@ -186,7 +186,7 @@ router.route("/signup/uniqueCheck/").get(async (req, res) => {
     const checkEmail = await userController.validateUnqiueEmail(email);
     if (!checkEmail) {
       return res.status(400).json({
-        message: "Email is in use by another user!",
+        message: "Email check failed!",
       });
     }
     const checkUsername = await userController.validateUnqiueUsername(username);
@@ -203,7 +203,7 @@ router.route("/signup/uniqueCheck/").get(async (req, res) => {
   } catch (e) {
     console.log(e);
     return res.status(500).json({
-      message: "Unique email check failed!",
+      message: "Email check failed!",
     });
   }
 });

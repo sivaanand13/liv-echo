@@ -104,7 +104,7 @@ router.route("/:postID").get(async (req, res) => {
 
   try {
     post = await postsController.getPostById(postID);
-    console.log("Welp, we made it this far");
+    console.log("Welp, we made it this far?");
     user = await userController.getUserByUID(uid);
     poster = await userController.getUserById(post.sender);
   } catch (e) {
@@ -150,7 +150,6 @@ router.route("/:postID").patch(async (req, res) => {
   let { text, isPrivate } = req.body;
   //let attachments = req.files;
 
-
   try {
     post = await postsController.getPostById(postID);
     user = await userController.getUserByUID(uid);
@@ -162,7 +161,7 @@ router.route("/:postID").patch(async (req, res) => {
     return res.status(400).json({ message: e });
   }
 
-  // if you aren't the poster, throw an error
+   // if you aren't the poster, throw an error
   try {
     if (uid.toString() == poster.uid.toString()) {
       
@@ -216,6 +215,94 @@ router.route("/:postID").delete(async (req, res) => {
     return res.status(403).json({ message: e });
   }
 });
+
+// like post
+router.route("/:postID/like").patch(async (req, res) => {
+  let postID = req.params.postID;
+  let uid = req.user.uid;
+  let post;
+  let user, poster;
+  //let attachments = req.files;
+
+
+  try {
+    post = await postsController.getPostById(postID);
+    user = await userController.getUserByUID(uid);
+    poster = await userController.getUserById(post.sender);
+  } catch (e) {
+    return res.status(400).json({ message: e });
+  }
+
+  // wow the same checks again
+  try {
+    if (post.isPrivate) {
+      console.log("boo");
+      console.log(uid.toString());
+      console.log(poster.uid.toString());
+      if (uid.toString() == poster.uid.toString()
+        || poster.friends.includes(uid)
+        || user.role == "admin") {
+        // they can see the post! Yay!
+
+      } else {
+        throw new Error("You can't see this!");
+      }
+    }
+    const pos = await postsController.likePost(uid, postID);
+    return res.status(200).json({
+      message: "Got the post!",
+      data: pos,
+    });
+  } catch (e) {
+    return res.status(403).json({ message: e });
+  }
+});
+
+// report post
+router.route("/:postID/report").patch(async (req, res) => {
+  let postID = req.params.postID;
+  let uid = req.user.uid;
+  let post;
+  let user, poster;
+  let { reportType, comment } = req.body;
+  //let attachments = req.files;
+
+
+  try {
+    post = await postsController.getPostById(postID);
+    user = await userController.getUserByUID(uid);
+    poster = await userController.getUserById(post.sender);
+    validation.validateString(reportType);
+    validation.validateString(comment);
+  } catch (e) {
+    return res.status(400).json({ message: e });
+  }
+
+  // yeah yeah make sure they can see the post
+  try {
+    if (post.isPrivate) {
+      console.log("boo");
+      console.log(uid.toString());
+      console.log(poster.uid.toString());
+      if (uid.toString() == poster.uid.toString()
+        || poster.friends.includes(uid)
+        || user.role == "admin") {
+        // they can see the post! Yay!
+
+      } else {
+        throw new Error("You can't see this!");
+      }
+    }
+    const pos = await postsController.reportPost(uid, postID, reportType, comment);
+    return res.status(200).json({
+      message: "Got the post!",
+      data: pos,
+    });
+  } catch (e) {
+    return res.status(403).json({ message: e });
+  }
+});
+
 router.route("/user/:userUid").get(async (req,res) => {
 let userUid = req.params.userUid;
   try{
@@ -226,6 +313,21 @@ let userUid = req.params.userUid;
   }
   catch(e){
     res.status(403).json({message: e});
+  }
+});
+router.route("/user/find/mutualFriend").get(async (req,res) => {
+  try {
+    let user
+    console.log("Does this have a value?", req.user.uid);
+    if (req.user && req.user.uid) {
+      user = await userController.getUserByUID(req.user.uid);
+    }
+    const results = await postsController.findMutualFriend(user);
+    res.json({ results });
+  } catch (err) {
+    console.error("Friend finding query failed:", err);
+    console.error(err);
+    res.status(500).json({ message: 'Friend finding failed' });
   }
 });
 
@@ -240,7 +342,7 @@ router.route("/:postID/comment").post(async (req, res) =>{
 
   try {
     post = await postsController.getPostById(postID);
-    console.log("Welp, we made it this far");
+    //console.log("Welp, we made it this far!");
     user = await userController.getUserByUID(uid);
     poster = await userController.getUserById(post.sender);
   } catch (e) {
@@ -264,7 +366,7 @@ router.route("/:postID/comment").post(async (req, res) =>{
       }
     }
 
-    const pos = await commmentsController.createComment(
+    const pos = await commentsController.createComment(
       postID,
       uid,
       text,
@@ -276,6 +378,7 @@ router.route("/:postID/comment").post(async (req, res) =>{
     });
 
   } catch (e) {
+    console.log("huh" + e);
     return res.status(403).json({ message: e});
   }
 });
@@ -292,7 +395,6 @@ router.route("/:postID/:commentID").patch(async (req, res) =>{
 
   try {
     post = await postsController.getPostById(postID);
-    console.log("Welp, we made it this far");
     user = await userController.getUserByUID(uid);
     comment = await commentsController.getCommentById(commendID);
     poster = await userController.getUserById(post.sender);
@@ -325,7 +427,7 @@ router.route("/:postID/:commentID").patch(async (req, res) =>{
     // last, make sure that it's the commmentor editing the comment
     if(commentor.uid.toString != uid.toString()) throw "you're not the commentor!";
 
-    const pos = await commmentsController.editComment(
+    const pos = await commentsController.editComment(
       commentID,
       uid,
       text,
@@ -350,7 +452,6 @@ router.route("/:postID/:commentID").delete(async (req, res) =>{
 
   try {
     post = await postsController.getPostById(postID);
-    console.log("Welp, we made it this far");
     user = await userController.getUserByUID(uid);
     poster = await userController.getUserById(post.sender);
   } catch (e) {
@@ -378,7 +479,7 @@ router.route("/:postID/:commentID").delete(async (req, res) =>{
       }
     }
 
-    const pos = await commmentsController.deleteComment(
+    const pos = await commentsController.deleteComment(
       uid,
       commentID,
     );
@@ -400,7 +501,6 @@ router.route("/postID/comment").get(async (req, res) =>{
 
   try {
     post = await postsController.getPostById(postID);
-    console.log("Welp, we made it this far");
     user = await userController.getUserByUID(uid);
     poster = await userController.getUserById(post.sender);
   } catch (e) {
