@@ -161,16 +161,18 @@ router.route("/:postID").patch(async (req, res) => {
     return res.status(400).json({ message: e });
   }
 
-  // make sure you're the poster
+   // if you aren't the poster, throw an error
   try {
-    
-    if(user._id.toString() != poster._id.toString()) throw "you can't edit this!";
-
-    const pos = await postsController.edit(uid, postID, text, isPrivate);
-    return res.status(200).json({
-      message: "Got the post!",
-      data: pos,
-    });
+    if (uid.toString() == poster.uid.toString()) {
+      
+      let pos = await postsController.editPost(uid, postID, text, isPrivate);
+      return res.status(200).json({
+        message: "Updated post succesfully!",
+        data: pos,
+      });
+    } else {
+      throw new Error("You can't edit this!");
+    }
   } catch (e) {
     return res.status(403).json({ message: e });
   }
