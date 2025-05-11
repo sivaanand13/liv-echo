@@ -1,4 +1,6 @@
-import { differenceInYears } from "date-fns";
+// @ts-nocheck
+import { differenceInYears, isEqual } from "date-fns";
+import { parseOneAddress } from "email-addresses";
 
 export const usernamePolicies = [
   {
@@ -134,12 +136,13 @@ const validateLoginPassword = (str, varName) => {
 
 const validateEmail = (email) => {
   email = validateString(email, "email");
-  // got email regex from https://regex101.com/library/SOgUIV
-  const emailRegex = /^((?!\.)[\w\-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/;
 
-  if (!emailRegex.test(email)) {
+  const parseRFC = parseOneAddress(email);
+
+  if (!parseRFC) {
     throw [`Email (${email}) is not valid!`];
   }
+
   return email.toLowerCase();
 };
 
