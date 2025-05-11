@@ -7,6 +7,7 @@ import Post from "../models/post.js";
 import elasticClient from "../elasticSearch/elasticsearchClient.js";
 import createIndex from "../elasticSearch/createPostIndex.js";
 import userController from "./users.js";
+import { sendNotification } from "./notification.js";
 // delete post... make sure an admin can do it no matter what!
 
 async function getNPosts(n) {
@@ -63,6 +64,19 @@ async function postPost(uid, text, attachments, isPrivate) {
       createdAt: new Date().toISOString(),
     },
   });
+
+  if (user.friends.length > 0) {
+    for (const friendId of user.friends) {
+      console.log("Notification Sending System Executed...");
+      const friendDetails = await userController.getUserById(friendId);
+      const result = await sendNotification(friendId, friendDetails.uid, "", {
+        type: "new-post",
+        title: `A new post from ${user.name}`,
+        body: "",
+      });
+    }
+  }
+
   return post;
 }
 
