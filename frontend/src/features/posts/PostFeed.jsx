@@ -10,7 +10,7 @@ import userUtils from "../users/userUtils.js";
 export default function MostCommentedFeed() {
   const { currentUser, serverUser } = useContext(AuthContext);
   const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); 
   const [error, setError] = useState("");
 
   useEffect(() => {

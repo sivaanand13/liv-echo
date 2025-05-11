@@ -175,8 +175,8 @@ async function likePost(uid, postId) {
 
   let likez = post.likes;
 
-  if (likez.includes(user._id))
-    throw new Error("you've already liked this post!");
+  // return false?
+  if (likez.includes(user._id)) return false;
   likez.push(user._id);
 
   post = await Post.findOneAndUpdate(
@@ -189,7 +189,7 @@ async function likePost(uid, postId) {
     {}
   );
 
-  return post;
+  return true;
 }
 
 // report the post
@@ -248,7 +248,7 @@ async function reportPost(uid, postId, reportType, comment) {
 }
 
 async function getPostById(postId) {
-  postId = validation.validateString(postId, "Post Id", true);
+  postId = validation.validateString(postId, "Post Id", true); 
   postId = ObjectId.createFromHexString(postId);
   const post = await Post.findById(postId);
   if (!post) {

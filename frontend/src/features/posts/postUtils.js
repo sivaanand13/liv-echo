@@ -79,6 +79,16 @@ async function getPostByPostId (postId) {
   }
 }
 
+async function likePostByPostId (postId) {
+  try {
+    const res = await axios.patch(`posts/${postId}/like`);
+    return res.data.data;
+  } catch (err) {
+    console.error("Failed to fetch post by ID:", err);
+    throw err.response?.data?.message || "Error fetching post.";
+  }
+}
+
 async function getPosts() {
   try {
     const response = await axios.get(`posts`);
@@ -86,6 +96,36 @@ async function getPosts() {
   } catch (e) {
     console.log(e);
     throw `Post fetch failed!`;
+  }
+}
+
+async function getComments(postID){
+    try {
+    const response = await axios.get(`posts/${postID}/comment`);
+    return response.data.data;
+  } catch (e) {
+    console.log(e);
+    throw `Comment fetch failed!`;
+  }
+}
+
+async function deleteComment(postID, commID){
+  try {
+    const response = await axios.delete(`posts/${postID}/${commID}`);
+    return response.data.data;
+  } catch (e) {
+    console.log(e);
+    throw `Comment fetch failed!`;
+  }
+}
+
+async function likeCommentByID (postID, commID) {
+  try {
+    const res = await axios.patch(`posts/${postID}/${commID}/like`);
+    return res.data.data;
+  } catch (err) {
+    console.error("Failed to fetch post by ID:", err);
+    throw err.response?.data?.message || "Error fetching post.";
   }
 }
 
@@ -123,6 +163,9 @@ async function deletePost(pos) {
 export default {
   createPost,
   getPosts,
+  getComments,
+  deleteComment,
+  likeCommentByID,
   deletePost,
   searchPosts,
   getPostsByUID,

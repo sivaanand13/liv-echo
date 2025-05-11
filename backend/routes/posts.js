@@ -130,6 +130,7 @@ router.route("/:postID").get(async (req, res) => {
       }
     }
     const pos = await postsController.getPostById(postID);
+    console.log(pos);
     return res.status(200).json({
       message: "Got the post!",
       data: pos,
@@ -493,12 +494,62 @@ router.route("/:postID/:commentID").delete(async (req, res) =>{
   }
 });
 
-// get every comment from a post
-router.route("/postID/comment").get(async (req, res) =>{
+// like comment
+router.route("/:postID/:commentID/like").patch(async (req, res) =>{
   let postID = req.params.postID;
+  let commentID = req.params.commentID;
   let uid = req.user.uid;
   let post, user, poster;
 
+  try {
+    post = await postsController.getPostById(postID);
+    user = await userController.getUserByUID(uid);
+    poster = await userController.getUserById(post.sender);
+  } catch (e) {
+    return res.status(400).json({ message: e });
+  }
+
+  // there's a lot of checks here actually, so I'll go one-by-one
+  try {
+    // first, let's make sure the comment is actually tied to the post
+    if(!post.comments.includes(commentID)) throw "comment isn't tied to post!";
+
+    // we only need to make the first two checks here
+    // it just so happens that the poster, commentor, and admins are the only people that can delete a comment
+    if (post.isPrivate) {
+      console.log("boo");
+      console.log(uid.toString());
+      console.log(poster.uid.toString());
+      if (uid.toString() == poster.uid.toString()
+        || poster.friends.includes(uid)
+        || user.role == "admin") {
+      
+
+      } else {
+        throw new Error("You can't see this!");
+      }
+    }
+    console.log("liking");
+    const pos = await commentsController.likeComment(
+      commentID,
+      uid,
+    );
+    console.log(pos);
+    return res.status(200).json({
+      message: "Attached message media!",
+      data: pos,
+    });
+
+  } catch (e) {
+    return res.status(403).json({ message: e});
+  }
+});
+
+// get every comment from a post
+router.route("/:postID/comment").get(async (req, res) =>{
+  let postID = req.params.postID;
+  let uid = req.user.uid;
+  let post, user, poster;
   try {
     post = await postsController.getPostById(postID);
     user = await userController.getUserByUID(uid);
@@ -518,13 +569,15 @@ router.route("/postID/comment").get(async (req, res) =>{
         throw new Error("You can't see this!");
       }
     }
-
     let comments = [];
 
-    for(c in post.comments){
+    for(let i = 0; i < post.comments.length; i ++){
+      let c = post.comments[i];
+      //console.log("heh " + c);
       let gotCom = await commentsController.getCommentById(c.toString());
       comments.push(gotCom);
     }
+      
 
     return res.status(200).json({
       message: "Attached message media!",

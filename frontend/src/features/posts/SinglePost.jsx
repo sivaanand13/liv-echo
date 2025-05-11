@@ -8,20 +8,25 @@ import {
   Typography,
   CircularProgress,
   Paper,
+  Grid,
 } from "@mui/material";
 import postUtils from "./postUtils"; // Adjust the path as needed
+import CommentListItem from "./CommentListItem";
 
 export default function SinglePost() {
   const { postId } = useParams(); // Assumes a route like /posts/:postId
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(""); 
+  const [comments, setComments] = useState([]);
 
   useEffect(() => {
     async function fetchPost() {
       try {
         const result = await postUtils.getPostByPostId(postId);
         setPost(result);
+        const coms = await postUtils.getComments(postId);
+        setComments(coms);
       } catch (err) {
         console.error(err);
         setError("Failed to load post.");
@@ -93,6 +98,13 @@ export default function SinglePost() {
           </CardContent>
         </Card>
       </Paper>
+      <Grid container spacing={3} justifyContent="center">
+        {comments.map((comment) => (
+          <Grid item xs={12} sm={6} md={4} key={comment._id}>
+              <CommentListItem item={comment} />
+          </Grid>
+        ))}
+      </Grid>
     </Box>
   );
 }
