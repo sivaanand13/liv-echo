@@ -86,7 +86,7 @@ export default function EditBio({ handleClose }) {
             onChange={(e) => setBio(e.target.value)}
           />
         </FormControl>
-        {error && <Typography>{error}</Typography>}
+        {error && <Typography color="error">{error}</Typography>}
         <CardActions sx={{ display: "flex" }}>
           <Button
             size="large"

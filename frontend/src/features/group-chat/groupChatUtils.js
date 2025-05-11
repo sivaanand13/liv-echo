@@ -3,6 +3,24 @@ import validation from "../../utils/validation.js";
 
 const CHAT_NAME_LENGTH = 75;
 
+async function groupInfoModeration(messageText, attachments) {
+  try {
+    const response = await axios.post("moderation", {
+      text: messageText,
+      attachments: attachments,
+    });
+
+    if (response.data) {
+      return response.data;
+    } else {
+      throw "No Response!";
+    }
+  } catch (e) {
+    console.error(e);
+    throw `Message Moderation Failed`;
+  }
+}
+
 function validateChatName(name) {
   name = validation.validateString(name, "Chat Name");
   if (name.length > CHAT_NAME_LENGTH) {
@@ -40,13 +58,38 @@ async function getAvaliableUsers() {
 }
 
 async function createGroupChat(curName, curProfile, curMembers) {
+  let body = {};
   try {
-    const body = { name: curName, members: curMembers };
+    body.name = curName;
+    body.members = curMembers;
     if (curProfile) {
       const images = await axios.uploadAttachments(curProfile);
       console.log("upload porfile: ", images);
       body.profile = images.data[0];
     }
+  } catch (e) {
+    console.log(e);
+    throw `Group chat create failed!`;
+  }
+
+  try {
+    const image_url_list = [];
+    if (body.profile) {
+      image_url_list.push(body.profile.secure_url);
+    }
+    const moderationResponse = await groupInfoModeration(
+      body.name,
+      image_url_list
+    );
+    if (moderationResponse.flagged) {
+      throw moderationResponse.message;
+    }
+  } catch (e) {
+    console.error(e);
+    throw `Groupchat Error: ${e}`;
+  }
+
+  try {
     console.log("Trying to create chat: ", body);
     const response = await axios.post("chats/group-chats/create", body);
     return response.data.data;

@@ -2,6 +2,24 @@ import axios from "../../utils/requests/axios.js";
 import validation from "../../utils/validation.js";
 import { MESSAGE_LENGTH } from "../../utils/settings.js"; // Assuming settings is available frontend too
 
+async function postModeration(text, attachments) {
+  try {
+    const response = await axios.post("moderation", {
+      text,
+      attachments,
+    });
+
+    if (response.data) {
+      return response.data;
+    } else {
+      throw "No Response!";
+    }
+  } catch (e) {
+    console.error(e);
+    throw `Post Moderation Failed`;
+  }
+}
+
 async function createPost(text, attachments, isPrivate = false) {
   try {
     // Validate the post text
@@ -12,8 +30,8 @@ async function createPost(text, attachments, isPrivate = false) {
 
     // If there are attachments, ensure they're valid (optional step)
     let uploaded = [];
-    if (attachments && Array.isArray (attachments) && attachments.length > 0) { 
-      let w = await axios.uploadAttachments(attachments);//uploadAttachments(attachments);
+    if (attachments && Array.isArray(attachments) && attachments.length > 0) {
+      let w = await axios.uploadAttachments(attachments); //uploadAttachments(attachments);
       console.log("Yeah we just sent " + w.length + " attachments");
       uploaded = w.data;
     }
@@ -24,6 +42,15 @@ async function createPost(text, attachments, isPrivate = false) {
       attachments: uploaded,
       isPrivate,
     };
+
+    //Post Moderation
+    const moderationResponse = await postModeration(
+      body.text,
+      body.attachments
+    );
+    if (moderationResponse.flagged) {
+      throw moderationResponse.message;
+    }
 
     // Send the post request
     const response = await axios.post("posts/create", body);
@@ -46,7 +73,10 @@ async function uploadAttachments(attachments) {
       formData.append("file", attachment);
       formData.append("upload_preset", "your-upload-preset"); // Add your Cloudinary upload preset here
 
-      const response = await axios.post("https://api.cloudinary.com/v1_1/your-cloud-name/image/upload", formData);
+      const response = await axios.post(
+        "https://api.cloudinary.com/v1_1/your-cloud-name/image/upload",
+        formData
+      );
       uploadedFiles.push(response.data.secure_url);
     }
 
@@ -65,11 +95,11 @@ async function searchPosts(query) {
     });
     return response.data.results;
   } catch (err) {
-    console.error('Search error:', err);
+    console.error("Search error:", err);
     throw err;
   }
 }
-async function getPostByPostId (postId) {
+async function getPostByPostId(postId) {
   try {
     const res = await axios.get(`posts/${postId}`);
     return res.data.data;
@@ -92,7 +122,7 @@ async function getPosts() {
 async function getPostsByUID(userUid) {
   try {
     const response = await axios.get(`posts/user/${userUid}`);
-    console.log(response.data.posts)
+    console.log(response.data.posts);
     return response.data.posts;
   } catch (e) {
     console.log(e);
@@ -117,5 +147,5 @@ export default {
   deletePost,
   searchPosts,
   getPostsByUID,
-  getPostByPostId
+  getPostByPostId,
 };
