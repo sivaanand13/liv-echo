@@ -27,12 +27,14 @@ export default function CommentListItem({ item: msg }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [ancor, setAncor] = useState(null);
   const [liked, setLiked] = useState(false);
+  const [lik, setLik] = useState(false);
 
   useEffect(() => {
     async function fetchLiked() {
           try {
-            let k = msg.likes.includes(currentUser._id);
+            let k = msg.likes.includes(serverUser._id);
             setLiked(k);
+            setLik(!k);
           } catch (err) {
             console.error(err);
             setError("Failed to load post.");
@@ -40,7 +42,7 @@ export default function CommentListItem({ item: msg }) {
           setLoading(false);
         }
         fetchLiked();
-  }, []);
+  }, [currentUser._id, msg]);
 
   function handleOpen(e) {
     setMenuOpen((prev) => !prev);
@@ -201,7 +203,7 @@ export default function CommentListItem({ item: msg }) {
           )}
           <Typography variant="body2">{liked ? "Liked" : "Like"}</Typography>
         </ListItemButton>
-        <Typography variant="body1">{msg.likes.length}</Typography>
+        <Typography variant="body1">{msg.likes.length + (lik ? liked : (0 - !liked))}</Typography>
       </Stack>
     </ListItem>
   );
