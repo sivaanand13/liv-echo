@@ -5,6 +5,7 @@ import validation from "../utils/validation.js";
 import settings from "../models/settings.js";
 import cloudinary from "../cloudinary/cloudinary.js";
 import Comment from "../models/comment.js";
+import Post from "../models/post.js";
 
 // create comment
 // each comment is tied to a post
@@ -38,7 +39,7 @@ async function createComment(postID, uid, text, attachments){
 
     let coms = post.comments;
     coms.push(com._id);
-    post = await post.findOneAndUpdate( 
+    post = await Post.findOneAndUpdate( 
                 {_id: post._id, sender: user._id},
                 {
                     $set: {

@@ -104,7 +104,7 @@ router.route("/:postID").get(async (req, res) => {
 
   try {
     post = await postsController.getPostById(postID);
-    console.log("Welp, we made it this far");
+    console.log("Welp, we made it this far?");
     user = await userController.getUserByUID(uid);
     poster = await userController.getUserById(post.sender);
   } catch (e) {
@@ -240,7 +240,7 @@ router.route("/:postID/comment").post(async (req, res) =>{
 
   try {
     post = await postsController.getPostById(postID);
-    console.log("Welp, we made it this far");
+    //console.log("Welp, we made it this far!");
     user = await userController.getUserByUID(uid);
     poster = await userController.getUserById(post.sender);
   } catch (e) {
@@ -276,6 +276,7 @@ router.route("/:postID/comment").post(async (req, res) =>{
     });
 
   } catch (e) {
+    console.log("huh" + e);
     return res.status(403).json({ message: e});
   }
 });
@@ -292,7 +293,6 @@ router.route("/:postID/:commentID").patch(async (req, res) =>{
 
   try {
     post = await postsController.getPostById(postID);
-    console.log("Welp, we made it this far");
     user = await userController.getUserByUID(uid);
     comment = await commentsController.getCommentById(commendID);
     poster = await userController.getUserById(post.sender);
@@ -350,7 +350,6 @@ router.route("/:postID/:commentID").delete(async (req, res) =>{
 
   try {
     post = await postsController.getPostById(postID);
-    console.log("Welp, we made it this far");
     user = await userController.getUserByUID(uid);
     poster = await userController.getUserById(post.sender);
   } catch (e) {
@@ -400,7 +399,6 @@ router.route("/postID/comment").get(async (req, res) =>{
 
   try {
     post = await postsController.getPostById(postID);
-    console.log("Welp, we made it this far");
     user = await userController.getUserByUID(uid);
     poster = await userController.getUserById(post.sender);
   } catch (e) {
