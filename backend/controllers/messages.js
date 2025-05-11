@@ -65,16 +65,10 @@ async function postMessage(chatId, uid, text, attachments, tempId) {
     if (memeber.uid !== uid) {
       const result = await sendNotification(memeber._id, memeber.uid, chatId, {
         type: "new-message",
-        senderName: user.name,
+        title: `Message from ${user.name}`,
         body: text.slice(0, 40) + "...",
       });
-      console.log("N", result);
     }
-    // const result = await sendNotification(memeber._id, memeber.uid, {
-    //   type: "new-message",
-    //   senderName: user.name,
-    // });
-    // console.log("N", result);
   }
 }
 

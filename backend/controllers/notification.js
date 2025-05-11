@@ -17,7 +17,7 @@ export async function sendNotification(userId, uid, chatId, data) {
     uid,
     chatId,
     type: data.type,
-    title: `A new message from ${data.senderName}`,
+    title: data.title,
     body: data.body,
   };
 

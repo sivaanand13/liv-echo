@@ -6,6 +6,7 @@ import cloudinary from "../cloudinary/cloudinary.js";
 import sharp from "../imageProcessing/sharp.js";
 import { chatNamespace } from "../websockets/index.js";
 import settings from "../models/settings.js";
+import { sendNotification } from "./notification.js";
 async function validateUnqiueEmail(email) {
   email = validation.validateEmail(email);
   const user = await User.findOne({ email: email });
@@ -23,7 +24,10 @@ async function getUserById(id) {
   if (typeof id == "string") {
     id = ObjectId.createFromHexString(id);
   }
-  const user = User.findOne({ _id: id }).populate("friends","name username email profile uid");
+  const user = User.findOne({ _id: id }).populate(
+    "friends",
+    "name username email profile uid"
+  );
   if (!user) {
     throw `No user with id ${id} exists!`;
   }
@@ -50,9 +54,12 @@ async function getUserByUID(uid, display) {
         banner: 1,
         friends: 1,
       }
-    ).populate("friends","name username email profile uid");
+    ).populate("friends", "name username email profile uid");
   } else {
-    user = await User.findOne({ uid: uid }).populate("friends","name username email profile uid");
+    user = await User.findOne({ uid: uid }).populate(
+      "friends",
+      "name username email profile uid"
+    );
   }
 
   if (!user) {
@@ -215,19 +222,22 @@ async function sendFriendRequest(userUid, friendUid) {
 
   const currUser = await getUserByUID(userUid);
   const friend = await getUserByUID(friendUid);
-  const friendId = friend._id
-  if (currUser.friends.some(f => f._id.toString() == friendId.toString())) {
+  const friendId = friend._id;
+  if (currUser.friends.some((f) => f._id.toString() == friendId.toString())) {
     throw "You are already friends with this user.";
   }
 
-  await User.updateOne(
-    { uid: userUid },
-    { $addToSet: { friends: friendId } }
-  );
-  console.log("Step 4")
+  await User.updateOne({ uid: userUid }, { $addToSet: { friends: friendId } });
+  console.log("Step 4");
   let user = await getUserByUID(userUid, false);
   console.log("Edited user", user);
   chatNamespace.to(user.uid).emit("accountUpdated", user);
+
+  await sendNotification(friendId, friendUid, "", {
+    type: "friend-request",
+    title: `${currUser.name} sent you a friend request`,
+    body: "",
+  });
 
   return { message: "Friend added" };
 }
@@ -236,16 +246,13 @@ async function removeFriend(userUid, friendUid) {
 
   const currUser = await getUserByUID(userUid);
   const friend = await getUserByUID(friendUid);
-  const friendId = friend._id
-  if (!currUser.friends.some(f => f._id.toString() == friendId.toString())) {
+  const friendId = friend._id;
+  if (!currUser.friends.some((f) => f._id.toString() == friendId.toString())) {
     throw "You are not friends with this user.";
   }
 
-  await User.updateOne(
-    { uid: userUid },
-    { $pull: { friends: friendId } }
-  );
-  console.log("Step 4")
+  await User.updateOne({ uid: userUid }, { $pull: { friends: friendId } });
+  console.log("Step 4");
   let user = await getUserByUID(userUid, false);
   console.log("Edited user", user);
   chatNamespace.to(user.uid).emit("accountUpdated", user);
