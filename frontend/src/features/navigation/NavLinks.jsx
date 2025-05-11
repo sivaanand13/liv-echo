@@ -2,10 +2,12 @@ import { useContext } from "react";
 import NavBarLink from "./NavBarLink";
 import { AuthContext } from "../../contexts/AuthContext";
 import SignOutButton from "../auth/SignOut";
+import NotificationCenters from "../../components/NotificationCenter";
 function AuthNavigation() {
   const auth = useContext(AuthContext);
   return (
     <>
+      <NotificationCenters />
       <NavBarLink to="/posts">Feed</NavBarLink>
       <NavBarLink to="/posts/search">Search Post</NavBarLink>
       <NavBarLink to="/posts/create">Create Post</NavBarLink>
