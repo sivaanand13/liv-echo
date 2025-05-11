@@ -129,6 +129,16 @@ async function leaveChat(uid, chatId) {
   return uiChat;
 }
 
+async function getFlagCount(chatId, userId) {
+  console.log(`Fetching Flag Count of user: ${userId} from chat: ${chatId}`);
+  let chat = await getDisplayChat(chatId);
+  const userFlag = chat.flaggedCount.find(
+    (entry) => entry.userId.toString() === userId.toString()
+  );
+  const flagCount = userFlag?.flagCount || 0;
+  return { success: true, data: flagCount };
+}
+
 async function updateFlagCount(chatId, userId) {
   console.log(`Updating Flag Count for user: ${userId}, chatId: ${chatId}`);
   let chat = await getDisplayChat(chatId);
@@ -416,4 +426,5 @@ export default {
   emitChatRemoved,
   changeAdmin,
   updateFlagCount,
+  getFlagCount,
 };
