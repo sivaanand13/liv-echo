@@ -201,6 +201,7 @@ export default function CommentListItem({ item: msg }) {
           )}
           <Typography variant="body2">{liked ? "Liked" : "Like"}</Typography>
         </ListItemButton>
+        <Typography variant="body1">{msg.likes.length}</Typography>
       </Stack>
     </ListItem>
   );

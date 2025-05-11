@@ -122,16 +122,20 @@ async function deleteComment(uid, commID){
 async function likeComment(commID, uid){
     let comm = await getCommentById(commID.toString());
     let user = await usersController.getUserByUID(uid);
+    let licked = false;
     console.log(comm.sender.toString());
     console.log(user._id.toString());
 
-    if (user._id.toString() == comm.sender._id.toString()) return false;//throw new Error("you can't like your own comment!");
+    if (user._id.toString() == comm.sender._id.toString()) return licked;//throw new Error("you can't like your own comment!");
     
       let likez = comm.likes;
     
-      if (likez.includes(user._id)) return true;//throw new Error("you've already liked this comment!");
-      likez.push(user._id);
-    
+      if (likez.includes(user._id)){
+        likez = likez.filter((lik) => lik != user._id); 
+      }else{
+        likez.push(user._id);
+        licked = true;
+      }
       comm = await Comment.findOneAndUpdate(
         { _id: comm._id },
         {
@@ -142,7 +146,7 @@ async function likeComment(commID, uid){
         {}
       );
     
-      return true;
+      return licked;
 }
 
 // get comment by ID
