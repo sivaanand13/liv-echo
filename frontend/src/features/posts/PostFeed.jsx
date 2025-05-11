@@ -11,7 +11,7 @@ export default function MostCommentedFeed() {
   const { currentUser, serverUser } = useContext(AuthContext);
   const [posts, setPosts] = useState([]);
    const [mutualFriend, setMutualFriends] = useState([]);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export default function MostCommentedFeed() {
     };
 
     fetchPosts();
-  }, [currentUser.uid]);
+  }, [currentUser]);
    const sortByComments = () => {
     return posts.sort((a, b) => (b.comments?.length || 0) - (a.comments?.length || 0));
   };
