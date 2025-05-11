@@ -13,7 +13,7 @@ import {
   CardContent,
   Tabs,
   Tab,
-  Grid
+  Grid,
 } from "@mui/material";
 import defaultBanner from "../../assets/landing/landing1.jpg";
 import PaginatedList from "../../components/PaginatedList.jsx";
@@ -27,6 +27,7 @@ import EditButton from "../../components/EditButton";
 import dayjs from "dayjs";
 import EditBio from "./EditBio";
 import postUtils from "../posts/postUtils.js";
+import userUtils from "../users/userUtils.js";
 export default function Account() {
   const { user } = useContext(AuthContext);
   const theme = useTheme();
@@ -34,15 +35,16 @@ export default function Account() {
   const [openEditProfile, setOpenEditProfile] = useState(false);
   const [openEditBanner, setOpenEditBanner] = useState(false);
   const [openEditBio, setOpenEditBio] = useState(false);
-  const [tab,setTab] = useState(0);
-  const [posts, setPosts] = useState([])
+  const [tab, setTab] = useState(0);
+  const [posts, setPosts] = useState([]);
+  const [userData, setUserData] = useState(null);
 
   const handleTabChange = (_, newValue) => {
     setTab(newValue);
   };
-  function getFriends(){
-    console.log(user.friends)
-    return user.friends
+  function getFriends() {
+    console.log(user.friends);
+    return user.friends;
   }
   console.log("Cur user: ", user);
   function closeModals() {
@@ -52,14 +54,22 @@ export default function Account() {
     setOpenEditBio(false);
   }
 
-useEffect(() => {
-  async function getPosts() {
-    const postList = await postUtils.getPostsByUID(user.uid) 
-    setPosts(postList);
-  }
-  getPosts();
-},[]);
-console.log("posts: " , posts)
+  useEffect(() => {
+    async function getUserData() {
+      const response = await userUtils.fetchUserByUID(user.uid);
+      setUserData(response);
+    }
+    getUserData();
+  }, [user.uid]);
+
+  useEffect(() => {
+    async function getPosts() {
+      const postList = await postUtils.getPostsByUID(user.uid);
+      setPosts(postList);
+    }
+    getPosts();
+  }, [user.uid]);
+  console.log("posts: ", posts);
   return (
     <Box
       sx={{
@@ -136,116 +146,109 @@ console.log("posts: " , posts)
           justifyContent: "center",
         }}
       >
-       <Tabs
-          value={tab}
-          onChange={handleTabChange}
-          centered
-          sx={{ mt: 10 }}
-        >
+        <Tabs value={tab} onChange={handleTabChange} centered sx={{ mt: 10 }}>
           <Tab label="About" />
           <Tab label="Friends" />
           <Tab label="Posts" />
         </Tabs>
-        {tab === 0 && (<Box sx={{ p: 2 }}>
-
-        
-        <Typography
-          variant="h3"
-          textAlign="center"
-          mx={"2rem"}
-        >{`Welcome, ${user.name}!`}</Typography>
-
-        <Card
-          sx={{
-            marginTop: "2rem",
-            mx: "auto",
-            width: "60%",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-            }}
-          >
-            <CardHeader title="Bio" />
-            <EditButton onClick={() => setOpenEditBio(true)} />
-          </Box>
-          <CardContent>{user.bio || "Edit to add bio!"}</CardContent>
-        </Card>
-        <Card
-          sx={{
-            marginTop: "2rem",
-            mx: "auto",
-            width: "60%",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-            }}
-          >
-            <CardHeader title="Account Info" />
-
-            <EditButton onClick={() => setOpenEditAccount(!openEditAccount)} />
-          </Box>
-          <CardContent>Name: {user.name}</CardContent>
-
-          <CardContent>Username: {user.username}</CardContent>
-          <CardContent>Email: {user.email}</CardContent>
-          <CardContent>
-            Date of Birth:{" "}
-            {dayjs(user.dob?.substring(0, 10)).format("MM/DD/YYYY")}
-          </CardContent>
-          <CardContent>Password: ****************</CardContent>
-        </Card>
-        </Box>)}
-
-        {tab === 1 && user.friends.length > 0 && (
+        {tab === 0 && (
           <Box sx={{ p: 2 }}>
-                <PaginatedList
-                  title="Friends"
-                  type="users"
-                  dataSource={getFriends}
-                  ListItemComponent={UserCard}
+            <Typography
+              variant="h3"
+              textAlign="center"
+              mx={"2rem"}
+            >{`Welcome, ${user.name}!`}</Typography>
+
+            <Card
+              sx={{
+                marginTop: "2rem",
+                mx: "auto",
+                width: "60%",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                <CardHeader title="Bio" />
+                <EditButton onClick={() => setOpenEditBio(true)} />
+              </Box>
+              <CardContent>{user.bio || "Edit to add bio!"}</CardContent>
+            </Card>
+            <Card
+              sx={{
+                marginTop: "2rem",
+                mx: "auto",
+                width: "60%",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                <CardHeader title="Account Info" />
+
+                <EditButton
+                  onClick={() => setOpenEditAccount(!openEditAccount)}
                 />
+              </Box>
+              <CardContent>Name: {user.name}</CardContent>
+
+              <CardContent>Username: {user.username}</CardContent>
+              <CardContent>Email: {user.email}</CardContent>
+              <CardContent>
+                Date of Birth:{" "}
+                {dayjs(user.dob?.substring(0, 10)).format("MM/DD/YYYY")}
+              </CardContent>
+              <CardContent>Password: ****************</CardContent>
+            </Card>
           </Box>
         )}
-        {tab === 1 && user.friends.length === 0 && (
-           <Typography
-           variant="h3"
-           textAlign="center"
-           mx={"2rem"}
-         >Sorry You Have No Friends</Typography>
+
+        {tab === 1 && userData?.friends.length > 0 && (
+          <Box sx={{ p: 2 }}>
+            <PaginatedList
+              title="Friends"
+              type="users"
+              dataSource={getFriends}
+              ListItemComponent={UserCard}
+            />
+          </Box>
         )}
-          {tab === 2 && posts.length > 0 && (
+        {tab === 1 && userData?.friends.length === 0 && (
+          <Typography variant="h3" textAlign="center" mx={"2rem"}>
+            Sorry You Have No Friends
+          </Typography>
+        )}
+        {tab === 2 && posts.length > 0 && (
           <Grid container spacing={3}>
-          {posts.map((post) => (
-            <Grid item xs={12} m={12} key={post._id}>
-              <Card elevation={1} sx={{width: "100%",padding: 2}}>
-                <CardHeader title={post.senderUsername} />
-                <CardContent>
-                  <Typography variant="body2" color="text.secondary">
-                    {post.text || "No content provided."}
-                  </Typography>
-                  <Typography variant="caption" display="block" mt={1}>
-                    {new Date(post.createdAt).toLocaleString()}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+            {posts.map((post) => (
+              <Grid item xs={12} m={12} key={post._id}>
+                <Card elevation={1} sx={{ width: "100%", padding: 2 }}>
+                  <CardHeader title={post.senderUsername} />
+                  <CardContent>
+                    <Typography variant="body2" color="text.secondary">
+                      {post.text || "No content provided."}
+                    </Typography>
+                    <Typography variant="caption" display="block" mt={1}>
+                      {new Date(post.createdAt).toLocaleString()}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
         )}
-        {tab === 2 && posts.length === 0 &&(
-           <Typography
-           variant="h3"
-           textAlign="center"
-           mx={"2rem"}
-         >Sorry You Have No Posts</Typography>
+        {tab === 2 && posts.length === 0 && (
+          <Typography variant="h3" textAlign="center" mx={"2rem"}>
+            Sorry You Have No Posts
+          </Typography>
         )}
       </Paper>
 
