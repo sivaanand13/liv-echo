@@ -150,7 +150,6 @@ router.route("/:postID").patch(async (req, res) => {
   let { text, isPrivate } = req.body;
   //let attachments = req.files;
 
-
   try {
     post = await postsController.getPostById(postID);
     user = await userController.getUserByUID(uid);
@@ -162,18 +161,16 @@ router.route("/:postID").patch(async (req, res) => {
     return res.status(400).json({ message: e });
   }
 
-  // if you aren't the poster, throw an error
+  // make sure you're the poster
   try {
-    if (uid.toString() == poster.uid.toString()) {
-      
-      let pos = await postsController.editPost(uid, postID, text, isPrivate);
-      return res.status(200).json({
-        message: "Updated post succesfully!",
-        data: pos,
-      });
-    } else {
-      throw new Error("You can't edit this!");
-    }
+    
+    if(user._id.toString() != poster._id.toString()) throw "you can't edit this!";
+
+    const pos = await postsController.edit(uid, postID, text, isPrivate);
+    return res.status(200).json({
+      message: "Got the post!",
+      data: pos,
+    });
   } catch (e) {
     return res.status(403).json({ message: e });
   }
@@ -216,6 +213,94 @@ router.route("/:postID").delete(async (req, res) => {
     return res.status(403).json({ message: e });
   }
 });
+
+// like post
+router.route("/:postID/like").patch(async (req, res) => {
+  let postID = req.params.postID;
+  let uid = req.user.uid;
+  let post;
+  let user, poster;
+  //let attachments = req.files;
+
+
+  try {
+    post = await postsController.getPostById(postID);
+    user = await userController.getUserByUID(uid);
+    poster = await userController.getUserById(post.sender);
+  } catch (e) {
+    return res.status(400).json({ message: e });
+  }
+
+  // wow the same checks again
+  try {
+    if (post.isPrivate) {
+      console.log("boo");
+      console.log(uid.toString());
+      console.log(poster.uid.toString());
+      if (uid.toString() == poster.uid.toString()
+        || poster.friends.includes(uid)
+        || user.role == "admin") {
+        // they can see the post! Yay!
+
+      } else {
+        throw new Error("You can't see this!");
+      }
+    }
+    const pos = await postsController.likePost(uid, postID);
+    return res.status(200).json({
+      message: "Got the post!",
+      data: pos,
+    });
+  } catch (e) {
+    return res.status(403).json({ message: e });
+  }
+});
+
+// report post
+router.route("/:postID/report").patch(async (req, res) => {
+  let postID = req.params.postID;
+  let uid = req.user.uid;
+  let post;
+  let user, poster;
+  let { reportType, comment } = req.body;
+  //let attachments = req.files;
+
+
+  try {
+    post = await postsController.getPostById(postID);
+    user = await userController.getUserByUID(uid);
+    poster = await userController.getUserById(post.sender);
+    validation.validateString(reportType);
+    validation.validateString(comment);
+  } catch (e) {
+    return res.status(400).json({ message: e });
+  }
+
+  // yeah yeah make sure they can see the post
+  try {
+    if (post.isPrivate) {
+      console.log("boo");
+      console.log(uid.toString());
+      console.log(poster.uid.toString());
+      if (uid.toString() == poster.uid.toString()
+        || poster.friends.includes(uid)
+        || user.role == "admin") {
+        // they can see the post! Yay!
+
+      } else {
+        throw new Error("You can't see this!");
+      }
+    }
+    const pos = await postsController.reportPost(uid, postID, reportType, comment);
+    return res.status(200).json({
+      message: "Got the post!",
+      data: pos,
+    });
+  } catch (e) {
+    return res.status(403).json({ message: e });
+  }
+});
+
 router.route("/user/:userUid").get(async (req,res) => {
 let userUid = req.params.userUid;
   try{
