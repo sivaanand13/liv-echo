@@ -40,7 +40,7 @@ async function createComment(postID, uid, text, attachments){
     let coms = post.comments;
     coms.push(com._id);
     post = await Post.findOneAndUpdate( 
-                {_id: post._id, sender: user._id},
+                {_id: post._id},
                 {
                     $set: {
                         comments: coms
