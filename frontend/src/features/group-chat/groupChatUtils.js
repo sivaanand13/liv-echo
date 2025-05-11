@@ -121,6 +121,27 @@ async function editGroupChat(curChat, name, profile, members) {
         console.log("setting edit name:", body.members);
       }
     }
+
+    try {
+      const image_url_list = [];
+      if (body.profile) {
+        image_url_list.push(body.profile.secure_url);
+      }
+      const moderationResponse = await groupInfoModeration(
+        body.name,
+        image_url_list
+      );
+      if (moderationResponse.flagged) {
+        throw moderationResponse.message;
+      }
+    } catch (e) {
+      console.error("Moderation Error:", e);
+      const err = new Error(`Moderation Error: ${e}`);
+      err.type = "moderation";
+      err.original = e;
+      throw err;
+    }
+
     console.log(body);
     if (Object.keys(body).length > 0) {
       console.log("Trying to edit chat: ", body);
@@ -128,7 +149,8 @@ async function editGroupChat(curChat, name, profile, members) {
       return response.data.data;
     }
   } catch (e) {
-    console.log("update chat error: ", e);
+    if (e.type === "moderation") throw e.message;
+    console.log("update chat error: ", JSON.stringify(e));
     throw `Group chat update failed!`;
   }
 }
