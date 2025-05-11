@@ -10,6 +10,7 @@ import userUtils from "../users/userUtils.js";
 export default function MostCommentedFeed() {
   const { currentUser, serverUser } = useContext(AuthContext);
   const [posts, setPosts] = useState([]);
+   const [mutualFriend, setMutualFriends] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -18,6 +19,7 @@ export default function MostCommentedFeed() {
       try {
         const allPosts = await postUtils.getPosts();
         const mutualFriends = (await postUtils.getMutualFriends()) || []; //returns list of uids as friends
+        setMutualFriends(mutualFriends);
         console.log("I got friends!", mutualFriends);
         const filteredPosts = (
           await Promise.all(
@@ -37,11 +39,7 @@ export default function MostCommentedFeed() {
           )
         ).filter(Boolean); // remove nulls
         console.log("I got these posts as possible", filteredPosts);
-        const sorted = filteredPosts.sort(
-          (a, b) => (b.comments?.length || 0) - (a.comments?.length || 0)
-        );
-        console.log("I got these posts sorted", sorted);
-        setPosts(sorted);
+        setPosts(filteredPosts);
       } catch (err) {
         console.error(err);
         setError("Could not load posts.");
@@ -51,8 +49,22 @@ export default function MostCommentedFeed() {
     };
 
     fetchPosts();
-  }, []);
+  }, [currentUser.uid]);
+   const sortByComments = () => {
+    return posts.sort((a, b) => (b.comments?.length || 0) - (a.comments?.length || 0));
+  };
 
+  // Sort posts by the number of likes
+  const sortByLikes = () => {
+    return posts.sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0));
+  };
+
+  // Sort posts by the number of friends of the sender
+  const sortByMutualFriendsPosts = () => {
+    return posts.filter(post => {
+      return post.sender && mutualFriend.includes(post.sender.uid); // Only posts by mutual friends
+    });
+  };
   return (
     <Box
       sx={{
@@ -76,7 +88,7 @@ export default function MostCommentedFeed() {
       {error && <Typography color="error">{error}</Typography>}
 
       <Grid container spacing={3} justifyContent="center">
-        {posts.map((post) => (
+        {sortByComments().map((post) => (
           <Grid item xs={12} sm={6} md={4} key={post._id}>
             <Link to={`/posts/${post._id}`} style={{ textDecoration: "none" }}>
               <PostCard item={post} />
@@ -90,6 +102,15 @@ export default function MostCommentedFeed() {
       >
         Most Liked Posts
       </Typography>
+      <Grid container spacing={3} justifyContent="center">
+        {sortByLikes().map((post) => (
+          <Grid item xs={12} sm={6} md={4} key={post._id}>
+            <Link to={`/posts/${post._id}`} style={{ textDecoration: "none" }}>
+              <PostCard item={post} />
+            </Link>
+          </Grid>
+        ))}
+      </Grid>
 
       <Typography
         variant="h4"
@@ -97,6 +118,15 @@ export default function MostCommentedFeed() {
       >
         Friends Posts
       </Typography>
+      <Grid container spacing={3} justifyContent="center">
+        {sortByMutualFriendsPosts().map((post) => (
+          <Grid item xs={12} sm={6} md={4} key={post._id}>
+            <Link to={`/posts/${post._id}`} style={{ textDecoration: "none" }}>
+              <PostCard item={post} />
+            </Link>
+          </Grid>
+        ))}
+      </Grid>
     </Box>
   );
 }
