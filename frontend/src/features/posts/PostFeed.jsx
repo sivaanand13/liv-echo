@@ -79,6 +79,13 @@ export default function MostCommentedFeed() {
           </Grid>
         ))}
       </Grid>
+      <Typography variant="h4" sx={{ color: "white", marginBottom: "20px", textAlign: "center" }}>
+        Most Liked Posts
+      </Typography>
+
+      <Typography variant="h4" sx={{ color: "white", marginBottom: "20px", textAlign: "center" }}>
+        Friends Posts
+      </Typography>
     </Box>
   );
 }
