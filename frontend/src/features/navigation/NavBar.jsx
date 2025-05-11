@@ -15,7 +15,6 @@ import { useState } from "react";
 import NavBarLinks from "./NavLinks";
 import MenuIcon from "@mui/icons-material/Menu";
 import logo from "../../assets/logo/svg/logo-no-background.svg";
-import NotificationCenter from "../../components/NotificationCenter";
 
 function NavBar() {
   const [navDrawerOpen, setNavDrawerOpen] = useState(false);
@@ -53,7 +52,6 @@ function NavBar() {
           <img src={logo} alt="LivEcho Logo" style={{ height: 50 }} />
         </Button>
         <Box sx={{ display: { xs: "none", md: "flex" }, gap: 3 }}>
-          {/* <NotificationCenter /> */}
           <NavBarLinks />
         </Box>
         <IconButton
