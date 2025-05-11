@@ -119,7 +119,29 @@ async function deleteComment(uid, commID){
 }
 
 // like comment
+async function likeComment(commID, uid){
+    let comm = await getCommentById(commID.toString());
+    let user = await usersController.getUserByUID(uid);
 
+    if (user._id.toString() == comm.sender.toString()) throw new Error("you can't like your own comment!");
+    
+      let likez = comm.likes;
+    
+      if (likez.includes(user._id)) throw new Error("you've already liked this comment!");
+      likez.push(user._id);
+    
+      comm = await Comment.findOneAndUpdate(
+        { _id: comm._id },
+        {
+          $set: {
+            likes: likez,
+          },
+        },
+        {}
+      );
+    
+      return post;
+}
 
 // get comment by ID
 async function getCommentById(commID) {
@@ -137,5 +159,6 @@ export default {
     createComment,
     editComment,
     deleteComment,
+    likeComment,
     getCommentById,
 };

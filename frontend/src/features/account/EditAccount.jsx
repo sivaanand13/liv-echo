@@ -170,7 +170,7 @@ function EditAccount({ handleClose }) {
         handleClose();
       } catch (e) {
         console.log("Account.jsx", e);
-        setError(e.message || "Edit account failed!");
+        setError(e || "Edit account failed!");
       }
     }
   };

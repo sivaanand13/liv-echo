@@ -114,7 +114,21 @@ async function editUser(uid, name, email, username, dob, profile, banner) {
   chatNamespace.to(user.uid).emit("accountUpdated", user);
   return user;
 }
+async function updateUserEmail(uid, newEmail) {
+  newEmail = validation.validateEmail(newEmail);
 
+  const user = await getUserByUID(uid);
+  if (!user) {
+    throw new Error(`No user found with uid ${uid}`);
+  }
+
+  const result = await User.updateOne(
+    { uid },
+    { $set: { email: newEmail } }
+  );
+
+  return result;
+}
 async function updateUser(uid, editObject) {
   let { profile, banner, bio } = editObject;
 
@@ -249,5 +263,6 @@ export default {
   uploadFiles,
   updateUser,
   sendFriendRequest,
-  removeFriend
+  removeFriend,
+  updateUserEmail
 };
