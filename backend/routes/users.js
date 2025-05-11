@@ -186,7 +186,7 @@ router.route("/signup/uniqueCheck/").get(async (req, res) => {
     const checkEmail = await userController.validateUnqiueEmail(email);
     if (!checkEmail) {
       return res.status(400).json({
-        message: "Email is invalid",
+        message: "Email check failed!",
       });
     }
     const checkUsername = await userController.validateUnqiueUsername(username);
