@@ -9,6 +9,7 @@ import {
   CardActionArea,
   Box,
   useTheme,
+  CardActions,
 } from "@mui/material";
 import Profile from "../../components/Profile";
 import CustomLink from "../../components/CustomLink";
@@ -72,7 +73,7 @@ export default function PostCard({ item: post }) {
         sx={{}}
         title={<Typography variant="h4">{post.text}</Typography>}
       />
-      <CardActionArea>
+      <Box sx={{ width: "100%" }}>
         <Stack
           direction="row"
           sx={{ alignItems: "center", justifyContent: "space-between" }}
@@ -89,7 +90,7 @@ export default function PostCard({ item: post }) {
           </Stack>
           <Link to={`/posts/${post._id}`}>see more</Link>
         </Stack>
-      </CardActionArea>
+      </Box>
     </Card>
   );
 }
