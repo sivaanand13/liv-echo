@@ -12,20 +12,30 @@ import {
 import { useState } from "react";
 import postUtils from "./postUtils";
 
-export default function EditPostDialog({ open, handleClose, post, onEditSuccess }) {
+export default function EditPostDialog({
+  open,
+  handleClose,
+  post,
+  onEditSuccess,
+}) {
   const [text, setText] = useState(post.text);
   const [isPrivate, setIsPrivate] = useState(post.isPrivate);
   const [error, setError] = useState("");
 
   const handleSave = async () => {
     try {
-      setError("");
+      setError(text);
       const updated = await postUtils.editPost(post._id, { text, isPrivate });
       onEditSuccess(updated);
       handleClose();
     } catch (e) {
+      if (e.type === "moderation") {
+        setError(`Moderation Error: ${e.message}`);
+        return;
+      }
       console.error(e);
       setError("Failed to update post.");
+      return;
     }
   };
 

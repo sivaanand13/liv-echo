@@ -150,7 +150,21 @@ async function getComments(postID) {
 
 async function createComment(postID, data) {
   try {
+    const moderationResponse = await postModeration(data.text, []);
+    console.log("moderationResponse", moderationResponse);
+    if (moderationResponse.flagged) {
+      const moderationError = new Error("Moderation Error");
+      moderationError.type = "moderation";
+      moderationError.message = moderationResponse.message;
+      throw moderationError;
+    }
+  } catch (err) {
+    console.log("Moderation Error!!");
+    throw err;
+  }
+  try {
     const response = await axios.post(`posts/${postID}/comment`, data);
+    console.log("Comment Info", response);
     return response.data.data;
   } catch (e) {
     console.error(e);
@@ -168,6 +182,19 @@ async function deleteComment(postID, commID) {
   }
 }
 async function editPost(postID, data) {
+  try {
+    const moderationResponse = await postModeration(data.text, []);
+    console.log("moderationResponse", moderationResponse);
+    if (moderationResponse.flagged) {
+      const moderationError = new Error("Moderation Error");
+      moderationError.type = "moderation";
+      moderationError.message = moderationResponse.message;
+      throw moderationError;
+    }
+  } catch (err) {
+    console.log("Moderation Error!!");
+    throw err;
+  }
   try {
     const response = await axios.patch(`posts/${postID}`, data);
     return response.data.data;
@@ -187,6 +214,19 @@ async function likeCommentByID(postID, commID) {
   }
 }
 async function editComment(postID, commentID, data) {
+  try {
+    const moderationResponse = await postModeration(data.text, []);
+    console.log("moderationResponse", moderationResponse);
+    if (moderationResponse.flagged) {
+      const moderationError = new Error("Moderation Error");
+      moderationError.type = "moderation";
+      moderationError.message = moderationResponse.message;
+      throw moderationError;
+    }
+  } catch (err) {
+    console.log("Moderation Error!!");
+    throw err;
+  }
   try {
     const response = await axios.patch(`posts/${postID}/${commentID}`, data);
     return response.data.data;

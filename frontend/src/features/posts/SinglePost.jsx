@@ -13,6 +13,7 @@ import {
   Button,
   TextField,
   Stack,
+  Alert,
 } from "@mui/material";
 import postUtils from "./postUtils"; // Adjust the path as needed
 import CommentListItem from "./CommentListItem";
@@ -23,7 +24,6 @@ import CustomLink from "../../components/CustomLink";
 import SendIcon from "@mui/icons-material/Send";
 import { Padding } from "@mui/icons-material";
 import ReportPostDialog from "./reportPostDialogue";
-
 
 export default function SinglePost() {
   const { currentUser, serverUser } = useContext(AuthContext);
@@ -37,13 +37,14 @@ export default function SinglePost() {
   const [editOpen, setEditOpen] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const [commentError, setCommentError] = useState("");
   const [reportOpen, setReportOpen] = useState(false);
   const senderId =
     typeof post?.sender === "object" ? post.sender._id : post?.sender;
   const canDelete =
     serverUser?._id.toString() === senderId?.toString() ||
     serverUser?.role === "admin";
-  const canEdit = serverUser?._id.toString() === senderId?.toString()
+  const canEdit = serverUser?._id.toString() === senderId?.toString();
 
   //console.log("I I EXIST ", canDelete);
   //console.log("user 1", serverUser?._id);
@@ -56,7 +57,7 @@ export default function SinglePost() {
       console.error("Failed to report post:", err.message);
       alert("Failed to report post.");
     }
-}
+  }
 
   useEffect(() => {
     async function fetchPost() {
@@ -89,13 +90,22 @@ export default function SinglePost() {
   async function handleAddComment() {
     if (!newComment.trim()) return;
     setCommentSubmitting(true);
+    setCommentError("");
     try {
       const commentData = { text: newComment };
       const newCom = await postUtils.createComment(postId, commentData);
       setComments((prev) => [newCom, ...prev]); // Add new comment to top
       setNewComment("");
     } catch (err) {
-      console.error("Failed to add comment:", err.message);
+      console.log(err.type);
+      if (err.type === "moderation") {
+        setNewComment("");
+        setCommentError(err.message);
+        return;
+      }
+      setNewComment("");
+      setCommentError(err);
+      console.error("Failed to add comment:", err);
     } finally {
       setCommentSubmitting(false);
     }
@@ -153,16 +163,18 @@ export default function SinglePost() {
             }
             subheader={post.senderName}
             action={
-          currentUser && currentUser._id !== senderId && (
-          <Button
-              size="small"
-              color="warning"
-              onClick={() => setReportOpen(true)}
-              sx={{ textTransform: "none" }}
-          >
-              Report
-            </Button>
-            )}
+              currentUser &&
+              currentUser._id !== senderId && (
+                <Button
+                  size="small"
+                  color="warning"
+                  onClick={() => setReportOpen(true)}
+                  sx={{ textTransform: "none" }}
+                >
+                  Report
+                </Button>
+              )
+            }
           />
           <CardContent>
             <Typography variant="body1" gutterBottom>
@@ -205,13 +217,13 @@ export default function SinglePost() {
             {canDelete && (
               <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
                 {canEdit && (
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  onClick={() => setEditOpen(true)}
-                >
-                  Edit Post
-                </Button>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => setEditOpen(true)}
+                  >
+                    Edit Post
+                  </Button>
                 )}
                 <Button
                   variant="outlined"
@@ -237,25 +249,28 @@ export default function SinglePost() {
         <Typography variant="h6" gutterBottom>
           Add a Comment
         </Typography>
-        <Stack direction="row" spacing={2}>
-          <TextField
-            fullWidth
-            multiline
-            variant="outlined"
-            placeholder="Write a comment..."
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            minRows={1}
-            maxRows={6}
-          />
+        <Stack direction="column">
+          <Stack direction="row" spacing={2}>
+            <TextField
+              fullWidth
+              multiline
+              variant="outlined"
+              placeholder="Write a comment..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              minRows={1}
+              maxRows={6}
+            />
 
-          <Button
-            variant="contained"
-            onClick={handleAddComment}
-            disabled={commentSubmitting}
-          >
-            <SendIcon />
-          </Button>
+            <Button
+              variant="contained"
+              onClick={handleAddComment}
+              disabled={commentSubmitting}
+            >
+              <SendIcon />
+            </Button>
+          </Stack>
+          {commentError && <Alert severity="error">{commentError}</Alert>}
         </Stack>
         <Grid container justifyContent="center" sx={{ width: "100%" }}>
           <Grid
@@ -268,7 +283,10 @@ export default function SinglePost() {
           >
             {comments.map((comment) => (
               <Box key={comment._id} sx={{ p: 0 }}>
-                <CommentListItem item={comment} onDelete={handleCommentDelete}/>
+                <CommentListItem
+                  item={comment}
+                  onDelete={handleCommentDelete}
+                />
               </Box>
             ))}
           </Grid>
@@ -291,9 +309,9 @@ export default function SinglePost() {
         handleClose={() => setReportOpen(false)}
         postId={postId}
         onReportSuccess={() => {
-        setReportOpen(false);}}
+          setReportOpen(false);
+        }}
       />
-
     </Box>
   );
 }
