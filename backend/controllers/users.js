@@ -24,7 +24,10 @@ async function getUserById(id) {
   if (typeof id == "string") {
     id = ObjectId.createFromHexString(id);
   }
-  const user = User.findOne({ _id: id }).populate("friends","name username email profile uid");
+  const user = User.findOne({ _id: id }).populate(
+    "friends",
+    "name username email profile uid"
+  );
   if (!user) {
     throw `No user with id ${id} exists!`;
   }
@@ -51,9 +54,12 @@ async function getUserByUID(uid, display) {
         banner: 1,
         friends: 1,
       }
-    ).populate("friends","name username email profile uid");
+    ).populate("friends", "name username email profile uid");
   } else {
-    user = await User.findOne({ uid: uid }).populate("friends","name username email profile uid");
+    user = await User.findOne({ uid: uid }).populate(
+      "friends",
+      "name username email profile uid"
+    );
   }
 
   if (!user) {
@@ -123,10 +129,7 @@ async function updateUserEmail(uid, newEmail) {
     throw new Error(`No user found with uid ${uid}`);
   }
 
-  const result = await User.updateOne(
-    { uid },
-    { $set: { email: newEmail } }
-  );
+  const result = await User.updateOne({ uid }, { $set: { email: newEmail } });
 
   return result;
 }
@@ -191,14 +194,20 @@ async function searchUsers(query) {
   }).select("uid name username email profile banner bio role");
 }
 
-async function uploadFiles(attachments, uid) {
+async function uploadFiles(attachments, uid, unprocessed) {
   let media = [];
   if (attachments) {
     validation.validateArray(attachments, "Message attachments");
     for (const attachment of attachments) {
       const { buffer, mimetype } = attachment;
       if (mimetype.startsWith("image/")) {
-        const processedImage = await sharp.processChatImage(buffer);
+        let processedImage;
+        if (unprocessed) {
+          processedImage = buffer;
+        } else {
+          processedImage = await sharp.processChatImage(buffer);
+        }
+
         const cloudinaryAsset = await cloudinary.uploadBufferedMedia(
           processedImage,
           uid
@@ -216,16 +225,13 @@ async function sendFriendRequest(userUid, friendUid) {
 
   const currUser = await getUserByUID(userUid);
   const friend = await getUserByUID(friendUid);
-  const friendId = friend._id
-  if (currUser.friends.some(f => f._id.toString() == friendId.toString())) {
+  const friendId = friend._id;
+  if (currUser.friends.some((f) => f._id.toString() == friendId.toString())) {
     throw "You are already friends with this user.";
   }
   console.log("user: ", currUser);
-  await User.updateOne(
-    { uid: userUid },
-    { $addToSet: { friends: friendId } }
-  );
-  console.log("Step 4")
+  await User.updateOne({ uid: userUid }, { $addToSet: { friends: friendId } });
+  console.log("Step 4");
   let user = await getUserByUID(userUid, false);
   console.log("Edited user", user);
   const updatefriend = await getUserByUID(friendUid);
@@ -237,7 +243,9 @@ async function sendFriendRequest(userUid, friendUid) {
     body: "",
   });
 
-  if(!updatefriend.friends.some(f => f._id.toString() == user._id.toString()))
+  if (
+    !updatefriend.friends.some((f) => f._id.toString() == user._id.toString())
+  )
     chatNamespace.to(friendUid).emit("friend-request-sent");
   return { message: "Friend added" };
 }
@@ -247,19 +255,16 @@ async function removeFriend(userUid, friendUid) {
   const currUser = await getUserByUID(userUid);
   const friend = await getUserByUID(friendUid);
   const friendId = friend._id;
-  if (!currUser.friends.some(f => f._id.toString() == friendId.toString())) {
+  if (!currUser.friends.some((f) => f._id.toString() == friendId.toString())) {
     throw "You are not friends with this user.";
   }
 
-  await User.updateOne(
-    { uid: userUid },
-    { $pull: { friends: friendId } }
-  );
-  console.log("Step 4")
+  await User.updateOne({ uid: userUid }, { $pull: { friends: friendId } });
+  console.log("Step 4");
   let user = await getUserByUID(userUid, false);
   console.log("Edited user", user);
   chatNamespace.to(user.uid).emit("accountUpdated", user);
-  if(!user.friends.some(f => f._id.toString() == friend._id.toString()))
+  if (!user.friends.some((f) => f._id.toString() == friend._id.toString()))
     chatNamespace.to(userUid).emit("friend-request-denied");
   return { message: "Friend removed" };
 }
@@ -276,5 +281,5 @@ export default {
   updateUser,
   sendFriendRequest,
   removeFriend,
-  updateUserEmail
+  updateUserEmail,
 };
