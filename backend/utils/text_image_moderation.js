@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import { text } from "stream/consumers";
+import { url } from "inspector";
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -31,6 +32,7 @@ export async function moderationFunction(text, urls) {
   // Return data schema {flagged: Boolean, categories: [{category_name: category_score:int}]}
 
   try {
+    console.log("image", urls);
     console.log(
       `Moderating... Text: ${text} Image_url: ${JSON.stringify(urls)}`
     );
