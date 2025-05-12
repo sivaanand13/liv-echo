@@ -37,6 +37,7 @@ import { Link } from "react-router-dom";
 import StaticPaginatedList from "../../components/StaticPaginatedList.jsx";
 import FriendCard from "./FriendCard.jsx";
 import CustomList from "../../components/CustomList.jsx";
+import chatSocket from "../../sockets/namespaces/chatSocket.js";
 export default function Account() {
   const { user } = useContext(AuthContext);
   const theme = useTheme();
