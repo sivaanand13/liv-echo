@@ -57,110 +57,118 @@ router.route("/profile/:userUID").get(authMiddleware, async (req, res) => {
   }
 });
 
-router.route("/editaccount/email/update").post(authMiddleware, async (req, res) => {
-  const { uid, newEmail } = req.body;
+router
+  .route("/editaccount/email/update")
+  .post(authMiddleware, async (req, res) => {
+    const { uid, newEmail } = req.body;
 
-  if (!uid || !newEmail) {
-    return res.status(400).json({
-      message: "Missing required parameters (uid, newEmail).",
-    });
-  }
-  try {
-    validation.validateEmail(newEmail); // Assuming this will throw if invalid
-  } catch (e) {
-    return res.status(400).json({
-      message: "Invalid email format.",
-      errors: e,
-    });
-  }
-
-  try {
-    await admin.auth().updateUser(uid, { email: newEmail });
-    res.status(200).json({
-      message: "Email successfully updated in Firebase.",
-    });
-    //console.log("AM i Here for some reason?");
-    await userController.updateUserEmail(uid, newEmail);
-  } catch (error) {
-    console.error("Error updating user email:", error);
-    res.status(500).json({
-      message: "Failed to update user email.",
-      error: error.message,
-    });
-  }
-});
-router.route("/editaccount/email/uniqueCheck/").get(authMiddleware, async (req, res) => {
-  let { email, uid } = req.query;
-  console.log("Checking unique email", email);
-  try {
-    email = validation.validateEmail(email);
-  } catch (e) {
-    return res.status(400).json({
-      message: "Email check failed!",
-      errors: e,
-    });
-  }
-  try {
-    const existingUser = await userController.getUserByUID(uid); //Retrieve the current user by UID
-    if (existingUser.email === email) {
-      //Email is not changing
-      return res.status(200).json({
-        message: "Email is available",
+    if (!uid || !newEmail) {
+      return res.status(400).json({
+        message: "Missing required parameters (uid, newEmail).",
       });
     }
-    const checkEmail = await userController.validateUnqiueEmail(email);
-    if (!checkEmail) {
+    try {
+      validation.validateEmail(newEmail); // Assuming this will throw if invalid
+    } catch (e) {
       return res.status(400).json({
+        message: "Invalid email format.",
+        errors: e,
+      });
+    }
+
+    try {
+      await admin.auth().updateUser(uid, { email: newEmail });
+      res.status(200).json({
+        message: "Email successfully updated in Firebase.",
+      });
+      //console.log("AM i Here for some reason?");
+      await userController.updateUserEmail(uid, newEmail);
+    } catch (error) {
+      console.error("Error updating user email:", error);
+      res.status(500).json({
+        message: "Failed to update user email.",
+        error: error.message,
+      });
+    }
+  });
+router
+  .route("/editaccount/email/uniqueCheck/")
+  .get(authMiddleware, async (req, res) => {
+    let { email, uid } = req.query;
+    console.log("Checking unique email", email);
+    try {
+      email = validation.validateEmail(email);
+    } catch (e) {
+      return res.status(400).json({
+        message: "Email check failed!",
+        errors: e,
+      });
+    }
+    try {
+      const existingUser = await userController.getUserByUID(uid); //Retrieve the current user by UID
+      if (existingUser.email === email) {
+        //Email is not changing
+        return res.status(200).json({
+          message: "Email is available",
+        });
+      }
+      const checkEmail = await userController.validateUnqiueEmail(email);
+      if (!checkEmail) {
+        return res.status(400).json({
+          message: "Email check failed!",
+        });
+      }
+      console.log("Email not taken");
+      return res.status(200).json({
+        email: checkEmail,
+      });
+    } catch (e) {
+      console.log(e);
+      return res.status(500).json({
         message: "Email check failed!",
       });
     }
-    console.log("Email not taken");
-    return res.status(200).json({
-      email: checkEmail,
-    });
-  } catch (e) {
-    console.log(e);
-    return res.status(500).json({
-      message: "Email check failed!",
-    });
-  }
-});
-router.route("/editaccount/username/uniqueCheck/").get(authMiddleware, async (req, res) => {
-  let { username, uid } = req.query;
-  console.log("Checking unique username", username);
-  try {
-    username = validation.validateUsername(username);
-  } catch (e) {
-    return res.status(400).json({
-      message: "Unique username check failed!",
-      errors: e,
-    });
-  }
-  try {
-    const existingUser = await userController.getUserByUID(uid); //Retrieve the current user by UID
-    if (existingUser.username === username) {
-      //Email is not changing
-      return res.status(200).json({
-        message: "Username is available",
-      });
-    }
-    const checkUsername = await userController.validateUnqiueUsername(username);
-    if (!checkUsername) {
+  });
+router
+  .route("/editaccount/username/uniqueCheck/")
+  .get(authMiddleware, async (req, res) => {
+    let { username, uid } = req.query;
+    console.log("Checking unique username", username);
+    try {
+      username = validation.validateUsername(username);
+    } catch (e) {
       return res.status(400).json({
-        message: "Username is in use by another user!",
+        message: "Unique username check failed!",
+        errors: e,
       });
     }
-    console.log("Username free");
-    return res.status(200).json({
-      username: checkUsername,
-    });
-  } catch (e) {
-    console.log(e);
-    return res.status(500).json({
-      message: "Unique username check failed!",
-    });
-  }
-});
+    try {
+      const existingUser = await userController.getUserByUID(uid); //Retrieve the current user by UID
+      if (existingUser.username === username) {
+        //Email is not changing
+        return res.status(200).json({
+          message: "Username is available",
+        });
+      }
+      const checkUsername = await userController.validateUnqiueUsername(
+        username
+      );
+      if (!checkUsername) {
+        return res.status(400).json({
+          message: "Username is in use by another user!",
+        });
+      }
+      console.log("Username free");
+      return res.status(200).json({
+        username: checkUsername,
+      });
+    } catch (e) {
+      console.log(e);
+      return res.status(500).json({
+        message: "Unique username check failed!",
+      });
+    }
+  });
 
 router.route("/signup/uniqueCheck/").get(async (req, res) => {
   let { email, username } = req.query;
@@ -186,7 +194,7 @@ router.route("/signup/uniqueCheck/").get(async (req, res) => {
     const checkEmail = await userController.validateUnqiueEmail(email);
     if (!checkEmail) {
       return res.status(400).json({
-        message: "Email check failed!",
+        message: "Email is invalid",
       });
     }
     const checkUsername = await userController.validateUnqiueUsername(username);
@@ -455,7 +463,8 @@ router
     try {
       const cloudinaryAssets = await userController.uploadFiles(
         files,
-        req.user.uid
+        req.user.uid,
+        true
       );
       return res.status(200).json({
         message: "Files upload successfully",
@@ -466,35 +475,61 @@ router
       res.status(500).json({ message: e });
     }
   });
-router.route('/friends/requests').
-post(authMiddleware, async (req,res) => {
-  const { friendUID } = req.body;
-  const currentUID = req.user?.uid;
-  if (!currentUID || !friendUID) {
-    return res.status(400).json({ message: "Invalid request" });
-  }
-  try {
-    console.log("Step 3")
-    await userController.sendFriendRequest(currentUID, friendUID);
-    return res.status(200).json({ message: "Friend request sent successfully" });
-  } catch (e) {
-    console.error(e);
-    return res.status(500).json({ message: "Failed to send friend request", error: e });
-  }
-})
-.patch(authMiddleware, async (req,res) => {
-  const { friendUID } = req.body;
-  const currentUID = req.user?.uid;
-  if (!currentUID || !friendUID) {
-    return res.status(400).json({ message: "Invalid request" });
-  }
-  try {
-    console.log("Step 3")
-    await userController.removeFriend(currentUID, friendUID);
-    return res.status(200).json({ message: "Friend successfully removed" });
-  } catch (e) {
-    console.error(e);
-    return res.status(500).json({ message: "Failed to remove friend", error: e });
-  }
-})
+router
+  .route("/friends/requests")
+  .post(authMiddleware, async (req, res) => {
+    const { friendUID } = req.body;
+    const currentUID = req.user?.uid;
+    if (!currentUID || !friendUID) {
+      return res.status(400).json({ message: "Invalid request" });
+    }
+    try {
+      console.log("Step 3");
+      await userController.sendFriendRequest(currentUID, friendUID);
+      return res
+        .status(200)
+        .json({ message: "Friend request sent successfully" });
+    } catch (e) {
+      console.error(e);
+      return res
+        .status(500)
+        .json({ message: "Failed to send friend request", error: e });
+    }
+  })
+  .patch(authMiddleware, async (req, res) => {
+    const { friendUID } = req.body;
+    const currentUID = req.user?.uid;
+    if (!currentUID || !friendUID) {
+      return res.status(400).json({ message: "Invalid request" });
+    }
+    try {
+      console.log("Step 3");
+      await userController.removeFriend(currentUID, friendUID);
+      return res.status(200).json({ message: "Friend successfully removed" });
+    } catch (e) {
+      console.error(e);
+      return res
+        .status(500)
+        .json({ message: "Failed to remove friend", error: e });
+    }
+  });
+router
+  .route("/friends/requests/remove")
+  .patch(authMiddleware, async (req, res) => {
+    const { friendUID } = req.body;
+    const currentUID = req.user?.uid;
+    if (!currentUID || !friendUID) {
+      return res.status(400).json({ message: "Invalid request" });
+    }
+    try {
+      console.log("Step 3");
+      await userController.removeFriend(friendUID, currentUID);
+      return res.status(200).json({ message: "Friend successfully removed" });
+    } catch (e) {
+      console.error(e);
+      return res
+        .status(500)
+        .json({ message: "Failed to remove friend", error: e });
+    }
+  });
 export default router;

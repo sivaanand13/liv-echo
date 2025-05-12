@@ -129,10 +129,7 @@ async function updateUserEmail(uid, newEmail) {
     throw new Error(`No user found with uid ${uid}`);
   }
 
-  const result = await User.updateOne(
-    { uid },
-    { $set: { email: newEmail } }
-  );
+  const result = await User.updateOne({ uid }, { $set: { email: newEmail } });
 
   return result;
 }
@@ -197,14 +194,20 @@ async function searchUsers(query) {
   }).select("uid name username email profile banner bio role");
 }
 
-async function uploadFiles(attachments, uid) {
+async function uploadFiles(attachments, uid, unprocessed) {
   let media = [];
   if (attachments) {
     validation.validateArray(attachments, "Message attachments");
     for (const attachment of attachments) {
       const { buffer, mimetype } = attachment;
       if (mimetype.startsWith("image/")) {
-        const processedImage = await sharp.processChatImage(buffer);
+        let processedImage;
+        if (unprocessed) {
+          processedImage = buffer;
+        } else {
+          processedImage = await sharp.processChatImage(buffer);
+        }
+
         const cloudinaryAsset = await cloudinary.uploadBufferedMedia(
           processedImage,
           uid
@@ -226,11 +229,12 @@ async function sendFriendRequest(userUid, friendUid) {
   if (currUser.friends.some((f) => f._id.toString() == friendId.toString())) {
     throw "You are already friends with this user.";
   }
-
+  console.log("user: ", currUser);
   await User.updateOne({ uid: userUid }, { $addToSet: { friends: friendId } });
   console.log("Step 4");
   let user = await getUserByUID(userUid, false);
   console.log("Edited user", user);
+  const updatefriend = await getUserByUID(friendUid);
   chatNamespace.to(user.uid).emit("accountUpdated", user);
 
   await sendNotification(friendId, friendUid, "", {
@@ -239,6 +243,10 @@ async function sendFriendRequest(userUid, friendUid) {
     body: "",
   });
 
+  if (
+    !updatefriend.friends.some((f) => f._id.toString() == user._id.toString())
+  )
+    chatNamespace.to(friendUid).emit("friend-request-sent");
   return { message: "Friend added" };
 }
 async function removeFriend(userUid, friendUid) {
@@ -256,6 +264,8 @@ async function removeFriend(userUid, friendUid) {
   let user = await getUserByUID(userUid, false);
   console.log("Edited user", user);
   chatNamespace.to(user.uid).emit("accountUpdated", user);
+  if (!user.friends.some((f) => f._id.toString() == friend._id.toString()))
+    chatNamespace.to(userUid).emit("friend-request-denied");
   return { message: "Friend removed" };
 }
 export default {
@@ -271,5 +281,5 @@ export default {
   updateUser,
   sendFriendRequest,
   removeFriend,
-  updateUserEmail
+  updateUserEmail,
 };

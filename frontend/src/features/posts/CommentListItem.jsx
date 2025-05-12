@@ -12,20 +12,42 @@ import {
   Menu,
   MenuItem,
   IconButton,
+  TextField,
+  Button,
 } from "@mui/material";
 import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 import Profile from "../../components/Profile";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { useContext, useState } from "react";
+import SaveIcon from "@mui/icons-material/Save";
+import CancelIcon from "@mui/icons-material/Cancel";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import postUtils from "./postUtils";
 import CustomLink from "../../components/CustomLink";
-export default function PostListItem({ msg }) {
+import { formatDistanceToNow } from "date-fns";
+
+export default function CommentListItem({ item: msg, onDelete }) {
+  console.log("comment list item: ", msg);
+  const { currentUser, serverUser } = useContext(AuthContext);
   const auth = useContext(AuthContext);
   const [menuOpen, setMenuOpen] = useState(false);
   const [ancor, setAncor] = useState(null);
   const [liked, setLiked] = useState(false);
+  const [lik, setLik] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [text, setText] = useState(msg.text);
+  const [tempText, setTempText] = useState(msg.text);
+
+  useEffect(() => {
+    async function fetchLiked() {
+      const likedByCurrentUser = msg.likes.includes(serverUser._id);
+      setLiked(likedByCurrentUser);
+      setLik(!likedByCurrentUser);
+    }
+    fetchLiked();
+  }, [currentUser._id, msg]);
+
   function handleOpen(e) {
     setMenuOpen((prev) => !prev);
     setAncor(e.currentTarget);
@@ -35,8 +57,14 @@ export default function PostListItem({ msg }) {
   }
 
   async function handleEdit() {
+    setEditing(true);
+    handleClose();
+  }
+
+  async function handleLike() {
     try {
-      //await postUtils.deleteMessage(msg);
+      let n = await postUtils.likeCommentByID(msg.post, msg._id);
+      setLiked(n);
     } catch (e) {
       console.log(e);
     }
@@ -45,22 +73,43 @@ export default function PostListItem({ msg }) {
 
   async function handleDelete() {
     try {
-      await postUtils.deletePost(msg);
+      await postUtils.deleteComment(msg.post, msg._id);
+      if (onDelete) onDelete(msg._id);
     } catch (e) {
       console.log(e);
     }
     handleClose();
   }
+  async function handleSaveEdit() {
+    try {
+      const updated = await postUtils.editComment(msg.post, msg._id, {
+        text: tempText,
+      });
+      setText(updated.text);
+      setEditing(false);
+    } catch (e) {
+      console.log("Edit failed:", e);
+    }
+  }
+  function handleCancelEdit() {
+    setTempText(text);
+    setEditing(false);
+  }
+  const isCommentor =
+    serverUser.uid === msg.sender?.uid ||
+    serverUser.uid === msg.sender ||
+    serverUser.role === "admin";
   return (
     <ListItem
       sx={{
         backgroundColor: "#611F69",
         backdropFilter: "blur(10px)",
         borderRadius: "0.5em",
-        marginBottom: "2em",
         boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
         color: "white",
         padding: "1rem",
+        width: "100%",
+        marginY: "1rem",
       }}
     >
       <Stack direction="column">
@@ -87,14 +136,42 @@ export default function PostListItem({ msg }) {
                 </CustomLink>
               </Typography>
               <Typography variant="caption">
-                {new Date(msg.createdAt).toLocaleString()}
+                {formatDistanceToNow(msg.createdAt, { addSuffix: true })}
               </Typography>
             </Stack>
-
-            <Typography variant="body1">{msg.text}</Typography>
+            {!editing ? (
+              <Typography variant="body1">{text}</Typography>
+            ) : (
+              <Stack spacing={1}>
+                <TextField
+                  fullWidth
+                  multiline
+                  variant="outlined"
+                  value={tempText}
+                  onChange={(e) => setTempText(e.target.value)}
+                />
+                <Stack direction="row" spacing={1}>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<SaveIcon />}
+                    onClick={handleSaveEdit}
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<CancelIcon />}
+                    onClick={handleCancelEdit}
+                  >
+                    Cancel
+                  </Button>
+                </Stack>
+              </Stack>
+            )}
           </Stack>
-          {(auth.currentUser.uid == msg.sender?.uid ||
-            auth.currentUser.role == "admin") && (
+          {isCommentor && (
             <>
               <IconButton
                 onClick={handleOpen}
@@ -147,7 +224,8 @@ export default function PostListItem({ msg }) {
 
         <ListItemButton
           onClick={() => {
-            setLiked((prev) => !prev);
+            handleLike();
+            //setLiked((prev) => !prev);
             console.log(`${!liked ? "Liked" : "Unliked"} post:`, msg._id);
             // Optional: postUtils.likePost(msg._id, !liked)
           }}
@@ -166,6 +244,9 @@ export default function PostListItem({ msg }) {
             },
           }}
         >
+          <Typography variant="body1" sx={{ paddingRight: 0.5 }}>
+            {msg.likes.length + (lik ? liked : 0 - !liked)}
+          </Typography>
           {liked ? (
             <ThumbUpAltIcon fontSize="small" sx={{ mr: 1 }} />
           ) : (

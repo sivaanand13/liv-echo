@@ -109,6 +109,16 @@ async function getPostByPostId(postId) {
   }
 }
 
+async function likePostByPostId (postId) {
+  try {
+    const res = await axios.patch(`posts/${postId}/like`);
+    return res.data.data;
+  } catch (err) {
+    console.error("Failed to fetch post by ID:", err);
+    throw err.response?.data?.message || "Error fetching post.";
+  }
+}
+
 async function getPosts() {
   try {
     const response = await axios.get(`posts`);
@@ -118,7 +128,74 @@ async function getPosts() {
     throw `Post fetch failed!`;
   }
 }
+async function getModPosts() {
+  try {
+    const response = await axios.get(`posts/mod`);
+    return response.data.data;
+  } catch (e) {
+    console.log(e);
+    throw `Post fetch failed!`;
+  }
+}
 
+
+async function getComments(postID){
+    try {
+    const response = await axios.get(`posts/${postID}/comment`);
+    return response.data.data;
+  } catch (e) {
+    console.log(e);
+    throw `Comment fetch failed!`;
+  }
+}
+
+async function createComment(postID, data) {
+  try {
+    const response = await axios.post(`posts/${postID}/comment`, data);
+    return response.data.data;
+  } catch (e) {
+    console.error(e);
+    throw new Error("Post update failed!");
+  }
+}
+
+async function deleteComment(postID, commID){
+  try {
+    const response = await axios.del(`posts/${postID}/${commID}`);
+    return response.data.data;
+  } catch (e) {
+    console.log(e);
+    throw `Comment fetch failed!`;
+  }
+}
+async function editPost(postID, data) {
+  try {
+    const response = await axios.patch(`posts/${postID}`, data);
+    return response.data.data;
+  } catch (e) {
+    console.error(e);
+    throw new Error("Post update failed!");
+  }
+}
+
+async function likeCommentByID (postID, commID) {
+  try {
+    const res = await axios.patch(`posts/${postID}/${commID}/like`);
+    return res.data.data;
+  } catch (err) {
+    console.error("Failed to fetch post by ID:", err);
+    throw err.response?.data?.message || "Error fetching post.";
+  }
+}
+async function editComment(postID, commentID, data) {
+  try {
+    const response = await axios.patch(`posts/${postID}/${commentID}`, data);
+    return response.data.data;
+  } catch (e) {
+    console.error("Failed to edit comment:", e);
+    throw new Error("Edit failed.");
+  }
+}
 async function getPostsByUID(userUid) {
   try {
     const response = await axios.get(`posts/user/${userUid}`);
@@ -141,7 +218,7 @@ async function getMutualFriends() {
 }
 async function deletePost(pos) {
   try {
-    const response = await axios.del(`posts/${pos._id}`, {});
+    const response = await axios.del(`posts/${pos}`, {});
     console.log("Well, I tried!");
     return response.data.data;
   } catch (e) {
@@ -153,9 +230,16 @@ async function deletePost(pos) {
 export default {
   createPost,
   getPosts,
+  getComments,
+  createComment,
+  deleteComment,
+  likeCommentByID,
   deletePost,
   searchPosts,
   getPostsByUID,
   getPostByPostId,
-  getMutualFriends
+  getMutualFriends,
+  editPost,
+  editComment,
+  getModPosts
 };

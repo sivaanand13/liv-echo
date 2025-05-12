@@ -85,8 +85,8 @@ function SignIn() {
       try {
         await authUtils.signInUser(null, email, password);
       } catch (e) {
-        console.log("SignIn.jsx", e);
-        setError(e);
+        console.log("SignIn.jsx", e.message);
+        setError(`Invalid email and password combination!`);
       }
     }
   };
@@ -107,7 +107,7 @@ function SignIn() {
     >
       <Card sx={{ minWidth: "40%", maxWidth: "50%", padding: "2rem" }}>
         <Stack spacing={2} width="100%">
-          <Typography variant="h4" sx={{ width: "100%" }}>
+          <Typography variant="h4" sx={{ width: "100%", textAlign: "center" }}>
             Sign In
           </Typography>
           <FormControl>

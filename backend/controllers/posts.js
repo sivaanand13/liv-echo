@@ -7,6 +7,7 @@ import Post from "../models/post.js";
 import elasticClient from "../elasticSearch/elasticsearchClient.js";
 import createIndex from "../elasticSearch/createPostIndex.js";
 import userController from "./users.js";
+import commentsController from "./comments.js";
 import { sendNotification } from "./notification.js";
 // delete post... make sure an admin can do it no matter what!
 
@@ -14,11 +15,19 @@ async function getNPosts(n) {
   //console.log("1");
   const posts = await Post.find({})
     .sort({ createdAt: -1 })
-    .limit(n * 2)
     .populate("sender", "name username email profile friends uid")
     .lean();
 
   //console.log("2");
+  return posts;
+}
+
+async function getModPosts() {
+  const posts = await Post.find({ "reports.reportNum": { $gte: 5 } })
+    .sort({ createdAt: -1 })
+    .populate("sender", "name username email profile friends uid")
+    .lean();
+
   return posts;
 }
 
@@ -87,7 +96,7 @@ async function canDeletePost(uid, postID) {
   let user = await usersController.getUserByUID(uid);
 
   // if the user is an admin we can ignore these checks
-  if (!user.role != "admin" && user._id.toString() != post.sender.toString()) {
+  if (!user.role != "admin" && user._id.toString() != post.sender._id.toString()) {
     console.log("User isn't poster or admin");
     return false;
   }
@@ -102,7 +111,15 @@ async function deletePost(uid, postID) {
 
   let canDel = await canDeletePost(uid, postID);
   if (!canDel) throw new Error("You don't have permissions to delete this!");
-
+  const commentIds = post.comments;
+  console.log("My commentIDs", commentIds);
+  for (const commentId of commentIds) {
+    try {
+      await commentsController.deleteCommentAnyway(uid, commentId.toString());
+    } catch (e) {
+      console.error(`Failed to delete comment ${commentId}:`, e);
+    }
+  }
   await Post.deleteOne({ _id: post._id });
   await elasticClient.delete({
     index: "posts",
@@ -115,10 +132,12 @@ async function editPost(uid, postID, text, isPrivate, updateTimestamps) {
   let post = await getPostById(postID.toString());
   let user = await usersController.getUserByUID(uid);
   validation.validateBoolean(isPrivate);
-
-  if (post.sender.toString() != user._id.toString())
+  console.log("post.sender",post.sender)
+  console.log("post.sender._id",post.sender.id)
+  console.log("user._id",user._id)
+  if (post.sender.id.toString() != user._id.toString())
     throw new Error("You can't delete this post!");
-
+  console.log("Chieff")
   if (text) {
     text = validation.validateString(text);
     if (text.length > settings.MESSAGE_LENGTH)
@@ -189,8 +208,8 @@ async function likePost(uid, postId) {
 
   let likez = post.likes;
 
-  if (likez.includes(user._id))
-    throw new Error("you've already liked this post!");
+  // return false?
+  if (likez.includes(user._id)) return false;
   likez.push(user._id);
 
   post = await Post.findOneAndUpdate(
@@ -203,7 +222,7 @@ async function likePost(uid, postId) {
     {}
   );
 
-  return post;
+  return true;
 }
 
 // report the post
@@ -264,7 +283,10 @@ async function reportPost(uid, postId, reportType, comment) {
 async function getPostById(postId) {
   postId = validation.validateString(postId, "Post Id", true);
   postId = ObjectId.createFromHexString(postId);
-  const post = await Post.findById(postId);
+  const post = await Post.findById(postId).populate(
+    "sender",
+    "name username email profile friends uid"
+  );
   if (!post) {
     throw `No post with id (${post})!`;
   }
@@ -273,7 +295,7 @@ async function getPostById(postId) {
 
 // if a post is private, you need to be either the user, their friend, or an admin to see it
 async function canSeePost(uid, postID) {
-  let post = await getPostById(postId.toString());
+  let post = await getPostById(postID.toString());
   let user = await usersController.getUserByUID(uid);
 
   if (!post.isPrivate) return true; // oh cool the post is public
@@ -287,7 +309,7 @@ async function canSeePost(uid, postID) {
 
   return false; // dammit
 }
-async function findMutualFriend(user){
+async function findMutualFriend(user) {
   let friendIds = (user?.friends || []).map((id) => id._id.toString());
   let finalArray = [];
   for (let i = 0; i < friendIds.length; i++) {
@@ -352,7 +374,7 @@ async function searchPosts(queryText, user) {
   //     }
   //    }
   // });
-  const { body } = await elasticClient.search({
+  let { body } = await elasticClient.search({
     index: "posts",
     body: {
       query: {
@@ -377,6 +399,7 @@ async function searchPosts(queryText, user) {
       },
     },
   });
+
   console.log("Raw Elasticsearch Response:", JSON.stringify(body, null, 2));
   console.log("Values we mentioned", body);
   console.log("hits", body.hits);
@@ -388,6 +411,13 @@ async function searchPosts(queryText, user) {
       ...hit._source,
     }));
     console.log("Mapped Search Results:", results);
+    for (let i = 0; i < results.length; i++) {
+      const curPost = results[i];
+      console.log("update sender: ", curPost);
+      const post = await getPostById(curPost.id);
+      console.log("updated post:", post);
+      results[i] = post;
+    }
     return results;
   } else {
     console.log("I should not be here");
@@ -473,5 +503,6 @@ export default {
   canSeePost,
   searchPosts,
   getPostsByUid,
-  findMutualFriend
+  findMutualFriend,
+  getModPosts
 };
