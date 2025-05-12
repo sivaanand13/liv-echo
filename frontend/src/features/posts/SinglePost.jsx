@@ -35,12 +35,14 @@ export default function SinglePost() {
   const [editOpen, setEditOpen] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const senderId =
+    typeof post?.sender === "object" ? post.sender._id : post?.sender;
   const canDelete =
-    serverUser?._id.toString() === post?.sender.toString() ||
+    serverUser?._id.toString() === senderId?.toString() ||
     serverUser?.role === "admin";
-  // console.log("I I EXIST ", canDelete);
-  // console.log("user 1", serverUser?._id);
-  // console.log("user 2", post?.sender);
+  //console.log("I I EXIST ", canDelete);
+  //console.log("user 1", serverUser?._id);
+  console.log("user 2", post?.sender);
 
   useEffect(() => {
     async function fetchPost() {
@@ -61,9 +63,14 @@ export default function SinglePost() {
   function handleDeleteSuccess() {
     navigate("/");
   }
-  function handleEditSuccess(updatedPost) {
-    setPost(updatedPost);
-    setEditOpen(false);
+  async function handleEditSuccess() {
+    try {
+      const updatedPost = await postUtils.getPostByPostId(postId);
+      setPost(updatedPost);
+      setEditOpen(false);
+    } catch (err) {
+      console.error("Failed to re-fetch post after edit:", err);
+    }
   }
   async function handleAddComment() {
     if (!newComment.trim()) return;

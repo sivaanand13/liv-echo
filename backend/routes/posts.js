@@ -181,6 +181,7 @@ router.route("/:postID").patch(async (req, res) => {
   try {
     if (uid.toString() == poster.uid.toString()) {
       let pos = await postsController.editPost(uid, postID, text, isPrivate);
+      console.log("Did i do that?", pos)
       return res.status(200).json({
         message: "Updated post succesfully!",
         data: pos,
@@ -214,7 +215,7 @@ router.route("/:postID").delete(async (req, res) => {
   // if you aren't, throw an error
   try {
     let candle = await postsController.canDeletePost(uid, postID);
-    console.log(candle);
+    console.log("Hi guys", candle);
     if (candle) {
       let pos = await postsController.deletePost(uid, postID);
       return res.status(200).json({
