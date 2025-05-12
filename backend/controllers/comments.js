@@ -126,7 +126,7 @@ async function deleteComment(uid, commID) {
   post = await Post.findOneAndUpdate(
     { _id: post._id, sender: user._id },
     {
-      $pull: {
+      $set: {
         comments: coms,
       },
     },
