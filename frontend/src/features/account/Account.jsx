@@ -46,6 +46,7 @@ export default function Account() {
   const [tab, setTab] = useState(0);
   const [posts, setPosts] = useState([]);
   const [userData, setUserData] = useState(null);
+  const [modPosts, setModPosts] = useState([]);
 
   const handleTabChange = (_, newValue) => {
     setTab(newValue);
@@ -87,6 +88,16 @@ export default function Account() {
     }
     getPosts();
   }, [user.uid]);
+  if(user.role === "admin"){
+    useEffect(() => {
+      async function getModPosts() {
+        const modPostList = await postUtils.getModPosts();
+        console.log("mod posts: " + modPostList)
+        setModPosts(modPostList);
+    }
+    getModPosts();
+    },[])
+  }
   console.log("posts: ", posts);
   return (
     <Box
@@ -232,7 +243,7 @@ export default function Account() {
           </Box>
         )}
 
-        {tab === 1 && userData?.friends.length > 0 && (
+        {tab === 1 && user?.friends.length > 0 && (
           <Box sx={{ p: 2 }}>
             <PaginatedList
               title="Friends"
@@ -242,7 +253,7 @@ export default function Account() {
             />
           </Box>
         )}
-        {tab === 1 && userData?.friends.length === 0 && (
+        {tab === 1 && user?.friends.length === 0 && (
           <Typography variant="h3" textAlign="center" mx={"2rem"}>
             Sorry You Have No Friends
           </Typography>
@@ -358,6 +369,120 @@ export default function Account() {
         {tab === 2 && posts.length === 0 && (
           <Typography variant="h3" textAlign="center" mx={"2rem"}>
             Sorry You Have No Posts
+          </Typography>
+        )}
+
+        {tab === 3 && modPosts.length > 0 && (
+          <Grid
+            container
+            spacing={3}
+            justifyContent="center"
+            direction={"column"}
+          >
+            {modPosts.map((post) => (
+              <Box key={post._id} sx={{ mb: 2 }}>
+                <Paper
+                  elevation={3}
+                  sx={{ maxWidth: "800px", mx: "auto", p: 1 }}
+                >
+                  <Card elevation={1}>
+                    <CardActionArea component={Link} to={`/posts/${post._id}`}>
+                      <CardHeader
+                        title={post.senderUsername}
+                        subheader={post.senderName}
+                      />
+                      <CardContent>
+                        <Typography variant="body1" gutterBottom>
+                          {post.text}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          display="block"
+                          color="text.secondary"
+                        >
+                          Posted on {new Date(post.createdAt).toLocaleString()}
+                        </Typography>
+                        {post.attachments && post.attachments.length > 0 && (
+                          <Box sx={{ mt: 2 }}>
+                            <Typography variant="subtitle1">
+                              Attachments:
+                            </Typography>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: 2,
+                                mt: 1,
+                              }}
+                            >
+                              {post.attachments.map((attachment) =>
+                                attachment.resource_type === "image" ? (
+                                  <Box
+                                    key={attachment._id}
+                                    sx={{ maxWidth: "100%" }}
+                                  >
+                                    <img
+                                      src={attachment.secure_url}
+                                      alt="attachment"
+                                      style={{
+                                        maxWidth: "100%",
+                                        maxHeight: "400px",
+                                        borderRadius: "8px",
+                                      }}
+                                    />
+                                  </Box>
+                                ) : null
+                              )}
+                            </Box>
+                          </Box>
+                        )}
+                        {post.isPrivate && (
+                          <Typography variant="caption" color="warning.main">
+                            Private Post
+                          </Typography>
+                        )}
+                        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                                        <Button
+                                          variant="outlined"
+                                          color="primary"
+                                          onClick={() => setEditPost(post)}
+                                        >
+                                          Edit Post
+                                        </Button>
+                                        <Button
+                                          variant="outlined"
+                                          color="error"
+                                          onClick={() => setDeletePost(post._id)}
+                                        >
+                                          Delete Post
+                                        </Button>
+                                        {deletePost === post._id && (
+                                        <DeletePostDialog
+                                           open={true}
+                                           handleClose={() => setDeletePost(null)}
+                                           postId={deletePost}
+                                           onDeleteSuccess={handleDeleteSuccess}
+                                          />)}
+                                        {editPost &&(
+                                        <EditPostDialog
+                                           open={editPost}
+                                           handleClose={() => setEditPost(null)}
+                                           post={post}
+                                           onEditSuccess={handleEditSuccess}
+                                        />
+                                        )}
+                        </Stack>
+                      </CardContent>
+                    </CardActionArea>
+                  </Card>
+                </Paper>
+              </Box>
+            ))}
+          </Grid>
+        )}
+        {tab === 3 && modPosts.length === 0 && (
+          <Typography variant="h3" textAlign="center" mx={"2rem"}>
+            Sorry You Have No Posts To Moderate
           </Typography>
         )}
       </Paper>

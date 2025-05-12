@@ -128,6 +128,16 @@ async function getPosts() {
     throw `Post fetch failed!`;
   }
 }
+async function getModPosts() {
+  try {
+    const response = await axios.get(`posts/mod`);
+    return response.data.data;
+  } catch (e) {
+    console.log(e);
+    throw `Post fetch failed!`;
+  }
+}
+
 
 async function getComments(postID){
     try {
@@ -230,5 +240,6 @@ export default {
   getPostByPostId,
   getMutualFriends,
   editPost,
-  editComment
+  editComment,
+  getModPosts
 };

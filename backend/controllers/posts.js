@@ -22,6 +22,15 @@ async function getNPosts(n) {
   return posts;
 }
 
+async function getModPosts() {
+  const posts = await Post.find({ reports: {reportNum: { $gt: 5 }} })
+    .sort({ createdAt: -1 })
+    .populate("sender", "name username email profile friends uid")
+    .lean();
+
+  return posts;
+}
+
 // post posts, pretty simple
 async function postPost(uid, text, attachments, isPrivate) {
   let user = await usersController.getUserByUID(uid);
@@ -493,4 +502,5 @@ export default {
   searchPosts,
   getPostsByUid,
   findMutualFriend,
+  getModPosts
 };
