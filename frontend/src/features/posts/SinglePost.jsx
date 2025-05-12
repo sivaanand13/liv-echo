@@ -62,6 +62,8 @@ export default function SinglePost() {
   useEffect(() => {
     async function fetchPost() {
       try {
+        console.log("ServerUser", serverUser);
+        console.log("CurrentUser", currentUser);
         console.log("Im post", postId);
         const result = await postUtils.getPostByPostId(postId);
         setPost(result);

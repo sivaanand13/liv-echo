@@ -15,6 +15,8 @@ import {
   useTheme,
   Typography,
   Stack,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import NotFound from "./NotFound.jsx";
 import ErrorPage from "./ErrorPage.jsx";
@@ -40,6 +42,8 @@ function PaginatedList({
   const [searchKey, setSearchKey] = useState(undefined);
   const [searchKeyError, setSearchKeyError] = useState(undefined);
   const [error, setError] = useState(null);
+  const [noUserFoundError, setNoUserFoundError] = useState("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const handleSearchKey = () => {
     if (!searchInput || searchInput.trim().length == 0) {
@@ -51,9 +55,9 @@ function PaginatedList({
     }
   };
   const handleSearchReset = () => {
-    setSearchKey(undefined);
+    setSearchKey("");
     setSearchInput("");
-    setSearchKeyError(undefined);
+    setSearchKeyError("");
     changePage(1);
   };
 
@@ -64,6 +68,8 @@ function PaginatedList({
   useEffect(() => {
     async function fetchData() {
       try {
+        // setSnackbarOpen(false);
+        setNoUserFoundError("");
         const data = await dataSource(searchKey || ".*");
         console.log("users:", data);
         if (data.length > 0) {
@@ -71,14 +77,16 @@ function PaginatedList({
           setLoading(false);
           setTotalPages(Math.ceil(data.length / PAGE_SIZE));
         } else {
-          alert(`There are no ${type} for search term (${searchKey})`);
+          console.error("User not found!");
+          setNoUserFoundError(`No ${type} found for "${searchKey}"`);
+          setSnackbarOpen(true);
         }
       } catch (e) {
         console.log(e);
       }
     }
     fetchData();
-  }, [searchKey]);
+  }, [searchKey, dataSource, type]);
 
   useEffect(() => {
     setError(null);
@@ -187,6 +195,29 @@ function PaginatedList({
                         sx={{ height: 28, m: 0.5 }}
                         orientation="vertical"
                       />
+                      <Snackbar
+                        open={snackbarOpen}
+                        autoHideDuration={4000}
+                        onClose={() => {
+                          handleSearchReset();
+                          setSnackbarOpen(false);
+                        }}
+                        anchorOrigin={{
+                          vertical: "bottom",
+                          horizontal: "center",
+                        }}
+                      >
+                        <Alert
+                          severity="info"
+                          variant="filled"
+                          onClose={() => {
+                            handleSearchReset();
+                            setSnackbarOpen(false);
+                          }}
+                        >
+                          {noUserFoundError}
+                        </Alert>
+                      </Snackbar>
 
                       <IconButton type="button" onClick={handleSearchReset}>
                         <RefreshIcon />

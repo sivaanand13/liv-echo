@@ -169,8 +169,14 @@ function EditAccount({ handleClose }) {
         const updatedUser = auth.currentUser;
         handleClose();
       } catch (e) {
+        if (e.type === "moderation") {
+          console.log("Account.jsx", e);
+          setError(e.message);
+          return;
+        }
         console.log("Account.jsx", e);
         setError(e || "Edit account failed!");
+        return;
       }
     }
   };
