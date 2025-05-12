@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { differenceInYears, isEqual } from "date-fns";
+import { differenceInYears, parse, isBefore } from "date-fns";
 import { parseOneAddress } from "email-addresses";
 
 export const usernamePolicies = [
@@ -235,8 +235,12 @@ function validateDate(date, varName) {
 function validateDob(date, varName) {
   date = validateString(date);
   const now = new Date();
-  const dob = new Date(date);
-
+  const dob = parse(date, "yyyy-MM-dd", new Date());
+  dob.setHours(0, 0, 0, 0);
+  now.setHours(0, 0, 0, 0);
+  if (isBefore(now, dob)) {
+    throw `Date of Birth cannot be in the future!`;
+  }
   let age = differenceInYears(now, dob);
   if (age < 13) {
     throw "Must be at least 13 years old to register";
