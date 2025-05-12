@@ -139,6 +139,16 @@ async function getComments(postID){
   }
 }
 
+async function createComment(postID, data) {
+  try {
+    const response = await axios.put(`posts/${postID}/comment`, data);
+    return response.data.data;
+  } catch (e) {
+    console.error(e);
+    throw new Error("Post update failed!");
+  }
+}
+
 async function deleteComment(postID, commID){
   try {
     const response = await axios.del(`posts/${postID}/${commID}`);
@@ -203,6 +213,7 @@ export default {
   createPost,
   getPosts,
   getComments,
+  createComment,
   deleteComment,
   likeCommentByID,
   deletePost,
