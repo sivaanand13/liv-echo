@@ -7,6 +7,7 @@ import uploadMiddleware from "../middleware/uploadMiddleware.js";
 import admin from "firebase-admin";
 import cloudinary from "../cloudinary/cloudinary.js";
 import settings from "../models/settings.js";
+import { moderationFunction } from "../utils/text_image_moderation.js";
 const router = express.Router();
 
 router.route("/").get(authMiddleware, async (req, res) => {
@@ -262,6 +263,23 @@ router.route("/signup").post(async (req, res) => {
     return res.status(400).json({
       message: "Unique date of birth!",
       errors: e,
+    });
+  }
+
+  try {
+    const moderationResponse1 = await moderationFunction(name, []);
+    if (moderationResponse1.flagged) {
+      throw "Invalid Name";
+    }
+    const moderationResponse2 = await moderationFunction(username, []);
+    if (moderationResponse2.flagged) {
+      throw "Invalid Username";
+    }
+  } catch (e) {
+    console.error("Moderation error:", e);
+    return res.status(400).json({
+      error: true,
+      message: e || "Moderation got flagged",
     });
   }
 
