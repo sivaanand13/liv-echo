@@ -309,6 +309,8 @@ router.route("/:postID/report").patch(async (req, res) => {
         throw new Error("You can't see this!");
       }
     }
+    console.log(reportType);
+    console.log(comment);
     const pos = await postsController.reportPost(
       uid,
       postID,

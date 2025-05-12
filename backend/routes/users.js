@@ -493,6 +493,7 @@ router
       res.status(500).json({ message: e });
     }
   });
+
 router
   .route("/friends/requests")
   .post(authMiddleware, async (req, res) => {
@@ -531,6 +532,93 @@ router
         .json({ message: "Failed to remove friend", error: e });
     }
   });
+
+router
+  .route("/friends/request")
+  .post(authMiddleware, async (req, res) => {
+    const { friendUID } = req.body;
+    const currentUID = req.user?.uid;
+    if (!currentUID || !friendUID) {
+      return res.status(400).json({ message: "Invalid request" });
+    }
+
+    let user;
+    let friend;
+    try {
+      user = await userController.getUserByUID(currentUID);
+      friend = await userController.getUserByUID(friendUID);
+      if (
+        friend.friendRequests.some(
+          (val) => val.toString() == user._id.toString()
+        )
+      ) {
+        throw "You are already sent a friend request to this user!";
+      }
+    } catch (e) {
+      return res
+        .status(409)
+        .json({ message: "Failed to send friend request", error: e });
+    }
+
+    try {
+      await userController.sendFriendRequest(currentUID, friendUID);
+      return res
+        .status(200)
+        .json({ message: "Friend request sent successfully" });
+    } catch (e) {
+      console.error(e);
+      return res
+        .status(500)
+        .json({ message: "Failed to send friend request", error: e });
+    }
+  })
+  .patch(authMiddleware, async (req, res) => {
+    const { friendUID, resolution } = req.body;
+
+    const currentUID = req.user?.uid;
+    if (!currentUID || !friendUID) {
+      return res.status(400).json({ message: "Invalid request" });
+    }
+
+    let user;
+    let friend;
+    try {
+      user = await userController.getUserByUID(currentUID);
+      friend = await userController.getUserByUID(friendUID);
+      if (
+        friend.friendRequests.some(
+          (val) => val.toString() == user._id.toString()
+        )
+      ) {
+        throw "You are already sent a friend request to this user!";
+      }
+
+      if (friend.friends.some((val) => val.toString() == user._id.toString())) {
+        throw "You are already sent a friend request to this user!";
+      }
+    } catch (e) {
+      return res
+        .status(409)
+        .json({ message: "Failed to send friend request", error: e });
+    }
+
+    try {
+      await userController.resolveFriendRequest(
+        currentUID,
+        friendUID,
+        resolution
+      );
+      return res
+        .status(200)
+        .json({ message: "Friend request resolved successfully" });
+    } catch (e) {
+      console.error(e);
+      return res
+        .status(500)
+        .json({ message: "Failed to send resolve friend request", error: e });
+    }
+  });
+
 router
   .route("/friends/requests/remove")
   .patch(authMiddleware, async (req, res) => {
@@ -544,7 +632,7 @@ router
       await userController.removeFriend(friendUID, currentUID);
       return res.status(200).json({ message: "Friend successfully removed" });
     } catch (e) {
-      console.error(e);
+      console.log(e);
       return res
         .status(500)
         .json({ message: "Failed to remove friend", error: e });

@@ -15,7 +15,7 @@ import {
   Grid,
   CardActionArea,
   Stack,
-  Button
+  Button,
 } from "@mui/material";
 import defaultBanner from "../../assets/landing/landing1.jpg";
 import PaginatedList from "../../components/PaginatedList.jsx";
@@ -34,6 +34,9 @@ import userUtils from "../users/userUtils.js";
 import DeletePostDialog from "../posts/DeletePostDialog";
 import EditPostDialog from "../posts/EditPostDialog";
 import { Link } from "react-router-dom";
+import StaticPaginatedList from "../../components/StaticPaginatedList.jsx";
+import FriendCard from "./FriendCard.jsx";
+import CustomList from "../../components/CustomList.jsx";
 export default function Account() {
   const { user } = useContext(AuthContext);
   const theme = useTheme();
@@ -58,7 +61,6 @@ export default function Account() {
   async function handleDeleteSuccess() {
     const postList = await postUtils.getPostsByUID(user.uid);
     setPosts(postList);
-    
   }
   async function handleEditSuccess() {
     const postList = await postUtils.getPostsByUID(user.uid);
@@ -88,15 +90,15 @@ export default function Account() {
     }
     getPosts();
   }, [user.uid]);
-  if(user.role === "admin"){
+  if (user.role === "admin") {
     useEffect(() => {
       async function getModPosts() {
         const modPostList = await postUtils.getModPosts();
-        console.log("mod posts: " + modPostList)
+        console.log("mod posts: " + modPostList);
         setModPosts(modPostList);
-    }
-    getModPosts();
-    },[])
+      }
+      getModPosts();
+    }, []);
   }
   console.log("posts: ", posts);
   return (
@@ -180,8 +182,11 @@ export default function Account() {
         <Tabs value={tab} onChange={handleTabChange} centered sx={{ mt: 10 }}>
           <Tab label="About" />
           <Tab label="Friends" />
+
           <Tab label="Posts" />
-          {user.role == "admin" && <Tab label="Moderation"/>}
+          <Tab label="Friend Requests" />
+
+          {user.role == "admin" && <Tab label="Moderation" />}
         </Tabs>
         {tab === 0 && (
           <Box sx={{ p: 2 }}>
@@ -243,22 +248,24 @@ export default function Account() {
           </Box>
         )}
 
-        {tab === 1 && user?.friends.length > 0 && (
+        {tab === 1 && user?.friends?.length > 0 && (
           <Box sx={{ p: 2 }}>
-            <PaginatedList
-              title="Friends"
-              type="users"
-              dataSource={getFriends}
-              ListItemComponent={UserCard}
+            <StaticPaginatedList
+              title={"Friends"}
+              type={"friends"}
+              sourceData={user?.friends}
+              ListItemComponent={FriendCard}
+              enableSearch={false}
+              PAGE_SIZE={10}
             />
           </Box>
         )}
-        {tab === 1 && user?.friends.length === 0 && (
+        {tab === 1 && user?.friends?.length === 0 && (
           <Typography variant="h3" textAlign="center" mx={"2rem"}>
             Sorry You Have No Friends
           </Typography>
         )}
-        {tab === 2 && posts.length > 0 && (
+        {tab === 2 && posts?.length > 0 && (
           <Grid
             container
             spacing={3}
@@ -288,7 +295,7 @@ export default function Account() {
                         >
                           Posted on {new Date(post.createdAt).toLocaleString()}
                         </Typography>
-                        {post.attachments && post.attachments.length > 0 && (
+                        {post.attachments && post.attachments?.length > 0 && (
                           <Box sx={{ mt: 2 }}>
                             <Typography variant="subtitle1">
                               Attachments:
@@ -327,52 +334,71 @@ export default function Account() {
                             Private Post
                           </Typography>
                         )}
-                        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-                                        <Button
-                                          variant="outlined"
-                                          color="primary"
-                                          onClick={() => setEditPost(post)}
-                                        >
-                                          Edit Post
-                                        </Button>
-                                        <Button
-                                          variant="outlined"
-                                          color="error"
-                                          onClick={() => setDeletePost(post._id)}
-                                        >
-                                          Delete Post
-                                        </Button>
-                                        {deletePost === post._id && (
-                                        <DeletePostDialog
-                                           open={true}
-                                           handleClose={() => setDeletePost(null)}
-                                           postId={deletePost}
-                                           onDeleteSuccess={handleDeleteSuccess}
-                                          />)}
-                                        {editPost &&(
-                                        <EditPostDialog
-                                           open={editPost}
-                                           handleClose={() => setEditPost(null)}
-                                           post={post}
-                                           onEditSuccess={handleEditSuccess}
-                                        />
-                                        )}
-                        </Stack>
                       </CardContent>
                     </CardActionArea>
                   </Card>
+                  <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => setEditPost(post)}
+                    >
+                      Edit Post
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={() => setDeletePost(post._id)}
+                    >
+                      Delete Post
+                    </Button>
+                    {deletePost === post._id && (
+                      <DeletePostDialog
+                        open={true}
+                        handleClose={() => setDeletePost(null)}
+                        postId={deletePost}
+                        onDeleteSuccess={handleDeleteSuccess}
+                      />
+                    )}
+                    {editPost && (
+                      <EditPostDialog
+                        open={editPost}
+                        handleClose={() => setEditPost(null)}
+                        post={post}
+                        onEditSuccess={handleEditSuccess}
+                      />
+                    )}
+                  </Stack>
                 </Paper>
               </Box>
             ))}
           </Grid>
         )}
-        {tab === 2 && posts.length === 0 && (
+        {tab === 2 && posts?.length === 0 && (
           <Typography variant="h3" textAlign="center" mx={"2rem"}>
             Sorry You Have No Posts
           </Typography>
         )}
 
-        {tab === 3 && modPosts.length > 0 && (
+        {tab === 3 && user?.friendRequests?.length > 0 && (
+          <Box sx={{ p: 2 }}>
+            <StaticPaginatedList
+              title={"Friend Requests"}
+              type={"friendRequests"}
+              sourceData={user?.friendRequests}
+              ListItemComponent={FriendCard}
+              enableSearch={false}
+              PAGE_SIZE={10}
+            />
+          </Box>
+        )}
+        {tab === 3 && user?.friendRequests?.length === 0 && (
+          <Typography variant="h3" textAlign="center" mx={"2rem"}>
+            No friend requests avaliable.
+          </Typography>
+        )}
+
+        {tab === 4 && modPosts?.length > 0 && (
           <Grid
             container
             spacing={3}
@@ -402,7 +428,7 @@ export default function Account() {
                         >
                           Posted on {new Date(post.createdAt).toLocaleString()}
                         </Typography>
-                        {post.attachments && post.attachments.length > 0 && (
+                        {post.attachments && post.attachments?.length > 0 && (
                           <Box sx={{ mt: 2 }}>
                             <Typography variant="subtitle1">
                               Attachments:
@@ -441,31 +467,32 @@ export default function Account() {
                             Private Post
                           </Typography>
                         )}
-                        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-                                        <Button
-                                          variant="outlined"
-                                          color="error"
-                                          onClick={() => setDeletePost(post._id)}
-                                        >
-                                          Delete Post
-                                        </Button>
-                                        {deletePost === post._id && (
-                                        <DeletePostDialog
-                                           open={true}
-                                           handleClose={() => setDeletePost(null)}
-                                           postId={deletePost}
-                                           onDeleteSuccess={handleDeleteSuccess}
-                                          />)}
-                        </Stack>
                       </CardContent>
                     </CardActionArea>
+                    <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        onClick={() => setDeletePost(post._id)}
+                      >
+                        Delete Post
+                      </Button>
+                      {deletePost === post._id && (
+                        <DeletePostDialog
+                          open={true}
+                          handleClose={() => setDeletePost(null)}
+                          postId={deletePost}
+                          onDeleteSuccess={handleDeleteSuccess}
+                        />
+                      )}
+                    </Stack>
                   </Card>
                 </Paper>
               </Box>
             ))}
           </Grid>
         )}
-        {tab === 3 && modPosts.length === 0 && (
+        {tab === 4 && modPosts?.length === 0 && (
           <Typography variant="h3" textAlign="center" mx={"2rem"}>
             Sorry You Have No Posts To Moderate
           </Typography>
