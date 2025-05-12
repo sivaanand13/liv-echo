@@ -184,6 +184,9 @@ async function signInUser(uid, email, username) {
 async function searchUsers(query) {
   query = validation.validateString(query, "Search Query");
   query = query.toLowerCase();
+  // if (query === "admin" || query === "livechofficial@gmail.com") {
+  //   return [];
+  // }
   const searchRegex = new RegExp(query, "i");
   return await User.find({
     $or: [
@@ -191,6 +194,7 @@ async function searchUsers(query) {
       { username: searchRegex },
       { email: searchRegex },
     ],
+    role: { $ne: "admin" },
   }).select("uid name username email profile banner bio role");
 }
 

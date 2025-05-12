@@ -41,6 +41,7 @@ export default function CommentListItem({ item: msg, onDelete }) {
   const [editCommentError, setEditCommentError] = useState("");
 
   useEffect(() => {
+    console.log("serverUser", serverUser);
     async function fetchLiked() {
       const likedByCurrentUser = msg.likes.includes(serverUser._id);
       setLiked(likedByCurrentUser);

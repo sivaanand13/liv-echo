@@ -165,6 +165,7 @@ function SignUp() {
         overflow: "auto",
         alignItems: "center",
         minHeight: "100vh",
+        mt: 2,
       }}
     >
       <Card sx={{ minWidth: "40%", maxWidth: "50%", padding: "2rem" }}>

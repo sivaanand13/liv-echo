@@ -213,4 +213,5 @@ export default {
   likeComment,
   getCommentById,
   deleteCommentAnyway,
+  canDeleteComment,
 };
