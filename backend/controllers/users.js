@@ -247,6 +247,14 @@ async function sendFriendRequest(userUid, friendUid) {
     !updatefriend.friends.some((f) => f._id.toString() == user._id.toString())
   )
     chatNamespace.to(friendUid).emit("friend-request-sent");
+
+  user = await getUserByUID(userUid, false);
+  console.log("Edited user", user);
+  chatNamespace.to(user.uid).emit("accountUpdated", user);
+
+  user = await getUserByUID(friendUid, false);
+  console.log("Edited user", user);
+  chatNamespace.to(user.uid).emit("accountUpdated", user);
   return { message: "Friend added" };
 }
 async function removeFriend(userUid, friendUid) {
@@ -266,6 +274,10 @@ async function removeFriend(userUid, friendUid) {
   chatNamespace.to(user.uid).emit("accountUpdated", user);
   if (!user.friends.some((f) => f._id.toString() == friend._id.toString()))
     chatNamespace.to(userUid).emit("friend-request-denied");
+
+  user = await getUserByUID(user.uid, false);
+  console.log("Edited user", user);
+  chatNamespace.to(user.uid).emit("accountUpdated", user);
   return { message: "Friend removed" };
 }
 export default {

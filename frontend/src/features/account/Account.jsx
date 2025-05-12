@@ -15,7 +15,7 @@ import {
   Grid,
   CardActionArea,
   Stack,
-  Button
+  Button,
 } from "@mui/material";
 import defaultBanner from "../../assets/landing/landing1.jpg";
 import PaginatedList from "../../components/PaginatedList.jsx";
@@ -58,7 +58,6 @@ export default function Account() {
   async function handleDeleteSuccess() {
     const postList = await postUtils.getPostsByUID(user.uid);
     setPosts(postList);
-    
   }
   async function handleEditSuccess() {
     const postList = await postUtils.getPostsByUID(user.uid);
@@ -88,15 +87,15 @@ export default function Account() {
     }
     getPosts();
   }, [user.uid]);
-  if(user.role === "admin"){
+  if (user.role === "admin") {
     useEffect(() => {
       async function getModPosts() {
         const modPostList = await postUtils.getModPosts();
-        console.log("mod posts: " + modPostList)
+        console.log("mod posts: " + modPostList);
         setModPosts(modPostList);
-    }
-    getModPosts();
-    },[])
+      }
+      getModPosts();
+    }, []);
   }
   console.log("posts: ", posts);
   return (
@@ -181,7 +180,7 @@ export default function Account() {
           <Tab label="About" />
           <Tab label="Friends" />
           <Tab label="Posts" />
-          {user.role == "admin" && <Tab label="Moderation"/>}
+          {user.role == "admin" && <Tab label="Moderation" />}
         </Tabs>
         {tab === 0 && (
           <Box sx={{ p: 2 }}>
@@ -328,35 +327,36 @@ export default function Account() {
                           </Typography>
                         )}
                         <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-                                        <Button
-                                          variant="outlined"
-                                          color="primary"
-                                          onClick={() => setEditPost(post)}
-                                        >
-                                          Edit Post
-                                        </Button>
-                                        <Button
-                                          variant="outlined"
-                                          color="error"
-                                          onClick={() => setDeletePost(post._id)}
-                                        >
-                                          Delete Post
-                                        </Button>
-                                        {deletePost === post._id && (
-                                        <DeletePostDialog
-                                           open={true}
-                                           handleClose={() => setDeletePost(null)}
-                                           postId={deletePost}
-                                           onDeleteSuccess={handleDeleteSuccess}
-                                          />)}
-                                        {editPost &&(
-                                        <EditPostDialog
-                                           open={editPost}
-                                           handleClose={() => setEditPost(null)}
-                                           post={post}
-                                           onEditSuccess={handleEditSuccess}
-                                        />
-                                        )}
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={() => setEditPost(post)}
+                          >
+                            Edit Post
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            color="error"
+                            onClick={() => setDeletePost(post._id)}
+                          >
+                            Delete Post
+                          </Button>
+                          {deletePost === post._id && (
+                            <DeletePostDialog
+                              open={true}
+                              handleClose={() => setDeletePost(null)}
+                              postId={deletePost}
+                              onDeleteSuccess={handleDeleteSuccess}
+                            />
+                          )}
+                          {editPost && (
+                            <EditPostDialog
+                              open={editPost}
+                              handleClose={() => setEditPost(null)}
+                              post={post}
+                              onEditSuccess={handleEditSuccess}
+                            />
+                          )}
                         </Stack>
                       </CardContent>
                     </CardActionArea>
@@ -442,20 +442,21 @@ export default function Account() {
                           </Typography>
                         )}
                         <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-                                        <Button
-                                          variant="outlined"
-                                          color="error"
-                                          onClick={() => setDeletePost(post._id)}
-                                        >
-                                          Delete Post
-                                        </Button>
-                                        {deletePost === post._id && (
-                                        <DeletePostDialog
-                                           open={true}
-                                           handleClose={() => setDeletePost(null)}
-                                           postId={deletePost}
-                                           onDeleteSuccess={handleDeleteSuccess}
-                                          />)}
+                          <Button
+                            variant="outlined"
+                            color="error"
+                            onClick={() => setDeletePost(post._id)}
+                          >
+                            Delete Post
+                          </Button>
+                          {deletePost === post._id && (
+                            <DeletePostDialog
+                              open={true}
+                              handleClose={() => setDeletePost(null)}
+                              postId={deletePost}
+                              onDeleteSuccess={handleDeleteSuccess}
+                            />
+                          )}
                         </Stack>
                       </CardContent>
                     </CardActionArea>
