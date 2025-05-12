@@ -13,6 +13,7 @@ import {
   Button,
   TextField,
   Stack,
+  Alert,
 } from "@mui/material";
 import postUtils from "./postUtils"; // Adjust the path as needed
 import CommentListItem from "./CommentListItem";
@@ -38,6 +39,7 @@ export default function SinglePost() {
   const [newComment, setNewComment] = useState("");
   const [commentSubmitting, setCommentSubmitting] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [commentError, setCommentError] = useState("");
   const senderId =
     typeof post?.sender === "object" ? post.sender._id : post?.sender;
   const canDelete =
@@ -89,13 +91,22 @@ export default function SinglePost() {
   async function handleAddComment() {
     if (!newComment.trim()) return;
     setCommentSubmitting(true);
+    setCommentError("");
     try {
       const commentData = { text: newComment };
       const newCom = await postUtils.createComment(postId, commentData);
       setComments((prev) => [newCom, ...prev]); // Add new comment to top
       setNewComment("");
     } catch (err) {
-      console.error("Failed to add comment:", err.message);
+      console.log(err.type);
+      if (err.type === "moderation") {
+        setNewComment("");
+        setCommentError(err.message);
+        return;
+      }
+      setNewComment("");
+      setCommentError(err);
+      console.error("Failed to add comment:", err);
     } finally {
       setCommentSubmitting(false);
     }
@@ -237,25 +248,28 @@ export default function SinglePost() {
         <Typography variant="h6" gutterBottom>
           Add a Comment
         </Typography>
-        <Stack direction="row" spacing={2}>
-          <TextField
-            fullWidth
-            multiline
-            variant="outlined"
-            placeholder="Write a comment..."
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            minRows={1}
-            maxRows={6}
-          />
+        <Stack direction="column">
+          <Stack direction="row" spacing={2}>
+            <TextField
+              fullWidth
+              multiline
+              variant="outlined"
+              placeholder="Write a comment..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              minRows={1}
+              maxRows={6}
+            />
 
-          <Button
-            variant="contained"
-            onClick={handleAddComment}
-            disabled={commentSubmitting}
-          >
-            <SendIcon />
-          </Button>
+            <Button
+              variant="contained"
+              onClick={handleAddComment}
+              disabled={commentSubmitting}
+            >
+              <SendIcon />
+            </Button>
+          </Stack>
+          {commentError && <Alert severity="error">{commentError}</Alert>}
         </Stack>
         <Grid container justifyContent="center" sx={{ width: "100%" }}>
           <Grid
@@ -268,7 +282,10 @@ export default function SinglePost() {
           >
             {comments.map((comment) => (
               <Box key={comment._id} sx={{ p: 0 }}>
-                <CommentListItem item={comment} onDelete={handleCommentDelete}/>
+                <CommentListItem
+                  item={comment}
+                  onDelete={handleCommentDelete}
+                />
               </Box>
             ))}
           </Grid>
