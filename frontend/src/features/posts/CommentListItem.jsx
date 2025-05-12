@@ -38,6 +38,7 @@ export default function CommentListItem({ item: msg, onDelete }) {
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(msg.text);
   const [tempText, setTempText] = useState(msg.text);
+  const [editCommentError, setEditCommentError] = useState("");
 
   useEffect(() => {
     async function fetchLiked() {
@@ -57,6 +58,7 @@ export default function CommentListItem({ item: msg, onDelete }) {
   }
 
   async function handleEdit() {
+    setEditCommentError("");
     setEditing(true);
     handleClose();
   }
@@ -82,13 +84,19 @@ export default function CommentListItem({ item: msg, onDelete }) {
   }
   async function handleSaveEdit() {
     try {
+      setEditCommentError("");
       const updated = await postUtils.editComment(msg.post, msg._id, {
         text: tempText,
       });
       setText(updated.text);
       setEditing(false);
     } catch (e) {
+      if (e.type === "moderation") {
+        setEditCommentError(`Moderation Error: ${e.message}`);
+        return;
+      }
       console.log("Edit failed:", e);
+      return;
     }
   }
   function handleCancelEdit() {
@@ -146,9 +154,13 @@ export default function CommentListItem({ item: msg, onDelete }) {
                 <TextField
                   fullWidth
                   multiline
+                  color="white"
                   variant="outlined"
                   value={tempText}
                   onChange={(e) => setTempText(e.target.value)}
+                  slotProps={{
+                    input: { style: { color: "white" } },
+                  }}
                 />
                 <Stack direction="row" spacing={1}>
                   <Button
@@ -168,6 +180,11 @@ export default function CommentListItem({ item: msg, onDelete }) {
                     Cancel
                   </Button>
                 </Stack>
+                {editCommentError && (
+                  <Typography variant="body2" color="error" gutterBottom>
+                    {editCommentError}
+                  </Typography>
+                )}
               </Stack>
             )}
           </Stack>
