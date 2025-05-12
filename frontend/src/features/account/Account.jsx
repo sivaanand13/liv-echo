@@ -326,41 +326,41 @@ export default function Account() {
                             Private Post
                           </Typography>
                         )}
-                        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            onClick={() => setEditPost(post)}
-                          >
-                            Edit Post
-                          </Button>
-                          <Button
-                            variant="outlined"
-                            color="error"
-                            onClick={() => setDeletePost(post._id)}
-                          >
-                            Delete Post
-                          </Button>
-                          {deletePost === post._id && (
-                            <DeletePostDialog
-                              open={true}
-                              handleClose={() => setDeletePost(null)}
-                              postId={deletePost}
-                              onDeleteSuccess={handleDeleteSuccess}
-                            />
-                          )}
-                          {editPost && (
-                            <EditPostDialog
-                              open={editPost}
-                              handleClose={() => setEditPost(null)}
-                              post={post}
-                              onEditSuccess={handleEditSuccess}
-                            />
-                          )}
-                        </Stack>
                       </CardContent>
                     </CardActionArea>
                   </Card>
+                  <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => setEditPost(post)}
+                    >
+                      Edit Post
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={() => setDeletePost(post._id)}
+                    >
+                      Delete Post
+                    </Button>
+                    {deletePost === post._id && (
+                      <DeletePostDialog
+                        open={true}
+                        handleClose={() => setDeletePost(null)}
+                        postId={deletePost}
+                        onDeleteSuccess={handleDeleteSuccess}
+                      />
+                    )}
+                    {editPost && (
+                      <EditPostDialog
+                        open={editPost}
+                        handleClose={() => setEditPost(null)}
+                        post={post}
+                        onEditSuccess={handleEditSuccess}
+                      />
+                    )}
+                  </Stack>
                 </Paper>
               </Box>
             ))}
@@ -441,25 +441,25 @@ export default function Account() {
                             Private Post
                           </Typography>
                         )}
-                        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-                          <Button
-                            variant="outlined"
-                            color="error"
-                            onClick={() => setDeletePost(post._id)}
-                          >
-                            Delete Post
-                          </Button>
-                          {deletePost === post._id && (
-                            <DeletePostDialog
-                              open={true}
-                              handleClose={() => setDeletePost(null)}
-                              postId={deletePost}
-                              onDeleteSuccess={handleDeleteSuccess}
-                            />
-                          )}
-                        </Stack>
                       </CardContent>
                     </CardActionArea>
+                    <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        onClick={() => setDeletePost(post._id)}
+                      >
+                        Delete Post
+                      </Button>
+                      {deletePost === post._id && (
+                        <DeletePostDialog
+                          open={true}
+                          handleClose={() => setDeletePost(null)}
+                          postId={deletePost}
+                          onDeleteSuccess={handleDeleteSuccess}
+                        />
+                      )}
+                    </Stack>
                   </Card>
                 </Paper>
               </Box>

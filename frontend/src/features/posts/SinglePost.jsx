@@ -22,6 +22,8 @@ import { formatDistanceToNow } from "date-fns";
 import CustomLink from "../../components/CustomLink";
 import SendIcon from "@mui/icons-material/Send";
 import { Padding } from "@mui/icons-material";
+import ReportPostDialog from "./reportPostDialogue";
+
 
 export default function SinglePost() {
   const { currentUser, serverUser } = useContext(AuthContext);
@@ -35,14 +37,26 @@ export default function SinglePost() {
   const [editOpen, setEditOpen] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const senderId =
     typeof post?.sender === "object" ? post.sender._id : post?.sender;
   const canDelete =
     serverUser?._id.toString() === senderId?.toString() ||
     serverUser?.role === "admin";
+  const canEdit = serverUser?._id.toString() === senderId?.toString()
+
   //console.log("I I EXIST ", canDelete);
   //console.log("user 1", serverUser?._id);
   console.log("user 2", post?.sender);
+  async function handleReportPost() {
+    try {
+      await postUtils.reportPost(postId); // Define this in your utils to call your backend
+      alert("Post reported successfully.");
+    } catch (err) {
+      console.error("Failed to report post:", err.message);
+      alert("Failed to report post.");
+    }
+}
 
   useEffect(() => {
     async function fetchPost() {
@@ -138,6 +152,17 @@ export default function SinglePost() {
               </CustomLink>
             }
             subheader={post.senderName}
+            action={
+          currentUser && currentUser._id !== senderId && (
+          <Button
+              size="small"
+              color="warning"
+              onClick={() => setReportOpen(true)}
+              sx={{ textTransform: "none" }}
+          >
+              Report
+            </Button>
+            )}
           />
           <CardContent>
             <Typography variant="body1" gutterBottom>
@@ -179,6 +204,7 @@ export default function SinglePost() {
             )}
             {canDelete && (
               <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                {canEdit && (
                 <Button
                   variant="outlined"
                   color="primary"
@@ -186,6 +212,7 @@ export default function SinglePost() {
                 >
                   Edit Post
                 </Button>
+                )}
                 <Button
                   variant="outlined"
                   color="error"
@@ -259,6 +286,14 @@ export default function SinglePost() {
         post={post}
         onEditSuccess={handleEditSuccess}
       />
+      <ReportPostDialog
+        open={reportOpen}
+        handleClose={() => setReportOpen(false)}
+        postId={postId}
+        onReportSuccess={() => {
+        setReportOpen(false);}}
+      />
+
     </Box>
   );
 }
