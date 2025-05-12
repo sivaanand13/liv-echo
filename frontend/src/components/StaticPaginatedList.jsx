@@ -91,7 +91,10 @@ function StaticPaginatedList({
       return <ErrorPage title="Invalid Page Number" message={error} />;
     } else if (curPage > totalPages) {
       return (
-        <NotFound message={`No more ${type} for page number (${curPage})`} />
+        <NotFound
+          background={false}
+          message={`No more ${type} for page number (${curPage})`}
+        />
       );
     } else {
       return (
@@ -111,7 +114,7 @@ function StaticPaginatedList({
             <Loading />
           ) : error ? (
             <ErrorPage title="Invalid Page Number" message={error} />
-          ) : curPage > totalPages ? (
+          ) : curPage > totalPages && totalPages !== 0 ? (
             <NotFound
               message={`No more ${type} for page number (${curPage})`}
             />

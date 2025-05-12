@@ -110,7 +110,7 @@ export default function SinglePost() {
           <CardHeader
             title={
               <CustomLink
-                to={`/users/${post.sender}`}
+                to={`/users/${post.sender?.uid || post.sender}`}
                 sx={{
                   color: "black",
                   textDecoration: "none",

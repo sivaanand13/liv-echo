@@ -44,7 +44,7 @@ router.route("/mod").get(async (req, res) => {
       message: "Attached message media!",
       data: pos,
     });
-  }catch (e){
+  } catch (e) {
     return res.status(500).json({
       message: e,
     });

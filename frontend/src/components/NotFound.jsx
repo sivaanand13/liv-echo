@@ -2,15 +2,21 @@ import { Container, Typography, Box, CardMedia } from "@mui/material";
 import notFoundImage from "../assets/errors/not_found.svg";
 import bgImg from "../assets/landing/landing1.jpg";
 
-function NotFound({ message }) {
+function NotFound({ message, background }) {
+  let style = {};
+  if (background) {
+    style = {
+      backgroundImage: `url(${bgImg})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundAttachment: "fixed",
+    };
+  }
   return (
     <Box
       sx={{
-        backgroundImage: `url(${bgImg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
+        ...style,
         overflow: "auto",
-        backgroundAttachment: "fixed",
         placeItems: "center",
         display: "flex",
         justifyContent: "center",
