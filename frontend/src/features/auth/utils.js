@@ -9,6 +9,25 @@ import {
   verifyBeforeUpdateEmail,
 } from "firebase/auth";
 import validation from "../../utils/validation.js";
+
+async function userInfoModeration(text, attachments) {
+  try {
+    const response = await post("moderation", {
+      text,
+      attachments,
+    });
+
+    if (response.data) {
+      return response.data;
+    } else {
+      throw "No Response!";
+    }
+  } catch (e) {
+    console.error(e);
+    throw `Message Moderation Failed`;
+  }
+}
+
 async function signUpUser(name, email, username, dob, password) {
   try {
     validation.validateString(name);
@@ -20,6 +39,32 @@ async function signUpUser(name, email, username, dob, password) {
     console.log(e);
     throw "Fix errors before submitting!";
   }
+
+  // try {
+  //   const moderationResponse = await userInfoModeration(name, []);
+  //   if (moderationResponse.flagged) {
+  //     const moderationErr = new Error("Moderation Error");
+  //     moderationErr.type = "moderation";
+  //     moderationErr.message = "Name not allowed";
+  //     throw moderationErr;
+  //   }
+  // } catch (err) {
+  //   console.error("Name not allowed Error");
+  //   throw err;
+  // }
+
+  // try {
+  //   const moderationResponse = await userInfoModeration(username, []);
+  //   if (moderationResponse.flagged) {
+  //     const moderationErr = new Error("Moderation Error");
+  //     moderationErr.type = "moderation";
+  //     moderationErr.message = "Username not allowed";
+  //     throw moderationErr;
+  //   }
+  // } catch (err) {
+  //   console.error("Username not allowed Error");
+  //   throw err;
+  // }
 
   try {
     await get("users/signup/uniqueCheck/", {
@@ -96,6 +141,32 @@ async function editUser(name, email, username, dob, password, oldPassword) {
   } catch (e) {
     console.log(e);
     throw "Fix errors before submitting!";
+  }
+
+  try {
+    const moderationResponse = await userInfoModeration(name, []);
+    if (moderationResponse.flagged) {
+      const moderationErr = new Error("Moderation Error");
+      moderationErr.type = "moderation";
+      moderationErr.message = "Name not allowed";
+      throw moderationErr;
+    }
+  } catch (err) {
+    console.error("Name not allowed Error");
+    throw err;
+  }
+
+  try {
+    const moderationResponse = await userInfoModeration(username, []);
+    if (moderationResponse.flagged) {
+      const moderationErr = new Error("Moderation Error");
+      moderationErr.type = "moderation";
+      moderationErr.message = "Username not allowed";
+      throw moderationErr;
+    }
+  } catch (err) {
+    console.error("Username not allowed Error");
+    throw err;
   }
 
   try {

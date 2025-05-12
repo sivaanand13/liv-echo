@@ -266,6 +266,18 @@ async function deletePost(pos) {
   }
 }
 
+async function reportPost(postId,type,comment) {
+  try{
+    const response = await axios.patch(`posts/${postId}/report`,{reportType: type, comment})
+    return response.data.data
+  }
+  catch(e){
+    console.log(e);
+    throw `Report post failed`
+  }
+}
+
+
 export default {
   createPost,
   getPosts,
@@ -281,4 +293,5 @@ export default {
   editPost,
   editComment,
   getModPosts,
+  reportPost
 };

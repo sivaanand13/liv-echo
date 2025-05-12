@@ -141,8 +141,14 @@ function SignUp() {
         );
         setUser(user);
       } catch (e) {
+        if (e.type === "moderation") {
+          console.log("SignUp.jsx", e.message);
+          setError(e.message);
+          return;
+        }
         console.log("SignUp.jsx", e);
         setError(e);
+        return;
       }
     }
   };
@@ -159,6 +165,7 @@ function SignUp() {
         overflow: "auto",
         alignItems: "center",
         minHeight: "100vh",
+        mt: 2,
       }}
     >
       <Card sx={{ minWidth: "40%", maxWidth: "50%", padding: "2rem" }}>

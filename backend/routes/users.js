@@ -7,6 +7,7 @@ import uploadMiddleware from "../middleware/uploadMiddleware.js";
 import admin from "firebase-admin";
 import cloudinary from "../cloudinary/cloudinary.js";
 import settings from "../models/settings.js";
+import { moderationFunction } from "../utils/text_image_moderation.js";
 const router = express.Router();
 
 router.route("/").get(authMiddleware, async (req, res) => {
@@ -266,6 +267,23 @@ router.route("/signup").post(async (req, res) => {
   }
 
   try {
+    const moderationResponse1 = await moderationFunction(name, []);
+    if (moderationResponse1.flagged) {
+      throw "Invalid Name";
+    }
+    const moderationResponse2 = await moderationFunction(username, []);
+    if (moderationResponse2.flagged) {
+      throw "Invalid Username";
+    }
+  } catch (e) {
+    console.error("Moderation error:", e);
+    return res.status(400).json({
+      error: true,
+      message: e || "Moderation got flagged",
+    });
+  }
+
+  try {
     const user = await userController.signUpUser(
       uid,
       name,
@@ -475,6 +493,7 @@ router
       res.status(500).json({ message: e });
     }
   });
+
 router
   .route("/friends/requests")
   .post(authMiddleware, async (req, res) => {
@@ -513,6 +532,93 @@ router
         .json({ message: "Failed to remove friend", error: e });
     }
   });
+
+router
+  .route("/friends/request")
+  .post(authMiddleware, async (req, res) => {
+    const { friendUID } = req.body;
+    const currentUID = req.user?.uid;
+    if (!currentUID || !friendUID) {
+      return res.status(400).json({ message: "Invalid request" });
+    }
+
+    let user;
+    let friend;
+    try {
+      user = await userController.getUserByUID(currentUID);
+      friend = await userController.getUserByUID(friendUID);
+      if (
+        friend.friendRequests.some(
+          (val) => val.toString() == user._id.toString()
+        )
+      ) {
+        throw "You are already sent a friend request to this user!";
+      }
+    } catch (e) {
+      return res
+        .status(409)
+        .json({ message: "Failed to send friend request", error: e });
+    }
+
+    try {
+      await userController.sendFriendRequest(currentUID, friendUID);
+      return res
+        .status(200)
+        .json({ message: "Friend request sent successfully" });
+    } catch (e) {
+      console.error(e);
+      return res
+        .status(500)
+        .json({ message: "Failed to send friend request", error: e });
+    }
+  })
+  .patch(authMiddleware, async (req, res) => {
+    const { friendUID, resolution } = req.body;
+
+    const currentUID = req.user?.uid;
+    if (!currentUID || !friendUID) {
+      return res.status(400).json({ message: "Invalid request" });
+    }
+
+    let user;
+    let friend;
+    try {
+      user = await userController.getUserByUID(currentUID);
+      friend = await userController.getUserByUID(friendUID);
+      if (
+        friend.friendRequests.some(
+          (val) => val.toString() == user._id.toString()
+        )
+      ) {
+        throw "You are already sent a friend request to this user!";
+      }
+
+      if (friend.friends.some((val) => val.toString() == user._id.toString())) {
+        throw "You are already sent a friend request to this user!";
+      }
+    } catch (e) {
+      return res
+        .status(409)
+        .json({ message: "Failed to send friend request", error: e });
+    }
+
+    try {
+      await userController.resolveFriendRequest(
+        currentUID,
+        friendUID,
+        resolution
+      );
+      return res
+        .status(200)
+        .json({ message: "Friend request resolved successfully" });
+    } catch (e) {
+      console.error(e);
+      return res
+        .status(500)
+        .json({ message: "Failed to send resolve friend request", error: e });
+    }
+  });
+
 router
   .route("/friends/requests/remove")
   .patch(authMiddleware, async (req, res) => {
@@ -526,7 +632,7 @@ router
       await userController.removeFriend(friendUID, currentUID);
       return res.status(200).json({ message: "Friend successfully removed" });
     } catch (e) {
-      console.error(e);
+      console.log(e);
       return res
         .status(500)
         .json({ message: "Failed to remove friend", error: e });

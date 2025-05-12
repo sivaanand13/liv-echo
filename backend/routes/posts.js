@@ -1,6 +1,7 @@
 import express, { json } from "express";
 import postsController from "../controllers/posts.js";
 import commentsController from "../controllers/comments.js";
+import adminController from "../controllers/admin.js";
 import userController from "../controllers/users.js";
 import validation, { usernamePolicies } from "../utils/validation.js";
 import authMiddleware from "../middleware/authMiddleware.js";
@@ -11,6 +12,7 @@ import uploadMiddleware from "../middleware/uploadMiddleware.js";
 import cloudinary, {
   validateCloudinaryObject,
 } from "../cloudinary/cloudinary.js";
+import messages from "../controllers/messages.js";
 const router = express.Router();
 
 // middleware
@@ -181,7 +183,7 @@ router.route("/:postID").patch(async (req, res) => {
   try {
     if (uid.toString() == poster.uid.toString()) {
       let pos = await postsController.editPost(uid, postID, text, isPrivate);
-      console.log("Did i do that?", pos)
+      console.log("Did i do that?", pos);
       return res.status(200).json({
         message: "Updated post succesfully!",
         data: pos,
@@ -307,6 +309,8 @@ router.route("/:postID/report").patch(async (req, res) => {
         throw new Error("You can't see this!");
       }
     }
+    console.log(reportType);
+    console.log(comment);
     const pos = await postsController.reportPost(
       uid,
       postID,
@@ -459,17 +463,31 @@ router.route("/:postID/:commentID").patch(async (req, res) => {
 // delete comment on post
 // pretty similar to edit, you'd be surprised
 router.route("/:postID/:commentID").delete(async (req, res) => {
+  console.log("Delete Comment Route");
   let postID = req.params.postID;
   let commentID = req.params.commentID;
   let uid = req.user.uid;
   let post, user, poster;
-  console.log("we're here");
   try {
     post = await postsController.getPostById(postID);
     user = await userController.getUserByUID(uid);
     poster = await userController.getUserById(post.sender);
   } catch (e) {
     return res.status(400).json({ message: e });
+  }
+
+  // Admin Delete
+  try {
+    if (req.user.uid === process.env.ADMIN_UID) {
+      const response = await adminController.adminDeleteComment(commentID);
+      return res.status(200).json({
+        message:
+          "Comment deleted successfully and removed from post's comments!",
+      });
+    }
+  } catch (err) {
+    console.error(`Something went wrong in delete comment route`, err);
+    return res.status(500).json({ messages: `Something went wrong!` });
   }
 
   // there's a lot of checks here actually, so I'll go one-by-one

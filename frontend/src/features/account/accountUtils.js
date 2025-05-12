@@ -143,8 +143,52 @@ async function editBio(bio) {
     throw e.message || "Update bio failed!";
   }
 }
+
+async function resolveFriendRequest(friendUID, type) {
+  let body = {};
+
+  try {
+    validation.validateNumber(type);
+    body.resolution = type;
+    body.friendUID = friendUID;
+  } catch (e) {
+    throw "Friend request resolve failed!";
+  }
+
+  try {
+    if (Object.keys(body).length > 0) {
+      const response = await axios.patch(`users/friends/request`, body);
+      return response.data.data;
+    }
+  } catch (e) {
+    console.log("update account error: ", e);
+    throw e.message || "Update bio failed!";
+  }
+}
+removeFriend;
+
+async function removeFriend(friendUID) {
+  let body = {};
+
+  try {
+    body.friendUID = friendUID;
+  } catch (e) {
+    throw "Friend removal failed!";
+  }
+
+  try {
+    if (Object.keys(body).length > 0) {
+      const response = await axios.patch(`users/friends/requests/remove`, body);
+      return response.data.data;
+    }
+  } catch (e) {
+    throw e.message || "Friend removal failed!";
+  }
+}
 export default {
   editBanner,
   editProfile,
+  resolveFriendRequest,
   editBio,
+  removeFriend,
 };
