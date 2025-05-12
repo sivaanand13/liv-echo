@@ -148,6 +148,15 @@ async function deleteComment(postID, commID){
     throw `Comment fetch failed!`;
   }
 }
+async function editPost(postID, data) {
+  try {
+    const response = await axios.patch(`posts/${postID}`, data);
+    return response.data.data;
+  } catch (e) {
+    console.error(e);
+    throw new Error("Post update failed!");
+  }
+}
 
 async function likeCommentByID (postID, commID) {
   try {
@@ -181,7 +190,7 @@ async function getMutualFriends() {
 }
 async function deletePost(pos) {
   try {
-    const response = await axios.del(`posts/${pos._id}`, {});
+    const response = await axios.del(`posts/${pos}`, {});
     console.log("Well, I tried!");
     return response.data.data;
   } catch (e) {
@@ -200,5 +209,6 @@ export default {
   searchPosts,
   getPostsByUID,
   getPostByPostId,
-  getMutualFriends
+  getMutualFriends,
+  editPost
 };
