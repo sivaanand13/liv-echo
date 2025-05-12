@@ -327,7 +327,10 @@ export default function Account() {
                             Private Post
                           </Typography>
                         )}
-                        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                      </CardContent>
+                    </CardActionArea>
+                  </Card>
+                  <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
                                         <Button
                                           variant="outlined"
                                           color="primary"
@@ -358,9 +361,6 @@ export default function Account() {
                                         />
                                         )}
                         </Stack>
-                      </CardContent>
-                    </CardActionArea>
-                  </Card>
                 </Paper>
               </Box>
             ))}
@@ -441,7 +441,9 @@ export default function Account() {
                             Private Post
                           </Typography>
                         )}
-                        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                      </CardContent>
+                    </CardActionArea>
+                     <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
                                         <Button
                                           variant="outlined"
                                           color="error"
@@ -457,8 +459,6 @@ export default function Account() {
                                            onDeleteSuccess={handleDeleteSuccess}
                                           />)}
                         </Stack>
-                      </CardContent>
-                    </CardActionArea>
                   </Card>
                 </Paper>
               </Box>
