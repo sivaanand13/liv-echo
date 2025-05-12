@@ -36,6 +36,20 @@ router.route("/").get(async (req, res) => {
     });
   }
 });
+router.route("/mod").get(async (req, res) => {
+  try {
+    let role = req.user.role;
+    const pos = await postsController.getModPosts();
+    return res.status(200).json({
+      message: "Attached message media!",
+      data: pos,
+    });
+  }catch (e){
+    return res.status(500).json({
+      message: e,
+    });
+  }
+});
 
 // post creation
 router.route("/create").post(async (req, res) => {

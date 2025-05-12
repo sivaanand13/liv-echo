@@ -18,11 +18,11 @@ import {
   Tab,
   Grid,
   CardActionArea,
-  Link
 } from "@mui/material";
 import defaultBanner from "../../assets/landing/landing1.jpg";
 import Profile from "../../components/Profile";
 import chatSocket from "../../sockets/namespaces/chatSocket";
+import { Link } from "react-router-dom";
 export default function UserProfile() {
   const theme = useTheme();
   const { userUID } = useParams();
