@@ -56,10 +56,9 @@ async function getUserByUID(uid, display) {
       }
     ).populate("friends", "name username email profile uid");
   } else {
-    user = await User.findOne({ uid: uid }).populate(
-      "friends",
-      "name username email profile uid"
-    );
+    user = await User.findOne({ uid: uid })
+      .populate("friends", "name username email profile banner uid")
+      .populate("friendRequests", "name username email profile banner uid");
   }
 
   if (!user) {
@@ -230,25 +229,12 @@ async function sendFriendRequest(userUid, friendUid) {
     throw "You are already friends with this user.";
   }
   console.log("user: ", currUser);
-  await User.updateOne({ uid: userUid }, { $addToSet: { friends: friendId } });
-  console.log("Step 4");
+  await User.updateOne(
+    { uid: friendUid },
+    { $addToSet: { friendRequests: currUser._id } }
+  );
+
   let user = await getUserByUID(userUid, false);
-  console.log("Edited user", user);
-  const updatefriend = await getUserByUID(friendUid);
-  chatNamespace.to(user.uid).emit("accountUpdated", user);
-
-  await sendNotification(friendId, friendUid, "", {
-    type: "friend-request",
-    title: `${currUser.name} sent you a friend request`,
-    body: "",
-  });
-
-  if (
-    !updatefriend.friends.some((f) => f._id.toString() == user._id.toString())
-  )
-    chatNamespace.to(friendUid).emit("friend-request-sent");
-
-  user = await getUserByUID(userUid, false);
   console.log("Edited user", user);
   chatNamespace.to(user.uid).emit("accountUpdated", user);
 
@@ -257,28 +243,70 @@ async function sendFriendRequest(userUid, friendUid) {
   chatNamespace.to(user.uid).emit("accountUpdated", user);
   return { message: "Friend added" };
 }
+
 async function removeFriend(userUid, friendUid) {
   if (userUid === friendUid) throw "You cannot friend yourself.";
 
-  const currUser = await getUserByUID(userUid);
-  const friend = await getUserByUID(friendUid);
-  const friendId = friend._id;
+  let currUser = await getUserByUID(userUid);
+  let friend = await getUserByUID(friendUid);
+  let friendId = friend._id;
   if (!currUser.friends.some((f) => f._id.toString() == friendId.toString())) {
     throw "You are not friends with this user.";
   }
 
-  await User.updateOne({ uid: userUid }, { $pull: { friends: friendId } });
-  console.log("Step 4");
+  await User.updateOne({ uid: userUid }, { $pull: { friends: friend._id } });
+  await User.updateOne(
+    { uid: friendUid },
+    { $pull: { friends: currUser._id } }
+  );
+
   let user = await getUserByUID(userUid, false);
   console.log("Edited user", user);
   chatNamespace.to(user.uid).emit("accountUpdated", user);
-  if (!user.friends.some((f) => f._id.toString() == friend._id.toString()))
-    chatNamespace.to(userUid).emit("friend-request-denied");
+
+  friend = await getUserByUID(friend.uid, false);
+  chatNamespace.to(friend.uid).emit("accountUpdated", friend);
+
+  return { message: "Friend removed" };
+}
+
+async function resolveFriendRequest(currentUID, frientUID, resolution) {
+  let user = await getUserByUID(currentUID);
+  let friend = await getUserByUID(frientUID);
+  await User.updateOne(
+    { _id: user._id },
+    {
+      $pull: {
+        friendRequests: friend._id,
+      },
+    }
+  );
+  if (resolution == 1) {
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $addToSet: {
+          friends: friend._id,
+        },
+      }
+    );
+    await User.updateOne(
+      { _id: friend._id },
+      {
+        $addToSet: {
+          friends: user._id,
+        },
+      }
+    );
+  }
+
+  friend = await getUserByUID(frientUID, false);
+  chatNamespace.to(frientUID).emit("accountUpdated", friend);
 
   user = await getUserByUID(user.uid, false);
-  console.log("Edited user", user);
   chatNamespace.to(user.uid).emit("accountUpdated", user);
-  return { message: "Friend removed" };
+
+  return user;
 }
 export default {
   validateUnqiueEmail,
@@ -294,4 +322,5 @@ export default {
   sendFriendRequest,
   removeFriend,
   updateUserEmail,
+  resolveFriendRequest,
 };

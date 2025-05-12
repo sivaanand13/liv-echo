@@ -41,6 +41,7 @@ const UserSchema = new Schema(
     profile: { type: CloudinaryAssetSchema, required: false },
     banner: { type: CloudinaryAssetSchema, required: false },
     friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    friendRequests: [{ type: Schema.Types.ObjectId, ref: "User" }],
     settings: {
       notifications: {
         messages: { type: Boolean, default: true },
