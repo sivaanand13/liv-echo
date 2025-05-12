@@ -102,8 +102,11 @@ async function canDeleteComment(uid, postID){
 
 // the actual deletion
 async function deleteComment(uid, commID){
+    console.log("I made it coach", uid);
+    console.log("I love comments", commID)
     let comm = await getCommentById(commID.toString());
-    let user = await usersController.getUserByUID(uid);
+    console.log("comm", comm)
+    let user = await usersController.getUserByUID(uid.toString());
     let post = await postsController.getPostById(comm.post.toString());
 
     let canDel = await canDeleteComment(uid, commID);

@@ -27,7 +27,7 @@ import postUtils from "./postUtils";
 import CustomLink from "../../components/CustomLink";
 import { formatDistanceToNow } from "date-fns";
 
-export default function CommentListItem({ item: msg }) {
+export default function CommentListItem({ item: msg, onDelete }) {
   const { currentUser, serverUser } = useContext(AuthContext);
   const auth = useContext(AuthContext);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -73,6 +73,7 @@ export default function CommentListItem({ item: msg }) {
   async function handleDelete() {
     try {
       await postUtils.deleteComment(msg.post, msg._id);
+      if (onDelete) onDelete(msg._id);
     } catch (e) {
       console.log(e);
     }
@@ -167,8 +168,7 @@ export default function CommentListItem({ item: msg }) {
               </Stack>
             )}
           </Stack>
-          {(auth.currentUser.uid == msg.sender?.uid ||
-            auth.currentUser.role == "admin") && (
+          {isCommentor && (
             <>
               <IconButton
                 onClick={handleOpen}

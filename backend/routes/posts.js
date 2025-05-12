@@ -462,6 +462,7 @@ router.route("/:postID/:commentID").delete(async (req, res) =>{
   // there's a lot of checks here actually, so I'll go one-by-one
   try {
     // first, let's make sure the comment is actually tied to the post
+    console.log("comments", post.comments)
     if(!post.comments.includes(commentID)) throw "comment isn't tied to post!";
 
     // we only need to make the first two checks here
@@ -480,13 +481,12 @@ router.route("/:postID/:commentID").delete(async (req, res) =>{
       }
     }
     console.log("we're here");
-    const pos = await commentsController.deleteComment(
+    await commentsController.deleteComment(
       uid,
       commentID,
     );
     return res.status(200).json({
-      message: "Attached message media!",
-      data: pos,
+      message: "Comment deleted successfully and removed from post's comments!",
     });
 
   } catch (e) {

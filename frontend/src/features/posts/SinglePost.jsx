@@ -228,7 +228,12 @@ export default function SinglePost() {
           >
             {comments.map((comment) => (
               <Box key={comment._id} sx={{ p: 0 }}>
-                <CommentListItem item={comment} />
+                <CommentListItem 
+                item={comment}
+                onDelete={(deletedId) =>
+                  setComments((prev) => prev.filter((c) => c._id !== deletedId))
+                }
+                />
               </Box>
             ))}
           </Grid>
