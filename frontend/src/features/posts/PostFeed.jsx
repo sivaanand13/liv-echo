@@ -25,7 +25,7 @@ export default function MostCommentedFeed() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [tab, setTab] = useState(null);
+  const [tab, setTab] = useState(0);
   const [displayData, setDisplayData] = useState(null);
   const [displayTitle, setDisplayTitle] = useState("");
 

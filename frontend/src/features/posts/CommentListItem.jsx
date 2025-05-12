@@ -28,6 +28,7 @@ import CustomLink from "../../components/CustomLink";
 import { formatDistanceToNow } from "date-fns";
 
 export default function CommentListItem({ item: msg, onDelete }) {
+  console.log("comment list item: ", msg);
   const { currentUser, serverUser } = useContext(AuthContext);
   const auth = useContext(AuthContext);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -95,7 +96,9 @@ export default function CommentListItem({ item: msg, onDelete }) {
     setEditing(false);
   }
   const isCommentor =
-    serverUser.uid === msg.sender?.uid || serverUser.role === "admin";
+    serverUser.uid === msg.sender?.uid ||
+    serverUser.uid === msg.sender ||
+    serverUser.role === "admin";
   return (
     <ListItem
       sx={{
