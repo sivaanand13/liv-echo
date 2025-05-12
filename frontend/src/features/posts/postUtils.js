@@ -43,11 +43,11 @@ async function createPost(text, attachments, isPrivate = false) {
       isPrivate,
     };
 
+    const image_url = body.attachments.map((items) => items.secure_url);
+
+    console.log("Post Body Attachment: ", body.attachments);
     //Post Moderation
-    const moderationResponse = await postModeration(
-      body.text,
-      body.attachments
-    );
+    const moderationResponse = await postModeration(body.text, image_url);
     if (moderationResponse.flagged) {
       throw moderationResponse.message;
     }
@@ -109,7 +109,7 @@ async function getPostByPostId(postId) {
   }
 }
 
-async function likePostByPostId (postId) {
+async function likePostByPostId(postId) {
   try {
     const res = await axios.patch(`posts/${postId}/like`);
     return res.data.data;
@@ -138,9 +138,8 @@ async function getModPosts() {
   }
 }
 
-
-async function getComments(postID){
-    try {
+async function getComments(postID) {
+  try {
     const response = await axios.get(`posts/${postID}/comment`);
     return response.data.data;
   } catch (e) {
@@ -159,7 +158,7 @@ async function createComment(postID, data) {
   }
 }
 
-async function deleteComment(postID, commID){
+async function deleteComment(postID, commID) {
   try {
     const response = await axios.del(`posts/${postID}/${commID}`);
     return response.data.data;
@@ -178,7 +177,7 @@ async function editPost(postID, data) {
   }
 }
 
-async function likeCommentByID (postID, commID) {
+async function likeCommentByID(postID, commID) {
   try {
     const res = await axios.patch(`posts/${postID}/${commID}/like`);
     return res.data.data;
@@ -209,7 +208,7 @@ async function getPostsByUID(userUid) {
 async function getMutualFriends() {
   try {
     const response = await axios.get(`posts/user/find/mutualFriend`);
-    console.log(response.data.results)
+    console.log(response.data.results);
     return response.data.results;
   } catch (e) {
     console.log(e);
@@ -241,5 +240,5 @@ export default {
   getMutualFriends,
   editPost,
   editComment,
-  getModPosts
+  getModPosts,
 };
