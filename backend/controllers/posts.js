@@ -7,7 +7,7 @@ import Post from "../models/post.js";
 import elasticClient from "../elasticSearch/elasticsearchClient.js";
 import createIndex from "../elasticSearch/createPostIndex.js";
 import userController from "./users.js";
-import commentsController from "./comments.js"
+import commentsController from "./comments.js";
 import { sendNotification } from "./notification.js";
 // delete post... make sure an admin can do it no matter what!
 
@@ -15,7 +15,6 @@ async function getNPosts(n) {
   //console.log("1");
   const posts = await Post.find({})
     .sort({ createdAt: -1 })
-    .limit(n * 2)
     .populate("sender", "name username email profile friends uid")
     .lean();
 
@@ -271,9 +270,12 @@ async function reportPost(uid, postId, reportType, comment) {
 }
 
 async function getPostById(postId) {
-  postId = validation.validateString(postId, "Post Id", true); 
+  postId = validation.validateString(postId, "Post Id", true);
   postId = ObjectId.createFromHexString(postId);
-  const post = await Post.findById(postId);
+  const post = await Post.findById(postId).populate(
+    "sender",
+    "name username email profile friends uid"
+  );
   if (!post) {
     throw `No post with id (${post})!`;
   }
@@ -282,7 +284,7 @@ async function getPostById(postId) {
 
 // if a post is private, you need to be either the user, their friend, or an admin to see it
 async function canSeePost(uid, postID) {
-  let post = await getPostById(postId.toString());
+  let post = await getPostById(postID.toString());
   let user = await usersController.getUserByUID(uid);
 
   if (!post.isPrivate) return true; // oh cool the post is public
@@ -296,7 +298,7 @@ async function canSeePost(uid, postID) {
 
   return false; // dammit
 }
-async function findMutualFriend(user){
+async function findMutualFriend(user) {
   let friendIds = (user?.friends || []).map((id) => id._id.toString());
   let finalArray = [];
   for (let i = 0; i < friendIds.length; i++) {
@@ -361,7 +363,7 @@ async function searchPosts(queryText, user) {
   //     }
   //    }
   // });
-  const { body } = await elasticClient.search({
+  let { body } = await elasticClient.search({
     index: "posts",
     body: {
       query: {
@@ -386,6 +388,7 @@ async function searchPosts(queryText, user) {
       },
     },
   });
+
   console.log("Raw Elasticsearch Response:", JSON.stringify(body, null, 2));
   console.log("Values we mentioned", body);
   console.log("hits", body.hits);
@@ -397,6 +400,13 @@ async function searchPosts(queryText, user) {
       ...hit._source,
     }));
     console.log("Mapped Search Results:", results);
+    for (let i = 0; i < results.length; i++) {
+      const curPost = results[i];
+      console.log("update sender: ", curPost);
+      const post = await getPostById(curPost.id);
+      console.log("updated post:", post);
+      results[i] = post;
+    }
     return results;
   } else {
     console.log("I should not be here");
@@ -482,5 +492,5 @@ export default {
   canSeePost,
   searchPosts,
   getPostsByUid,
-  findMutualFriend
+  findMutualFriend,
 };

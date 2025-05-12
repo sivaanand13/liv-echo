@@ -15,6 +15,7 @@ import { AuthContext } from "../../contexts/AuthContext.jsx";
 import userUtils from "../users/userUtils.js";
 import StaticPaginatedList from "../../components/StaticPaginatedList.jsx";
 import { Co2Sharp } from "@mui/icons-material";
+import { post } from "../../utils/requests/axios.js";
 import { formatDistanceToNow } from "date-fns";
 
 export default function MostCommentedFeed() {
@@ -31,24 +32,23 @@ export default function MostCommentedFeed() {
   function handleTabChange(_, newTab) {
     console.log("Handling tab change: ", newTab);
     setTab(newTab);
+    let data;
     switch (newTab) {
       case 0:
         setDisplayTitle("Most Liked Posts");
-        let data = sortByLikes();
-        console.log("likes data: ", data);
-        setDisplayData(data);
+        data = sortByLikes();
         break;
       case 1:
         setDisplayTitle("Most Commented Posts");
-
-        setDisplayData(sortByComments());
+        data = sortByComments();
         break;
       case 2:
         setDisplayTitle("Friends' Posts");
-
-        setDisplayData(sortByMutualFriendsPosts());
+        data = sortByMutualFriendsPosts();
         break;
     }
+    console.log("sorted: ", data);
+    setDisplayData(data);
   }
 
   useEffect(() => {
@@ -95,21 +95,21 @@ export default function MostCommentedFeed() {
   }, [posts, tab]);
 
   const sortByComments = () => {
-    return posts.sort(
+    return [...posts].sort(
       (a, b) => (b.comments?.length || 0) - (a.comments?.length || 0)
     );
   };
 
   // Sort posts by the number of likes
   const sortByLikes = () => {
-    return posts.sort(
+    return [...posts].sort(
       (a, b) => (b.likes?.length || 0) - (a.likes?.length || 0)
     );
   };
 
   // Sort posts by the number of friends of the sender
   const sortByMutualFriendsPosts = () => {
-    return posts.filter((post) => {
+    return [...posts].filter((post) => {
       return post.sender && mutualFriend.includes(post.sender.uid); // Only posts by mutual friends
     });
   };

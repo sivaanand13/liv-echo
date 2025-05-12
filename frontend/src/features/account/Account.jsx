@@ -9,12 +9,13 @@ import {
   Dialog,
   Typography,
   useTheme,
-  Link,
   CardContent,
   Tabs,
   Tab,
   Grid,
   CardActionArea,
+  Stack,
+  Button
 } from "@mui/material";
 import defaultBanner from "../../assets/landing/landing1.jpg";
 import PaginatedList from "../../components/PaginatedList.jsx";
@@ -30,6 +31,9 @@ import EditBio from "./EditBio";
 import postUtils from "../posts/postUtils.js";
 import PostCard from "../posts/PostCard.jsx";
 import userUtils from "../users/userUtils.js";
+import DeletePostDialog from "../posts/DeletePostDialog";
+import EditPostDialog from "../posts/EditPostDialog";
+import { Link } from "react-router-dom";
 export default function Account() {
   const { user } = useContext(AuthContext);
   const theme = useTheme();
@@ -37,6 +41,8 @@ export default function Account() {
   const [openEditProfile, setOpenEditProfile] = useState(false);
   const [openEditBanner, setOpenEditBanner] = useState(false);
   const [openEditBio, setOpenEditBio] = useState(false);
+  const [deletePost, setDeletePost] = useState(false);
+  const [editPost, setEditPost] = useState(null);
   const [tab, setTab] = useState(0);
   const [posts, setPosts] = useState([]);
   const [userData, setUserData] = useState(null);
@@ -47,6 +53,16 @@ export default function Account() {
   function getFriends() {
     console.log(user.friends);
     return user.friends;
+  }
+  async function handleDeleteSuccess() {
+    const postList = await postUtils.getPostsByUID(user.uid);
+    setPosts(postList);
+    
+  }
+  async function handleEditSuccess() {
+    const postList = await postUtils.getPostsByUID(user.uid);
+    setPosts(postList);
+    setEditPost(null);
   }
   console.log("Cur user: ", user);
   function closeModals() {
@@ -154,6 +170,7 @@ export default function Account() {
           <Tab label="About" />
           <Tab label="Friends" />
           <Tab label="Posts" />
+          {user.role == "admin" && <Tab label="Moderation"/>}
         </Tabs>
         {tab === 0 && (
           <Box sx={{ p: 2 }}>
@@ -299,6 +316,37 @@ export default function Account() {
                             Private Post
                           </Typography>
                         )}
+                        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                                        <Button
+                                          variant="outlined"
+                                          color="primary"
+                                          onClick={() => setEditPost(post)}
+                                        >
+                                          Edit Post
+                                        </Button>
+                                        <Button
+                                          variant="outlined"
+                                          color="error"
+                                          onClick={() => setDeletePost(post._id)}
+                                        >
+                                          Delete Post
+                                        </Button>
+                                        {deletePost === post._id && (
+                                        <DeletePostDialog
+                                           open={true}
+                                           handleClose={() => setDeletePost(null)}
+                                           postId={deletePost}
+                                           onDeleteSuccess={handleDeleteSuccess}
+                                          />)}
+                                        {editPost &&(
+                                        <EditPostDialog
+                                           open={editPost}
+                                           handleClose={() => setEditPost(null)}
+                                           post={post}
+                                           onEditSuccess={handleEditSuccess}
+                                        />
+                                        )}
+                        </Stack>
                       </CardContent>
                     </CardActionArea>
                   </Card>
