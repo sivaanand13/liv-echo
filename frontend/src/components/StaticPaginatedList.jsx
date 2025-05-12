@@ -34,7 +34,7 @@ function StaticPaginatedList({
   const [curPageData, setCurPageData] = useState(undefined);
   const [listData, setlistData] = useState(sourceData);
   const [loading, setLoading] = useState(true);
-  const [totalPages, setTotalPages] = useState(undefined);
+  const [totalPages, setTotalPages] = useState(1);
   const [searchInput, setSearchInput] = useState(undefined);
   const [searchKey, setSearchKey] = useState(undefined);
   const [searchKeyError, setSearchKeyError] = useState(undefined);
@@ -66,7 +66,7 @@ function StaticPaginatedList({
         console.log("static list data: ", sourceData);
         setLoading(false);
         setlistData(sourceData);
-        setTotalPages(Math.ceil(data.length / PAGE_SIZE));
+        setTotalPages(Math.ceil(sourceData.length / PAGE_SIZE));
       } catch (e) {
         console.log(e);
       }
@@ -217,8 +217,8 @@ function StaticPaginatedList({
                 onChange={(e, newPage) => {
                   changePage(newPage);
                 }}
-                hideNextButton={curPage == totalPages}
-                hidePrevButton={curPage == 1}
+                hideNextButton={totalPages === 1 || curPage === totalPages}
+                hidePrevButton={totalPages === 1 || curPage === 1}
                 page={curPage}
                 sx={{
                   display: "flex",
