@@ -27,9 +27,11 @@ export default function UserProfile() {
   const theme = useTheme();
   const { userUID } = useParams();
   const { user: currUser } = useContext(AuthContext);
+  console.log("curr user: ", currUser);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
   const [isFriend, setIsFriend] = useState(false);
   const [posts, setPosts] = useState([]);
   const [tab, setTab] = useState(0);
@@ -58,14 +60,13 @@ export default function UserProfile() {
         setPosts(userPosts);
         setIsFriend(isNowFriend);
         setMutualFriend(isMutual);
-        setRequest(hasIncomingRequest);
         setLoading(false);
       } catch (e) {
         setError(e);
       }
     }
     fetchUser();
-  }, []);
+  }, [currUser]);
 
   useEffect(() => {
     let socket;
@@ -99,24 +100,12 @@ export default function UserProfile() {
     };
   }, []);
   async function onClickAddFriend() {
-    if (isFriend) {
-      try {
-        console.log("Step 1");
-        await userUtils.addFriendwithUID(userUID, isFriend);
-        setIsFriend(false);
-        setRequest(false);
-      } catch (e) {
-        setError(e);
-      }
-    } else {
-      try {
-        console.log("Step 1");
-        await userUtils.addFriendwithUID(userUID, isFriend);
-        setIsFriend(true);
-        setRequest(false);
-      } catch (e) {
-        setError(e);
-      }
+    try {
+      await userUtils.addFriendwithUID(userUID, isFriend);
+      setIsFriend(true);
+      setRequest(false);
+    } catch (e) {
+      alert(e);
     }
   }
   async function onClickRemoveRequest() {
@@ -192,15 +181,13 @@ export default function UserProfile() {
             {user.name}
           </Typography>
 
-          <Box textAlign="center" mt={2}>
-            <Button variant="contained" onClick={onClickAddFriend}>
-              {isFriend ? "Remove Friend" : "Add Friend"}
-            </Button>
-          </Box>
-          {request && (
+          {!currUser.friends?.some(
+            (val) =>
+              val.toString() == user._id || val._id?.toString() == user._id
+          ) && (
             <Box textAlign="center" mt={2}>
-              <Button variant="contained" onClick={onClickRemoveRequest}>
-                {"Remove Friend"}
+              <Button variant="contained" onClick={onClickAddFriend}>
+                {"Send Friend Request"}
               </Button>
             </Box>
           )}

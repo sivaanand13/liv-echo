@@ -34,6 +34,9 @@ import userUtils from "../users/userUtils.js";
 import DeletePostDialog from "../posts/DeletePostDialog";
 import EditPostDialog from "../posts/EditPostDialog";
 import { Link } from "react-router-dom";
+import StaticPaginatedList from "../../components/StaticPaginatedList.jsx";
+import FriendCard from "./FriendCard.jsx";
+import CustomList from "../../components/CustomList.jsx";
 export default function Account() {
   const { user } = useContext(AuthContext);
   const theme = useTheme();
@@ -179,7 +182,10 @@ export default function Account() {
         <Tabs value={tab} onChange={handleTabChange} centered sx={{ mt: 10 }}>
           <Tab label="About" />
           <Tab label="Friends" />
+
           <Tab label="Posts" />
+          <Tab label="Friend Requests" />
+
           {user.role == "admin" && <Tab label="Moderation" />}
         </Tabs>
         {tab === 0 && (
@@ -242,22 +248,24 @@ export default function Account() {
           </Box>
         )}
 
-        {tab === 1 && user?.friends.length > 0 && (
+        {tab === 1 && user?.friends?.length > 0 && (
           <Box sx={{ p: 2 }}>
-            <PaginatedList
-              title="Friends"
-              type="users"
-              dataSource={getFriends}
-              ListItemComponent={UserCard}
+            <StaticPaginatedList
+              title={"Friends"}
+              type={"friends"}
+              sourceData={user?.friends}
+              ListItemComponent={FriendCard}
+              enableSearch={false}
+              PAGE_SIZE={10}
             />
           </Box>
         )}
-        {tab === 1 && user?.friends.length === 0 && (
+        {tab === 1 && user?.friends?.length === 0 && (
           <Typography variant="h3" textAlign="center" mx={"2rem"}>
             Sorry You Have No Friends
           </Typography>
         )}
-        {tab === 2 && posts.length > 0 && (
+        {tab === 2 && posts?.length > 0 && (
           <Grid
             container
             spacing={3}
@@ -287,7 +295,7 @@ export default function Account() {
                         >
                           Posted on {new Date(post.createdAt).toLocaleString()}
                         </Typography>
-                        {post.attachments && post.attachments.length > 0 && (
+                        {post.attachments && post.attachments?.length > 0 && (
                           <Box sx={{ mt: 2 }}>
                             <Typography variant="subtitle1">
                               Attachments:
@@ -366,13 +374,31 @@ export default function Account() {
             ))}
           </Grid>
         )}
-        {tab === 2 && posts.length === 0 && (
+        {tab === 2 && posts?.length === 0 && (
           <Typography variant="h3" textAlign="center" mx={"2rem"}>
             Sorry You Have No Posts
           </Typography>
         )}
 
-        {tab === 3 && modPosts.length > 0 && (
+        {tab === 3 && user?.friendRequests?.length > 0 && (
+          <Box sx={{ p: 2 }}>
+            <StaticPaginatedList
+              title={"Friend Requests"}
+              type={"friendRequests"}
+              sourceData={user?.friendRequests}
+              ListItemComponent={FriendCard}
+              enableSearch={false}
+              PAGE_SIZE={10}
+            />
+          </Box>
+        )}
+        {tab === 3 && user?.friendRequests?.length === 0 && (
+          <Typography variant="h3" textAlign="center" mx={"2rem"}>
+            No friend requests avaliable.
+          </Typography>
+        )}
+
+        {tab === 4 && modPosts?.length > 0 && (
           <Grid
             container
             spacing={3}
@@ -402,7 +428,7 @@ export default function Account() {
                         >
                           Posted on {new Date(post.createdAt).toLocaleString()}
                         </Typography>
-                        {post.attachments && post.attachments.length > 0 && (
+                        {post.attachments && post.attachments?.length > 0 && (
                           <Box sx={{ mt: 2 }}>
                             <Typography variant="subtitle1">
                               Attachments:
@@ -466,7 +492,7 @@ export default function Account() {
             ))}
           </Grid>
         )}
-        {tab === 3 && modPosts.length === 0 && (
+        {tab === 4 && modPosts?.length === 0 && (
           <Typography variant="h3" textAlign="center" mx={"2rem"}>
             Sorry You Have No Posts To Moderate
           </Typography>

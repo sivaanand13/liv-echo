@@ -209,7 +209,7 @@ function StaticPaginatedList({
                           display: "flex",
                         }}
                       >
-                        <ListItemComponent item={listItem} />
+                        <ListItemComponent type={type} item={listItem} />
                         <Divider sx={{ opacity: 0.2 }} />
                       </Grid>
                     );

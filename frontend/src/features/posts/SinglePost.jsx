@@ -37,8 +37,8 @@ export default function SinglePost() {
   const [editOpen, setEditOpen] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [commentSubmitting, setCommentSubmitting] = useState(false);
-  const [commentError, setCommentError] = useState("");
   const [reportOpen, setReportOpen] = useState(false);
+  const [commentError, setCommentError] = useState("");
   const senderId =
     typeof post?.sender === "object" ? post.sender._id : post?.sender;
   const canDelete =
