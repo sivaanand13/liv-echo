@@ -117,7 +117,7 @@ async function deleteComment(uid, commID) {
 
   let canDel = await canDeleteComment(uid, commID);
   if (!canDel) throw new Error("You don't have permissions to delete this!");
-
+  console.log("Another test", comm._id);
   let k = comm._id.toString();
   await Comment.deleteOne({ _id: comm._id });
 

@@ -86,6 +86,12 @@ export default function SinglePost() {
       setCommentSubmitting(false);
     }
   }
+  function handleCommentDelete(deletedCommentId) {
+    setComments((prevComments) =>
+      prevComments.filter((comment) => comment._id !== deletedCommentId)
+    );
+  }
+
   if (loading) {
     return (
       <Box sx={{ textAlign: "center", mt: 4 }}>
@@ -235,7 +241,7 @@ export default function SinglePost() {
           >
             {comments.map((comment) => (
               <Box key={comment._id} sx={{ p: 0 }}>
-                <CommentListItem item={comment} />
+                <CommentListItem item={comment} onDelete={handleCommentDelete}/>
               </Box>
             ))}
           </Grid>
