@@ -7,6 +7,7 @@ import Post from "../models/post.js";
 import elasticClient from "../elasticSearch/elasticsearchClient.js";
 import createIndex from "../elasticSearch/createPostIndex.js";
 import userController from "./users.js";
+import commentsController from "./comments.js"
 import { sendNotification } from "./notification.js";
 // delete post... make sure an admin can do it no matter what!
 
@@ -102,7 +103,15 @@ async function deletePost(uid, postID) {
 
   let canDel = await canDeletePost(uid, postID);
   if (!canDel) throw new Error("You don't have permissions to delete this!");
-
+  const commentIds = post.comments;
+  console.log("My commentIDs", commentIds);
+  for (const commentId of commentIds) {
+    try {
+      await commentsController.deleteCommentAnyway(uid, commentId.toString());
+    } catch (e) {
+      console.error(`Failed to delete comment ${commentId}:`, e);
+    }
+  }
   await Post.deleteOne({ _id: post._id });
   await elasticClient.delete({
     index: "posts",

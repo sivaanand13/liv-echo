@@ -106,9 +106,33 @@ async function deleteComment(uid, commID){
     let k = comm._id.toString();
     await Comment.deleteOne({_id: comm._id});
 
-    let coms = post.comments.filter((comment) => comment.toString() != k);
+    let coms = post.comments.filter((comment) => comment.toString() !== k);
 
-    post = await post.findOneAndUpdate( 
+    post = await Post.findOneAndUpdate( 
+                {_id: post._id, sender: user._id},
+                {
+                    $set: {
+                        comments: coms
+                    }
+                },
+                { }
+            );
+}
+async function deleteCommentAnyway(uid, commID){
+    let comm = await getCommentById(commID.toString());
+    //console.log("comm", comm);
+    //console.log("comm.sender", comm.sender)
+    let user = await usersController.getUserByUID(comm.sender.uid.toString());
+    //console.log("user", user);
+    let post = await postsController.getPostById(comm.post.toString());
+    //console.log("post", post)
+    //console.log("comm.post", comm.post)
+    let k = comm._id.toString();
+    await Comment.deleteOne({_id: comm._id});
+
+    let coms = post.comments.filter((comment) => comment.toString() !== k);
+
+    post = await Post.findOneAndUpdate( 
                 {_id: post._id, sender: user._id},
                 {
                     $set: {
@@ -171,4 +195,5 @@ export default {
     deleteComment,
     likeComment,
     getCommentById,
+    deleteCommentAnyway
 };
