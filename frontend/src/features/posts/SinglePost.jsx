@@ -12,12 +12,16 @@ import {
   Grid,
   Button,
   TextField,
-  Stack
+  Stack,
 } from "@mui/material";
 import postUtils from "./postUtils"; // Adjust the path as needed
 import CommentListItem from "./CommentListItem";
 import EditPostDialog from "./EditPostDialog";
 import { AuthContext } from "../../contexts/AuthContext";
+import { formatDistanceToNow } from "date-fns";
+import CustomLink from "../../components/CustomLink";
+import SendIcon from "@mui/icons-material/Send";
+import { Padding } from "@mui/icons-material";
 
 export default function SinglePost() {
   const { currentUser, serverUser } = useContext(AuthContext);
@@ -25,14 +29,15 @@ export default function SinglePost() {
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(""); 
+  const [error, setError] = useState("");
   const [comments, setComments] = useState([]);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [commentSubmitting, setCommentSubmitting] = useState(false);
   const canDelete =
-    serverUser?._id.toString() === post?.sender.toString() || serverUser?.role === "admin";
+    serverUser?._id.toString() === post?.sender.toString() ||
+    serverUser?.role === "admin";
   // console.log("I I EXIST ", canDelete);
   // console.log("user 1", serverUser?._id);
   // console.log("user 2", post?.sender);
@@ -40,7 +45,7 @@ export default function SinglePost() {
   useEffect(() => {
     async function fetchPost() {
       try {
-        console.log("Im post",postId)
+        console.log("Im post", postId);
         const result = await postUtils.getPostByPostId(postId);
         setPost(result);
         const coms = await postUtils.getComments(postId);
@@ -102,32 +107,58 @@ export default function SinglePost() {
     <Box sx={{ p: 4 }}>
       <Paper elevation={3} sx={{ maxWidth: "800px", mx: "auto", p: 2 }}>
         <Card elevation={1}>
-          <CardHeader title={post.senderUsername} subheader={post.senderName} />
+          <CardHeader
+            title={
+              <CustomLink
+                to={`/users/${post.sender}`}
+                sx={{
+                  color: "black",
+                  textDecoration: "none",
+
+                  "&:hover": {
+                    color: "red",
+                    textDecoration: "none",
+                  },
+                }}
+              >
+                {post.senderUsername}
+              </CustomLink>
+            }
+            subheader={post.senderName}
+          />
           <CardContent>
             <Typography variant="body1" gutterBottom>
               {post.text}
             </Typography>
-            <Typography variant="caption" display="block" color="text.secondary">
-              Posted on {new Date(post.createdAt).toLocaleString()}
+            <Typography
+              variant="caption"
+              display="block"
+              color="text.secondary"
+            >
+              Posted {formatDistanceToNow(post.createdAt, { addSuffix: true })}
             </Typography>
             {post.attachments && post.attachments.length > 0 && (
               <Box sx={{ mt: 2 }}>
                 <Typography variant="subtitle1">Attachments:</Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 1 }}>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
                   {post.attachments.map((attachment) =>
                     attachment.resource_type === "image" ? (
                       <Box key={attachment._id} sx={{ maxWidth: "100%" }}>
                         <img
                           src={attachment.secure_url}
                           alt="attachment"
-                          style={{ maxWidth: "100%", maxHeight: "400px", borderRadius: "8px" }}
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "400px",
+                            borderRadius: "8px",
+                          }}
                         />
                       </Box>
                     ) : null
                   )}
                 </Box>
               </Box>
-              )}
+            )}
             {post.isPrivate && (
               <Typography variant="caption" color="warning.main">
                 Private Post
@@ -154,34 +185,55 @@ export default function SinglePost() {
           </CardContent>
         </Card>
       </Paper>
-      <Paper elevation={1} sx={{ maxWidth: "800px", mx: "auto", mt: 3, p: 2 }}>
-        <Typography variant="h6" gutterBottom>Add a Comment</Typography>
+      <Paper
+        elevation={1}
+        sx={{
+          maxWidth: "800px",
+          mx: "auto",
+          mt: 3,
+          p: 1,
+        }}
+      >
+        <Typography variant="h6" gutterBottom>
+          Add a Comment
+        </Typography>
         <Stack direction="row" spacing={2}>
           <TextField
             fullWidth
             multiline
-            rows={2}
             variant="outlined"
             placeholder="Write a comment..."
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
+            minRows={1}
+            maxRows={6}
           />
+
           <Button
             variant="contained"
             onClick={handleAddComment}
             disabled={commentSubmitting}
           >
-            {commentSubmitting ? "Posting..." : "Post"}
+            <SendIcon />
           </Button>
         </Stack>
-      </Paper>
-      <Grid container spacing={3} justifyContent="center">
-        {comments.map((comment) => (
-          <Grid item xs={12} sm={6} md={4} key={comment._id}>
-              <CommentListItem item={comment} />
+        <Grid container justifyContent="center" sx={{ width: "100%" }}>
+          <Grid
+            item
+            xs={12}
+            sm={10}
+            md={8}
+            lg={6}
+            sx={{ pt: 1, pb: 0, width: "100%" }}
+          >
+            {comments.map((comment) => (
+              <Box key={comment._id} sx={{ p: 0 }}>
+                <CommentListItem item={comment} />
+              </Box>
+            ))}
           </Grid>
-        ))}
-      </Grid>
+        </Grid>
+      </Paper>
       <DeletePostDialog
         open={deleteOpen}
         handleClose={() => setDeleteOpen(false)}

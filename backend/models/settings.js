@@ -6,7 +6,13 @@ const DM = "dm";
 const GROUP = "group";
 const CHAT_TYPES = [DM, GROUP];
 const USER_TYPES = ["user", "admin"];
-const REPORT_TYPES = ["inappropriate", "hateful", "misinformation", "spam", "other"];
+const REPORT_TYPES = [
+  "inappropriate",
+  "hateful",
+  "misinformation",
+  "spam",
+  "other",
+];
 export default {
   BIO_LENGTH,
   MESSAGE_LENGTH,

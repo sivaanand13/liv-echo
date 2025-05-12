@@ -13,9 +13,9 @@ import {
   MenuItem,
   IconButton,
   TextField,
-  Button
+  Button,
 } from "@mui/material";
-import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt"; 
+import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 import Profile from "../../components/Profile";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -25,6 +25,8 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import postUtils from "./postUtils";
 import CustomLink from "../../components/CustomLink";
+import { formatDistanceToNow } from "date-fns";
+
 export default function CommentListItem({ item: msg }) {
   const { currentUser, serverUser } = useContext(AuthContext);
   const auth = useContext(AuthContext);
@@ -38,10 +40,10 @@ export default function CommentListItem({ item: msg }) {
 
   useEffect(() => {
     async function fetchLiked() {
-          const likedByCurrentUser = msg.likes.includes(serverUser._id);
-          setLiked(likedByCurrentUser);
-          setLik(!likedByCurrentUser);
-        }
+      const likedByCurrentUser = msg.likes.includes(serverUser._id);
+      setLiked(likedByCurrentUser);
+      setLik(!likedByCurrentUser);
+    }
     fetchLiked();
   }, [currentUser._id, msg]);
 
@@ -54,7 +56,7 @@ export default function CommentListItem({ item: msg }) {
   }
 
   async function handleEdit() {
-    setEditing(true)
+    setEditing(true);
     handleClose();
   }
 
@@ -68,7 +70,6 @@ export default function CommentListItem({ item: msg }) {
     handleClose();
   }
 
-
   async function handleDelete() {
     try {
       await postUtils.deleteComment(msg.post, msg._id);
@@ -79,7 +80,9 @@ export default function CommentListItem({ item: msg }) {
   }
   async function handleSaveEdit() {
     try {
-      const updated = await postUtils.editComment(msg.post, msg._id, { text: tempText });
+      const updated = await postUtils.editComment(msg.post, msg._id, {
+        text: tempText,
+      });
       setText(updated.text);
       setEditing(false);
     } catch (e) {
@@ -90,17 +93,19 @@ export default function CommentListItem({ item: msg }) {
     setTempText(text);
     setEditing(false);
   }
-  const isCommentor = serverUser.uid === msg.sender?.uid || serverUser.role === "admin";
+  const isCommentor =
+    serverUser.uid === msg.sender?.uid || serverUser.role === "admin";
   return (
     <ListItem
       sx={{
         backgroundColor: "#611F69",
         backdropFilter: "blur(10px)",
         borderRadius: "0.5em",
-        marginBottom: "2em",
         boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
         color: "white",
         padding: "1rem",
+        width: "100%",
+        marginY: "1rem",
       }}
     >
       <Stack direction="column">
@@ -127,7 +132,7 @@ export default function CommentListItem({ item: msg }) {
                 </CustomLink>
               </Typography>
               <Typography variant="caption">
-                {new Date(msg.createdAt).toLocaleString()}
+                {formatDistanceToNow(msg.createdAt, { addSuffix: true })}
               </Typography>
             </Stack>
             {!editing ? (
@@ -236,6 +241,9 @@ export default function CommentListItem({ item: msg }) {
             },
           }}
         >
+          <Typography variant="body1" sx={{ paddingRight: 0.5 }}>
+            {msg.likes.length + (lik ? liked : 0 - !liked)}
+          </Typography>
           {liked ? (
             <ThumbUpAltIcon fontSize="small" sx={{ mr: 1 }} />
           ) : (
@@ -243,7 +251,6 @@ export default function CommentListItem({ item: msg }) {
           )}
           <Typography variant="body2">{liked ? "Liked" : "Like"}</Typography>
         </ListItemButton>
-        <Typography variant="body1">{msg.likes.length + (lik ? liked : (0 - !liked))}</Typography>
       </Stack>
     </ListItem>
   );

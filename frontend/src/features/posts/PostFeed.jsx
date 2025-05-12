@@ -16,6 +16,7 @@ import userUtils from "../users/userUtils.js";
 import StaticPaginatedList from "../../components/StaticPaginatedList.jsx";
 import { Co2Sharp } from "@mui/icons-material";
 import { post } from "../../utils/requests/axios.js";
+import { formatDistanceToNow } from "date-fns";
 
 export default function MostCommentedFeed() {
   const { currentUser, serverUser } = useContext(AuthContext);

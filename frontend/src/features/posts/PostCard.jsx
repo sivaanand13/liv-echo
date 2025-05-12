@@ -16,6 +16,8 @@ import CustomLink from "../../components/CustomLink";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import { Link } from "react-router";
 import CommentIcon from "@mui/icons-material/Comment";
+import { formatDistanceToNow } from "date-fns";
+
 export default function PostCard({ item: post }) {
   const theme = useTheme();
   console.log("display post:", post);
@@ -65,7 +67,7 @@ export default function PostCard({ item: post }) {
             </Typography>
           </Stack>
           <Typography variant="caption">
-            {new Date(post.createdAt).toLocaleString()}
+            {formatDistanceToNow(post.createdAt, { addSuffix: true })}
           </Typography>{" "}
         </Stack>
       </Stack>
