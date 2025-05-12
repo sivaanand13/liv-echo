@@ -15,6 +15,7 @@ import { AuthContext } from "../../contexts/AuthContext.jsx";
 import userUtils from "../users/userUtils.js";
 import StaticPaginatedList from "../../components/StaticPaginatedList.jsx";
 import { Co2Sharp } from "@mui/icons-material";
+import { formatDistanceToNow } from "date-fns";
 
 export default function MostCommentedFeed() {
   const { currentUser, serverUser } = useContext(AuthContext);
