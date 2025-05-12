@@ -444,13 +444,6 @@ export default function Account() {
                         <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
                                         <Button
                                           variant="outlined"
-                                          color="primary"
-                                          onClick={() => setEditPost(post)}
-                                        >
-                                          Edit Post
-                                        </Button>
-                                        <Button
-                                          variant="outlined"
                                           color="error"
                                           onClick={() => setDeletePost(post._id)}
                                         >
@@ -463,14 +456,6 @@ export default function Account() {
                                            postId={deletePost}
                                            onDeleteSuccess={handleDeleteSuccess}
                                           />)}
-                                        {editPost &&(
-                                        <EditPostDialog
-                                           open={editPost}
-                                           handleClose={() => setEditPost(null)}
-                                           post={post}
-                                           onEditSuccess={handleEditSuccess}
-                                        />
-                                        )}
                         </Stack>
                       </CardContent>
                     </CardActionArea>

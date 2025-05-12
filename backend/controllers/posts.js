@@ -23,7 +23,7 @@ async function getNPosts(n) {
 }
 
 async function getModPosts() {
-  const posts = await Post.find({ reports: {reportNum: { $gt: 5 }} })
+  const posts = await Post.find({ "reports.reportNum": { $gte: 5 } })
     .sort({ createdAt: -1 })
     .populate("sender", "name username email profile friends uid")
     .lean();
