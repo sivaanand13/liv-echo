@@ -43,11 +43,11 @@ async function createPost(text, attachments, isPrivate = false) {
       isPrivate,
     };
 
+    const image_url = body.attachments.map((items) => items.secure_url);
+
+    console.log("Post Body Attachment: ", body.attachments);
     //Post Moderation
-    const moderationResponse = await postModeration(
-      body.text,
-      body.attachments
-    );
+    const moderationResponse = await postModeration(body.text, image_url);
     if (moderationResponse.flagged) {
       throw moderationResponse.message;
     }
