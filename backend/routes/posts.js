@@ -397,7 +397,7 @@ router.route("/:postID/:commentID").patch(async (req, res) =>{
   try {
     post = await postsController.getPostById(postID);
     user = await userController.getUserByUID(uid);
-    comment = await commentsController.getCommentById(commendID);
+    comment = await commentsController.getCommentById(commentID);
     poster = await userController.getUserById(post.sender);
     commentor = await userController.getUserById(comment.sender);
   } catch (e) {
@@ -426,7 +426,7 @@ router.route("/:postID/:commentID").patch(async (req, res) =>{
     }
 
     // last, make sure that it's the commmentor editing the comment
-    if(commentor.uid.toString != uid.toString()) throw "you're not the commentor!";
+    if(commentor.uid.toString() != uid.toString()) throw "you're not the commentor!";
 
     const pos = await commentsController.editComment(
       commentID,

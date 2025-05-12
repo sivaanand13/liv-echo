@@ -57,24 +57,30 @@ async function createComment(postID, uid, text, attachments){
 async function editComment(commID, uid, text){
     let user = await usersController.getUserByUID(uid);
     let comment = await getCommentById(commID);
+    console.log("Do i make it here", comment.sender._id)
+    console.log("User is", user)
+    if(comment.sender._id.toString() != user._id.toString()) throw new Error ("You can't edit this comment");
 
-    if(comment.sender.toString() != user._id.toString()) throw new Error ("You can't delete this post!");
-
-    if (text){
+    try {
+    if (text) {
         text = validation.validateString(text);
-        if(text.length > settings.MESSAGE_LENGTH) throw new Error ("text is too long!");
+        if (text.length > settings.MESSAGE_LENGTH) throw new Error("text is too long!");
 
         comment = await Comment.findOneAndUpdate(
-            {_id: comment.id, sender: user._id},
-            {
-                $set: {
-                    text: text
-                }
+        { _id: comment.id, sender: user._id },
+        {
+            $set: {
+            text: text,
             },
-            { new: true, timestamps: updateTimestamps }
+        },
+        { new: true, timestamps: true }
         );
     }
-
+    console.log("I made it to end safe and sound!", comment);
+    } catch (err) {
+    console.error("Failed mid-editComment logic:", err);
+    throw err;
+    }
     return comment;
 }
 

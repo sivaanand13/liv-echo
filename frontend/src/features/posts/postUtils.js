@@ -141,7 +141,7 @@ async function getComments(postID){
 
 async function createComment(postID, data) {
   try {
-    const response = await axios.put(`posts/${postID}/comment`, data);
+    const response = await axios.post(`posts/${postID}/comment`, data);
     return response.data.data;
   } catch (e) {
     console.error(e);
@@ -177,7 +177,15 @@ async function likeCommentByID (postID, commID) {
     throw err.response?.data?.message || "Error fetching post.";
   }
 }
-
+async function editComment(postID, commentID, data) {
+  try {
+    const response = await axios.patch(`posts/${postID}/${commentID}`, data);
+    return response.data.data;
+  } catch (e) {
+    console.error("Failed to edit comment:", e);
+    throw new Error("Edit failed.");
+  }
+}
 async function getPostsByUID(userUid) {
   try {
     const response = await axios.get(`posts/user/${userUid}`);
@@ -221,5 +229,6 @@ export default {
   getPostsByUID,
   getPostByPostId,
   getMutualFriends,
-  editPost
+  editPost,
+  editComment
 };

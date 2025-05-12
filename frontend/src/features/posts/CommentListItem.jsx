@@ -12,11 +12,15 @@ import {
   Menu,
   MenuItem,
   IconButton,
+  TextField,
+  Button
 } from "@mui/material";
 import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt"; 
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 import Profile from "../../components/Profile";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import SaveIcon from "@mui/icons-material/Save";
+import CancelIcon from "@mui/icons-material/Cancel";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import postUtils from "./postUtils";
@@ -28,20 +32,17 @@ export default function CommentListItem({ item: msg }) {
   const [ancor, setAncor] = useState(null);
   const [liked, setLiked] = useState(false);
   const [lik, setLik] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [text, setText] = useState(msg.text);
+  const [tempText, setTempText] = useState(msg.text);
 
   useEffect(() => {
     async function fetchLiked() {
-          try {
-            let k = msg.likes.includes(serverUser._id);
-            setLiked(k);
-            setLik(!k);
-          } catch (err) {
-            console.error(err);
-            setError("Failed to load post.");
-          }
-          setLoading(false);
+          const likedByCurrentUser = msg.likes.includes(serverUser._id);
+          setLiked(likedByCurrentUser);
+          setLik(!likedByCurrentUser);
         }
-        fetchLiked();
+    fetchLiked();
   }, [currentUser._id, msg]);
 
   function handleOpen(e) {
@@ -53,11 +54,7 @@ export default function CommentListItem({ item: msg }) {
   }
 
   async function handleEdit() {
-    try {
-      //await postUtils.deleteMessage(msg);
-    } catch (e) {
-      console.log(e);
-    }
+    setEditing(true)
     handleClose();
   }
 
@@ -80,6 +77,20 @@ export default function CommentListItem({ item: msg }) {
     }
     handleClose();
   }
+  async function handleSaveEdit() {
+    try {
+      const updated = await postUtils.editComment(msg.post, msg._id, { text: tempText });
+      setText(updated.text);
+      setEditing(false);
+    } catch (e) {
+      console.log("Edit failed:", e);
+    }
+  }
+  function handleCancelEdit() {
+    setTempText(text);
+    setEditing(false);
+  }
+  const isCommentor = serverUser.uid === msg.sender?.uid || serverUser.role === "admin";
   return (
     <ListItem
       sx={{
@@ -119,8 +130,37 @@ export default function CommentListItem({ item: msg }) {
                 {new Date(msg.createdAt).toLocaleString()}
               </Typography>
             </Stack>
-
-            <Typography variant="body1">{msg.text}</Typography>
+            {!editing ? (
+              <Typography variant="body1">{text}</Typography>
+            ) : (
+              <Stack spacing={1}>
+                <TextField
+                  fullWidth
+                  multiline
+                  variant="outlined"
+                  value={tempText}
+                  onChange={(e) => setTempText(e.target.value)}
+                />
+                <Stack direction="row" spacing={1}>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<SaveIcon />}
+                    onClick={handleSaveEdit}
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<CancelIcon />}
+                    onClick={handleCancelEdit}
+                  >
+                    Cancel
+                  </Button>
+                </Stack>
+              </Stack>
+            )}
           </Stack>
           {(auth.currentUser.uid == msg.sender?.uid ||
             auth.currentUser.role == "admin") && (

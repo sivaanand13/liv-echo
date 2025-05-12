@@ -11,6 +11,7 @@ import {
   Paper,
   Grid,
   Button,
+  TextField,
   Stack
 } from "@mui/material";
 import postUtils from "./postUtils"; // Adjust the path as needed
@@ -28,6 +29,8 @@ export default function SinglePost() {
   const [comments, setComments] = useState([]);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [newComment, setNewComment] = useState("");
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
   const canDelete =
     serverUser?._id.toString() === post?.sender.toString() || serverUser?.role === "admin";
   // console.log("I I EXIST ", canDelete);
@@ -56,6 +59,20 @@ export default function SinglePost() {
   function handleEditSuccess(updatedPost) {
     setPost(updatedPost);
     setEditOpen(false);
+  }
+  async function handleAddComment() {
+    if (!newComment.trim()) return;
+    setCommentSubmitting(true);
+    try {
+      const commentData = { text: newComment };
+      const newCom = await postUtils.createComment(postId, commentData);
+      setComments((prev) => [newCom, ...prev]); // Add new comment to top
+      setNewComment("");
+    } catch (err) {
+      console.error("Failed to add comment:", err.message);
+    } finally {
+      setCommentSubmitting(false);
+    }
   }
   if (loading) {
     return (
@@ -136,6 +153,27 @@ export default function SinglePost() {
             )}
           </CardContent>
         </Card>
+      </Paper>
+      <Paper elevation={1} sx={{ maxWidth: "800px", mx: "auto", mt: 3, p: 2 }}>
+        <Typography variant="h6" gutterBottom>Add a Comment</Typography>
+        <Stack direction="row" spacing={2}>
+          <TextField
+            fullWidth
+            multiline
+            rows={2}
+            variant="outlined"
+            placeholder="Write a comment..."
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+          />
+          <Button
+            variant="contained"
+            onClick={handleAddComment}
+            disabled={commentSubmitting}
+          >
+            {commentSubmitting ? "Posting..." : "Post"}
+          </Button>
+        </Stack>
       </Paper>
       <Grid container spacing={3} justifyContent="center">
         {comments.map((comment) => (
