@@ -220,6 +220,8 @@ async function updateChat(chatId, uid, options) {
     update.profile = profile;
   }
 
+  
+
   if (Object.keys(update).length != 0) {
     newChat = await Chat.findOneAndUpdate({ _id: chat._id }, update, {
       new: true,

@@ -183,6 +183,7 @@ async function editPost(uid, postID, text, isPrivate, updateTimestamps) {
 async function likePost(uid, postId) {
   let post = await getPostById(postId.toString());
   let user = await usersController.getUserByUID(uid);
+  let postOwnerInfo = await userController.getUserById(postId.sender);
 
   if (user._id.toString() == post.sender.toString())
     throw new Error("you can't like your own post!");
@@ -202,6 +203,12 @@ async function likePost(uid, postId) {
     },
     {}
   );
+
+  await sendNotification(post.sender, postOwnerInfo.uid, "", {
+    type: "post-liked",
+    title: `${user.name} liked your post`,
+    body: "",
+  });
 
   return post;
 }
@@ -287,7 +294,7 @@ async function canSeePost(uid, postID) {
 
   return false; // dammit
 }
-async function findMutualFriend(user){
+async function findMutualFriend(user) {
   let friendIds = (user?.friends || []).map((id) => id._id.toString());
   let finalArray = [];
   for (let i = 0; i < friendIds.length; i++) {
@@ -473,5 +480,5 @@ export default {
   canSeePost,
   searchPosts,
   getPostsByUid,
-  findMutualFriend
+  findMutualFriend,
 };
