@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { connectSocket } from "../sockets/socketManager";
 import { getAuth } from "firebase/auth";
 import axios from "../utils/requests/axios";
+import { AuthContext } from "./AuthContext";
 
 const NotificationContext = createContext();
 
@@ -9,6 +10,7 @@ const NotificationContext = createContext();
 export const useNotification = () => useContext(NotificationContext);
 
 export function NotificationProvider({ children }) {
+  const { refreshAccount } = useContext(AuthContext);
   const [notifications, setNotifications] = useState([]);
   const [socket, setSocket] = useState(null);
 
@@ -30,6 +32,9 @@ export function NotificationProvider({ children }) {
             if (alreadyExists) return prev;
             return [notify, ...prev];
           });
+          try {
+            refreshAccount();
+          } catch (e) {}
         });
         setSocket(socket);
       }

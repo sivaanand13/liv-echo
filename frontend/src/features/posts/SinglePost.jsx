@@ -27,6 +27,8 @@ import ReportPostDialog from "./reportPostDialogue";
 import FlagIcon from "@mui/icons-material/Flag";
 import ErrorPage from "../../components/ErrorPage";
 import NotFound from "../../components/NotFound";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import validation from "../../utils/validation";
 
 export default function SinglePost() {
   const { currentUser, serverUser } = useContext(AuthContext);
@@ -48,7 +50,6 @@ export default function SinglePost() {
     serverUser?._id.toString() === senderId?.toString() ||
     serverUser?.role === "admin";
   const canEdit = serverUser?._id.toString() === senderId?.toString();
-
   console.log("user 2", post?.sender);
   async function handleReportPost() {
     try {
@@ -57,6 +58,14 @@ export default function SinglePost() {
     } catch (err) {
       console.error("Failed to report post:", err.message);
       alert("Failed to report post.");
+    }
+  }
+  async function handleLikePost() {
+    try {
+      const { post: updatedPost } = await postUtils.likePostByPostId(postId);
+      setPost(updatedPost);
+    } catch (err) {
+      console.error("Failed to like post:", err);
     }
   }
 
@@ -71,6 +80,7 @@ export default function SinglePost() {
         const coms = await postUtils.getComments(postId);
         setComments(coms);
         console.log("post info", result);
+        console.log("post comments", coms);
       } catch (err) {
         console.error(err);
         setError("Failed to load post.");
@@ -92,10 +102,12 @@ export default function SinglePost() {
     }
   }
   async function handleAddComment() {
-    if (!newComment.trim()) return;
     setCommentSubmitting(true);
     setCommentError("");
+
     try {
+      validation.validateString(newComment, "comment text");
+
       const commentData = { text: newComment };
       const newCom = await postUtils.createComment(postId, commentData);
       setComments((prev) => [newCom, ...prev]); // Add new comment to top
@@ -107,8 +119,15 @@ export default function SinglePost() {
         setCommentError(err.message);
         return;
       }
+      if (Array.isArray(err)) {
+        err = err.join(" ");
+        setNewComment("");
+        setCommentError(err);
+        return;
+      }
       setNewComment("");
-      setCommentError(err);
+      console.log(err);
+      setCommentError("Post comment failed");
       console.error("Failed to add comment:", err);
     } finally {
       setCommentSubmitting(false);
@@ -135,6 +154,7 @@ export default function SinglePost() {
   if (!post) {
     return <NotFound message="Post not found!" />;
   }
+  const userHasLiked = post.likes?.includes(serverUser?._id);
 
   return (
     <Box sx={{ p: 4 }}>
@@ -207,6 +227,15 @@ export default function SinglePost() {
                 </Box>
               </Box>
             )}
+            <Button
+              variant={userHasLiked ? "contained" : "outlined"}
+              color="primary"
+              onClick={handleLikePost}
+              sx={{ mt: 2 }}
+            >
+              <FavoriteIcon color={userHasLiked ? "red" : "purple"} />
+              {userHasLiked ? "Liked" : "Like"} ({post.likes?.length || 0})
+            </Button>
             {post.isPrivate && (
               <Typography variant="caption" color="warning.main">
                 Private Post
@@ -270,24 +299,22 @@ export default function SinglePost() {
           </Stack>
           {commentError && <Alert severity="error">{commentError}</Alert>}
         </Stack>
-        <Grid container justifyContent="center" sx={{ width: "100%" }}>
-          <Grid
-            item
-            xs={12}
-            sm={10}
-            md={8}
-            lg={6}
-            sx={{ pt: 1, pb: 0, width: "100%" }}
-          >
-            {comments.map((comment) => (
-              <Box key={comment._id} sx={{ p: 0 }}>
-                <CommentListItem
-                  item={comment}
-                  onDelete={handleCommentDelete}
-                />
-              </Box>
-            ))}
-          </Grid>
+        <Grid justifyContent="center" sx={{ width: "100%" }}>
+          {comments.map((comment) => (
+            <Grid
+              xs={12}
+              sm={10}
+              md={8}
+              lg={6}
+              sx={{ pt: 1, pb: 0, width: "100%" }}
+            >
+              <CommentListItem
+                item={comment}
+                key={comment._id}
+                onDelete={handleCommentDelete}
+              />
+            </Grid>
+          ))}
         </Grid>
       </Paper>
       <DeletePostDialog

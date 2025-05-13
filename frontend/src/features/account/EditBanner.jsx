@@ -90,30 +90,41 @@ export default function EditBanner({ handleClose }) {
               <Avatar
                 src={image ? URL.createObjectURL(image) : curImage}
                 sx={{ width: "25vh", height: "25vh" }}
+                alt="Banner"
               />
             </Box>
 
             <FormControl>
-              <Button
+              <Box
                 component="label"
-                variant="contained"
-                tabIndex={-1}
-                startIcon={<CloudUploadIcon />}
+                htmlFor="banner"
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: "1em",
+                  backgroundColor: theme.palette.secondary.main,
+                  color: "white",
+                  borderRadius: "0.5em",
+                  cursor: "pointer",
+                  textAlign: "center",
+                  gap: "1em",
+                }}
               >
+                <CloudUploadIcon />
                 Upload Banner
                 <input
-                  accept="image/*"
-                  id="banner"
-                  name="banner"
-                  required={true}
                   type="file"
+                  id="banner"
+                  accept="image/*"
+                  hidden
                   onChange={(e) => {
-                    console.log(e);
+                    console.log(e.target.files[0]);
                     setImage(e.target.files[0]);
                   }}
-                  hidden={true}
                 />
-              </Button>
+              </Box>
             </FormControl>
             {error && (
               <Typography color="red" textAlign="center">

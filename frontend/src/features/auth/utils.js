@@ -93,6 +93,10 @@ async function signUpUser(name, email, username, dob, password) {
       await post("users/signup/", { uid: user.uid, name, email, username, dob })
     ).data.data;
     console.log("signed up user", serverUser);
+    await sendEmailVerification(user);
+
+    await firebaseUtils.signOutFirebaseUser();
+
     return { ...user, ...serverUser };
   } catch (e) {
     await firebaseUtils.deleteFirebaseUser();
@@ -229,8 +233,8 @@ async function editUser(name, email, username, dob, password, oldPassword) {
       uid: user.uid,
       name: name || user.displayName,
       email: email || user.email,
-      username: username || server.username,
-      dob: dob || server.dob,
+      username: username,
+      dob: dob,
     });
     await updateProfile(user, {
       displayName: name,

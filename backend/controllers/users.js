@@ -53,6 +53,7 @@ async function getUserByUID(uid, display) {
         profile: 1,
         banner: 1,
         friends: 1,
+        email: 1,
       }
     ).populate("friends", "name username email profile uid");
   } else {
@@ -246,7 +247,7 @@ async function sendFriendRequest(userUid, friendUid) {
   console.log("Edited user", user);
   chatNamespace.to(user.uid).emit("accountUpdated", user);
   sendNotification(friend._id, friend.uid, "", {
-    title: `${user.name} sent you a friend request`,
+    title: `${currUser.name} sent you a friend request`,
     body: "",
     type: "friend-request",
     link: `/account`,

@@ -75,15 +75,28 @@ export default function EditProfile({ handleClose }) {
           <Avatar
             src={image ? URL.createObjectURL(image) : curImage}
             sx={{ width: "25vh", height: "25vh" }}
+            alt="Profile image"
           />
         </Box>
         <FormControl>
-          <Button
+          <Box
             component="label"
-            variant="contained"
-            tabIndex={-1}
-            startIcon={<CloudUploadIcon />}
+            htmlFor="banner"
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "1em",
+              backgroundColor: theme.palette.secondary.main,
+              color: "white",
+              borderRadius: "0.5em",
+              cursor: "pointer",
+              textAlign: "center",
+              gap: "1em",
+            }}
           >
+            <CloudUploadIcon />
             Upload Profile
             <input
               accept="image/*"
@@ -97,8 +110,9 @@ export default function EditProfile({ handleClose }) {
               }}
               hidden={true}
             />
-          </Button>
+          </Box>
         </FormControl>
+
         {error && <Typography>{error}</Typography>}
         <CardActions sx={{ display: "flex" }}>
           <Button

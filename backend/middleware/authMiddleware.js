@@ -10,6 +10,11 @@ export default async function authMiddleware(req, res, next) {
   try {
     const token = authHeader.split("Bearer ")[1];
     const user = await firebaseUtils.verifyAuthToken(token);
+
+    if (user && !user.email_verified) {
+      console.log("Email not verified");
+      return res.status(401).json({ message: "Email not verified!" });
+    }
     req.user = user;
     console.log("Authenticated user: " + user.uid);
     next();

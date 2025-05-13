@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router";
+import { Routes, Route, Navigate } from "react-router";
 import PrivateRoute from "./PrivateRoute";
 import Account from "../features/account/Account";
 import Landing from "../features/landing/Landing";
@@ -20,7 +20,7 @@ function AppRoutes() {
       <Route path="/signin" element={<SignIn />} />
 
       <Route element={<PrivateRoute />}>
-        <Route path="/" element={<PostFeed />} />
+        <Route path="/" element={<Navigate to="/posts" replace />} />
         <Route path="/account" element={<Account />} />
         <Route path="/dms" element={<DirectMessages />} />
         <Route path="/group-chats" element={<GroupChats />} />

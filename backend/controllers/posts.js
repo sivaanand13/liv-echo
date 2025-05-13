@@ -98,7 +98,7 @@ async function canDeletePost(uid, postID) {
   let user = await usersController.getUserByUID(uid);
 
   // if the user is an admin we can ignore these checks
-  if (!user.role != "admin" && user._id.toString() != post.sender.toString()) {
+  if (user.role != "admin" && user._id.toString() != post.sender.toString()) {
     console.log("User isn't poster or admin");
     return false;
   }
@@ -136,8 +136,9 @@ async function editPost(uid, postID, text, isPrivate, updateTimestamps) {
   let user = await usersController.getUserByUID(uid);
   validation.validateBoolean(isPrivate);
 
-  if (post.sender.toString() != user._id.toString())
-    throw new Error("You can't delete this post!");
+  console.log(post.sender, user._id);
+  if (post.sender._id.toString() != user._id.toString())
+    throw new Error("You can't edit this post!");
 
   if (text) {
     text = validation.validateString(text);
@@ -205,36 +206,62 @@ async function editPost(uid, postID, text, isPrivate, updateTimestamps) {
 async function likePost(uid, postId) {
   let post = await getPostById(postId.toString());
   let user = await usersController.getUserByUID(uid);
-  let postOwnerInfo = await userController.getUserById(post.sender.toString());
+  // console.log("sender man", post.sender)
+  // console.log("user", user._id)
+  let postOwnerInfo = await userController.getUserById(
+    post.sender._id.toString()
+  );
 
-  if (user._id.toString() == post.sender.toString())
+  if (user._id.toString() == post.sender._id.toString())
     throw new Error("you can't like your own post!");
 
-  let likez = post.likes;
-
+  let likez = post.likes.map((id) => id.toString());
+  console.log("likes before", likez);
+  let updatedLikes;
+  let isLiked;
   // return false?
-  if (likez.includes(user._id)) return false;
-  likez.push(user._id);
-
+  if (likez.includes(user._id.toString())) {
+    updatedLikes = post.likes.filter(
+      (id) => id.toString() !== user._id.toString()
+    );
+    isLiked = false;
+  } else {
+    updatedLikes = [...post.likes, user._id];
+    isLiked = true;
+    const postOwnerInfo = await userController.getUserById(
+      post.sender._id.toString()
+    );
+    await sendNotification(post.sender, postOwnerInfo.uid, "", {
+      title: `${user.name} liked your post`,
+      body: "",
+      type: "post-liked",
+      link: `/posts/${postId}`,
+    });
+  }
+  console.log("likes after", likez);
+  console.log("post", updatedLikes);
   post = await Post.findOneAndUpdate(
     { _id: post._id },
     {
       $set: {
-        likes: likez,
+        likes: updatedLikes,
       },
     },
-    {}
+    { new: true }
   );
   await redisUtils.unsetJSON(`posts/${post._id.toString()}`);
 
-  await sendNotification(post.sender, postOwnerInfo.uid, "", {
-    title: `${user.name} liked your post`,
-    body: "",
-    type: "post-liked",
-    link: `/posts/${postId}`,
-  });
+  // await sendNotification(post.sender, postOwnerInfo.uid, "", {
+  //   title: `${user.name} liked your post`,
+  //   body: "",
+  //   type: "post-liked",
+  //   link: `/posts/${postId}`,
+  // });
 
-  return true;
+  return {
+    post,
+    isLiked,
+  };
 }
 
 // report the post
@@ -243,6 +270,7 @@ async function reportPost(uid, postId, reportType, comment) {
   let post = await getPostById(postId.toString());
   let user = await usersController.getUserByUID(uid);
   let com = "";
+  await redisUtils.unsetJSON(`posts/${post._id.toString()}`);
 
   if (user._id.toString() == post.sender.toString())
     throw new Error("how did you even manage to report your own post?!");
@@ -293,19 +321,23 @@ async function reportPost(uid, postId, reportType, comment) {
   return post;
 }
 
-async function getPostById(postId) {
+async function getPostById(postId, useCache) {
   postId = validation.validateString(postId, "Post Id", true);
   postId = ObjectId.createFromHexString(postId);
+  let post;
 
-  let post = await redisUtils.getJSON(`posts/${postId}`);
-  if (post) {
-    return post;
+  if (useCache) {
+    post = await redisUtils.getJSON(`posts/${postId}`);
+    if (post) {
+      return post;
+    }
   }
 
   post = await Post.findById(postId).populate(
     "sender",
     "name username email profile friends uid"
   );
+
   if (!post) {
     throw `No post with id (${post})!`;
   }
@@ -378,22 +410,9 @@ async function searchPosts(queryText, user) {
       shouldClauses.push({ terms: { uid: finalArray } });
     }
   }
-  console.log("Checking friendsIds", friendIds);
-  console.log("Checking UserId", currentUserId);
-  //console.log();
-  // const  {body} = await elasticClient.search({
-  //   index: 'posts',
-  //   body: {
-  //     query: {
-  //         multi_match: {
-  //             query: queryText.toLowerCase(),
-  //             fuzziness: "AUTO",  // Optional: Allow fuzzy search to handle typos
-  //             operator: "and",
-  //             fields: ["text", "senderUsername"],
-  //         }
-  //     }
-  //    }
-  // });
+  //console.log("Checking friendsIds", friendIds);
+  //console.log("Checking UserId", currentUserId);
+
   let { body } = await elasticClient.search({
     index: "posts",
     body: {
@@ -404,7 +423,8 @@ async function searchPosts(queryText, user) {
               multi_match: {
                 query: queryText.toLowerCase(),
                 fuzziness: "AUTO",
-                operator: "and",
+                operator: "or",
+                minimum_should_match: "60%",
                 fields: ["text", "senderUsername"],
               },
             },
@@ -420,22 +440,22 @@ async function searchPosts(queryText, user) {
     },
   });
 
-  console.log("Raw Elasticsearch Response:", JSON.stringify(body, null, 2));
-  console.log("Values we mentioned", body);
-  console.log("hits", body.hits);
-  console.log("length", body.hits.hits.length);
+  //console.log("Raw Elasticsearch Response:", JSON.stringify(body, null, 2));
+  //console.log("Values we mentioned", body);
+  //console.log("hits", body.hits);
+  //console.log("length", body.hits.hits.length);
   if (body && body.hits && body.hits.hits.length > 0) {
-    console.log("Search Results:", body.hits.hits);
-    const results = body.hits.hits.map((hit) => ({
+    //console.log("Search Results:", body.hits.hits);
+    let results = body.hits.hits.map((hit) => ({
       id: hit._id,
       ...hit._source,
     }));
-    console.log("Mapped Search Results:", results);
+    //console.log("Mapped Search Results:", results);
     for (let i = 0; i < results.length; i++) {
       const curPost = results[i];
-      console.log("update sender: ", curPost);
+      //console.log("update sender: ", curPost);
       const post = await getPostById(curPost.id);
-      console.log("updated post:", post);
+      //console.log("updated post:", post);
       results[i] = post;
     }
     return results;

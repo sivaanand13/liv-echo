@@ -9,6 +9,7 @@ import {
   EmailAuthProvider,
   GoogleAuthProvider,
   signInWithPopup,
+  sendEmailVerification,
 } from "firebase/auth";
 
 async function createFirebaseUserWithGoogle(email, password, displayName) {
@@ -21,6 +22,7 @@ async function createFirebaseUser(email, password, displayName) {
   const auth = getAuth();
   await createUserWithEmailAndPassword(auth, email, password);
   await updateProfile(auth.currentUser, { displayName: displayName });
+  await sendEmailVerification(auth.currentUser);
 }
 
 async function deleteFirebaseUser() {
@@ -34,7 +36,19 @@ async function signOutFirebaseUser() {
 }
 async function signInFirebaseUser(email, password) {
   const auth = getAuth();
-  await signInWithEmailAndPassword(auth, email, password);
+  const credential = await signInWithEmailAndPassword(auth, email, password);
+
+  let user = credential.user;
+  console.log("sign in user: ", user);
+  if (user.emailVerified != null && !user.emailVerified) {
+    await sendEmailVerification(user);
+    await signOutFirebaseUser();
+    alert(
+      "You havn't verified your email yet! Please check your inbox for the verification link!"
+    );
+    throw "Email not verified!";
+  }
+  return user;
 }
 
 async function reauthenticateFirebaseUser(oldPassword) {

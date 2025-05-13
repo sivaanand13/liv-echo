@@ -31,7 +31,6 @@ export default function UserProfile() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const [isFriend, setIsFriend] = useState(false);
   const [posts, setPosts] = useState([]);
   const [tab, setTab] = useState(0);
@@ -57,6 +56,7 @@ export default function UserProfile() {
           user.friends.some((friend) => friend._id === currUser._id);
 
         setUser(user);
+        console.log("other profile: ", user);
         setPosts(userPosts);
         setIsFriend(isNowFriend);
         setMutualFriend(isMutual);

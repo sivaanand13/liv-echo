@@ -7,7 +7,7 @@ import cloudinary from "../cloudinary/cloudinary.js";
 import Comment from "../models/comment.js";
 import Post from "../models/post.js";
 import { sendNotification } from "./notification.js";
-
+import redisUtils from "../redis/redisUtils.js";
 // create comment
 // each comment is tied to a post
 
@@ -42,15 +42,17 @@ async function createComment(postID, uid, text, attachments) {
   const com = await getCommentById(res._id.toString());
   let coms = post.comments;
   coms.push(com._id);
+  console.log("new comment id: ", com._id);
   post = await Post.findOneAndUpdate(
     { _id: post._id },
     {
-      $set: {
-        comments: coms,
+      $addToSet: {
+        comments: com._id,
       },
     },
-    {}
+    { returnDocument: "after" }
   );
+  await redisUtils.unsetJSON(`posts/${post._id.toString()}`);
 
   sendNotification(postOwnerInfo._id, postOwnerInfo.uid, "", {
     title: `${user.name} commented on your post`,
@@ -132,10 +134,11 @@ async function deleteComment(uid, commID) {
   const result = await Post.findOneAndUpdate(
     { _id: post._id },
     {
-      $pull: { comments: commID },
+      $pull: { comments: comm._id },
     },
     { new: true }
   );
+  await redisUtils.unsetJSON(`posts/${post._id.toString()}`);
 
   if (result.comments.includes(commID)) {
     throw "Could not delete comment in post";
@@ -175,7 +178,7 @@ async function likeComment(commID, uid) {
   //console.log(comm.sender.toString());
   //console.log(user._id.toString());
 
-  if (user._id.toString() == comm.sender._id.toString()) return licked;//throw new Error("you can't like your own comment!");
+  if (user._id.toString() == comm.sender._id.toString()) return licked; //throw new Error("you can't like your own comment!");
 
   let likez = comm.likes;
 
@@ -196,6 +199,7 @@ async function likeComment(commID, uid) {
     },
     {}
   );
+  await redisUtils.unsetJSON(`posts/${comm.post.toString()}`);
 
   if (licked)
     sendNotification(commentOwnerInfo._id, commentOwnerInfo.uid, "", {
@@ -223,6 +227,20 @@ async function getCommentById(commID) {
   return comm;
 }
 
+async function getCommentsByPostId(postId) {
+  postId = validation.validateString(postId, "Post Id", true);
+  postId = ObjectId.createFromHexString(postId);
+  const posts = await Comment.find({ post: postId })
+    .populate("sender", "name username email profile friends uid")
+    .sort({ createdAt: -1 })
+    .lean();
+  if (!posts) {
+    console.log("oops");
+    throw `No comments with for post (${postId})!`;
+  }
+  return posts;
+}
+
 export default {
   createComment,
   editComment,
@@ -231,4 +249,5 @@ export default {
   getCommentById,
   deleteCommentAnyway,
   canDeleteComment,
+  getCommentsByPostId,
 };

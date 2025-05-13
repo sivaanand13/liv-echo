@@ -22,7 +22,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Errors from "../../components/Errors.jsx";
 import { toDate } from "date-fns";
 function EditAccount({ handleClose }) {
-  const { currentUser, serverUser } = useContext(AuthContext);
+  const { currentUser, user: serverUser } = useContext(AuthContext);
 
   const [error, setError] = useState("");
 
@@ -40,7 +40,7 @@ function EditAccount({ handleClose }) {
   const [usernameError, setUsernameError] = useState("");
   const [dobError, setDobError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-
+  const [hasError, setHasError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   console.log(currentUser);
   const toggleShowPassword = () => {
@@ -73,6 +73,7 @@ function EditAccount({ handleClose }) {
       } catch (e) {
         const errors = [].concat(e);
         setErrorState(errors.join("\n"));
+        setHasError(true);
       }
     } else {
       try {
@@ -81,6 +82,7 @@ function EditAccount({ handleClose }) {
       } catch (e) {
         const errors = [].concat(e);
         setErrorState(errors.join("\n"));
+        setHasError(true);
       }
     }
   };
@@ -88,17 +90,27 @@ function EditAccount({ handleClose }) {
     console.log("Account.jsx", "Handler for editing account");
     e.preventDefault();
 
+    setHasError(false);
     setError("");
-    const finalName = name.trim() || currentUser.displayName;
-    const finalEmail = email.trim() || currentUser.email;
-    const finalUsername = username.trim() || serverUser.username;
-    const finalDOB = dob.trim() || serverUser.dob;
-    const finalPassword = password.trim() || undefined;
-    const finalOldPassword = oldPassword.trim() || undefined;
-    if (name.trim()) {
+    setNameError("");
+    setEmailError("");
+    setUsernameError("");
+    setDobError("");
+    setPasswordError("");
+    setOldPasswordError("");
+
+    const finalName = name || currentUser.displayName;
+    const finalEmail = email || currentUser.email;
+    const finalUsername = username || serverUser.username;
+    const finalDOB = dob || serverUser.dob;
+    const finalPassword = password || undefined;
+    const finalOldPassword = oldPassword || undefined;
+    if (name) {
       validateField(name, validation.validateString, setName, setNameError);
     }
-    if (email.trim() && email.trim() !== currentUser.email) {
+    console.log(finalEmail, currentUser.email);
+    if (email.trim() && finalEmail != currentUser.email) {
+      console.log("here");
       validateField(email, validation.validateEmail, setEmail, setEmailError);
       validateField(
         oldPassword,
@@ -107,7 +119,7 @@ function EditAccount({ handleClose }) {
         setOldPasswordError
       );
     }
-    if (username.trim()) {
+    if (username) {
       validateField(
         username,
         validation.validateUsername,
@@ -115,11 +127,11 @@ function EditAccount({ handleClose }) {
         setUsernameError
       );
     }
-    if (dob.trim()) {
+    if (dob) {
       validateField(dob, validation.validateDob, setDob, setDobError);
     }
 
-    if (password.trim()) {
+    if (password) {
       validateField(
         password,
         validation.validatePassword,
@@ -138,46 +150,41 @@ function EditAccount({ handleClose }) {
       return;
     }
 
-    const invalidFields = [
-      nameError,
-      emailError,
-      usernameError,
-      dobError,
-      passwordError,
-      oldPasswordError,
-    ].some((e) => e != "");
-
-    if (invalidFields) {
-      setError("Please fix errors before submitting!");
-      return;
-    } else {
-      try {
-        const result = await authUtils.editUser(
-          finalName,
-          finalEmail,
-          finalUsername,
-          finalDOB,
-          finalPassword,
-          finalOldPassword
-        );
-        if (result?.emailPendingVerification) {
-          setError(result.message);
-          return;
-        }
-        const auth = getAuth();
-        await auth.currentUser.reload(); // Refresh the user object
-        const updatedUser = auth.currentUser;
-        handleClose();
-      } catch (e) {
-        if (e.type === "moderation") {
-          console.log("Account.jsx", e);
-          setError(e.message);
-          return;
-        }
-        console.log("Account.jsx", e);
-        setError(e || "Edit account failed!");
+    console.log(
+      finalName,
+      finalEmail,
+      finalUsername,
+      finalDOB,
+      finalPassword,
+      finalOldPassword
+    );
+    try {
+      const result = await authUtils.editUser(
+        finalName,
+        finalEmail,
+        finalUsername,
+        finalDOB,
+        finalPassword,
+        finalOldPassword
+      );
+      if (result?.emailPendingVerification) {
+        setError(result.message);
         return;
       }
+      const auth = getAuth();
+      await auth.currentUser.reload(); // Refresh the user object
+      const updatedUser = auth.currentUser;
+      handleClose();
+    } catch (e) {
+      console.log(e);
+      if (e.type === "moderation") {
+        console.log("Account.jsx", e);
+        setError(e.message);
+        return;
+      }
+      console.log("Account.jsx", e);
+      setError(e || "Edit account failed!");
+      return;
     }
   };
   if (!currentUser) {
@@ -187,9 +194,10 @@ function EditAccount({ handleClose }) {
     <Container
       sx={{
         justifyContent: "center",
-        display: "flex",
         overflow: "auto",
         width: "100%",
+        maxHeight: "80vh",
+        overflowY: "auto",
         justifyContent: "center",
         alignItems: "center",
       }}
@@ -202,6 +210,11 @@ function EditAccount({ handleClose }) {
           </Typography>
           <Typography variant="h4" sx={{ width: "100%" }}>
             Edit Account
+          </Typography>
+          <Typography variant="h7" sx={{ width: "100%" }}>
+            To edit your account you can add in any of the fields you want to
+            but you dont have to. However, to change email or password you need
+            to put in your current password
           </Typography>
 
           <FormControl>
@@ -240,15 +253,7 @@ function EditAccount({ handleClose }) {
               required
               fullWidth
               value={email}
-              onChange={(e) =>
-                validateField(
-                  email,
-                  validation.validateEmail,
-                  setEmail,
-                  setEmailError,
-                  e
-                )
-              }
+              onChange={(e) => setEmail(e.target.value)}
             />
           </FormControl>
           <FormControl>

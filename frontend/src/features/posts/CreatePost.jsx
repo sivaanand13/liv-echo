@@ -10,10 +10,12 @@ import {
   TextField,
   Typography,
   Grid,
+  Stack,
 } from "@mui/material";
 import postBg from "../../assets/users/search.jpg";
 import { useNavigate } from "react-router";
-
+import validation from "../../utils/validation";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 function CreatePost() {
   const [text, setText] = useState("");
   const [attachments, setAttachments] = useState([]);
@@ -29,15 +31,26 @@ function CreatePost() {
     e.preventDefault();
     setLoading(true);
     setMessage("");
+
     try {
-      const post = await postUtils.createPost(text, attachments, isPrivate);
+      validation.validateString(text, "Post text");
+
+      let post;
+      try {
+        post = await postUtils.createPost(text, attachments, isPrivate);
+      } catch (e) {
+        if (typeof e == "string") {
+          throw e;
+        }
+        throw `Failed to create post!`;
+      }
       setMessage("Post created successfully!");
       setText("");
       setAttachments([]);
       setIsPrivate(false);
       navigate(`/posts/${post._id}`);
     } catch (err) {
-      setMessage("Failed to create post." + JSON.stringify(err));
+      setMessage(err);
     } finally {
       setLoading(false);
     }
@@ -79,30 +92,35 @@ function CreatePost() {
           value={text}
           onChange={(e) => setText(e.target.value)}
           fullWidth
-          required
           sx={{ marginBottom: "20px" }}
         />
 
         <Box
           component="label"
           sx={{
-            display: "inline-block",
+            display: "flex",
             padding: "10px 20px",
-            backgroundColor: "primary.main",
+            backgroundColor: "orange",
             color: "white",
             cursor: "pointer",
             borderRadius: "5px",
             textAlign: "center",
+            justifyContent: "center",
+            margin: "0 auto",
           }}
         >
-          Upload Attachments
-          <input
-            type="file"
-            hidden
-            multiple
-            accept="image/*,video/*"
-            onChange={handleFileChange}
-          />
+          <Stack direction="row" spacing={2}>
+            <CloudUploadIcon color="white" />
+            <Typography> Upload Attachments</Typography>
+
+            <input
+              type="file"
+              hidden
+              multiple
+              accept="image/*,video/*"
+              onChange={handleFileChange}
+            />
+          </Stack>
         </Box>
 
         <Box sx={{ marginBottom: "20px" }}>
