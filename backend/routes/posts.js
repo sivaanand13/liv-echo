@@ -308,7 +308,7 @@ router.route("/:postID/report").patch(async (req, res) => {
       console.log(poster.uid.toString());
       if (
         uid.toString() == poster.uid.toString() ||
-        poster.friends.includes(uid) ||
+        poster.friends.map((obj) => obj.uid).includes(uid) ||
         user.role == "admin"
       ) {
         // they can see the post! Yay!
@@ -387,7 +387,7 @@ router.route("/:postID/comment").post(async (req, res) => {
       console.log(poster.uid.toString());
       if (
         uid.toString() == poster.uid.toString() ||
-        poster.friends.includes(uid) ||
+        poster.friends.map((obj) => obj.uid).includes(uid) ||
         user.role == "admin"
       ) {
         // they can see the post! Yay!
@@ -444,7 +444,7 @@ router.route("/:postID/:commentID").patch(async (req, res) => {
       console.log(poster.uid.toString());
       if (
         uid.toString() == poster.uid.toString() ||
-        poster.friends.includes(uid) ||
+        poster.friends.map((obj) => obj.uid).includes(uid) ||
         user.role == "admin"
       ) {
         // they can see the post! Yay!
@@ -511,7 +511,7 @@ router.route("/:postID/:commentID").delete(async (req, res) => {
       console.log(poster.uid.toString());
       if (
         uid.toString() == poster.uid.toString() ||
-        poster.friends.includes(uid) ||
+        poster.friends.map((obj) => obj.uid).includes(uid) ||
         user.role == "admin"
       ) {
       } else {
@@ -556,7 +556,7 @@ router.route("/:postID/:commentID/like").patch(async (req, res) => {
       console.log(poster.uid.toString());
       if (
         uid.toString() == poster.uid.toString() ||
-        poster.friends.includes(uid) ||
+        poster.friends.map((obj) => obj.uid).includes(uid) ||
         user.role == "admin"
       ) {
       } else {

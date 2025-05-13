@@ -17,6 +17,7 @@ import StaticPaginatedList from "../../components/StaticPaginatedList.jsx";
 import { Co2Sharp } from "@mui/icons-material";
 import { post } from "../../utils/requests/axios.js";
 import { formatDistanceToNow } from "date-fns";
+import { useNotification } from "../../contexts/NotificationContext.jsx";
 
 export default function MostCommentedFeed() {
   const { currentUser, serverUser } = useContext(AuthContext);
@@ -29,6 +30,8 @@ export default function MostCommentedFeed() {
   const [displayData, setDisplayData] = useState(null);
   const [displayTitle, setDisplayTitle] = useState("");
 
+  const { notifications } = useNotification();
+  console.log("notifications", notifications);
   function handleTabChange(_, newTab) {
     console.log("Handling tab change: ", newTab);
     setTab(newTab);
@@ -88,7 +91,7 @@ export default function MostCommentedFeed() {
     };
 
     fetchPosts();
-  }, [currentUser]);
+  }, [currentUser, notifications]);
 
   useEffect(() => {
     console.log("Posts updated");

@@ -109,7 +109,8 @@ export default function SinglePost() {
         return;
       }
       setNewComment("");
-      setCommentError(err);
+      console.log(err);
+      setCommentError("Post comment failed");
       console.error("Failed to add comment:", err);
     } finally {
       setCommentSubmitting(false);
