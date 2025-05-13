@@ -98,7 +98,11 @@ async function canDeletePost(uid, postID) {
   let user = await usersController.getUserByUID(uid);
 
   // if the user is an admin we can ignore these checks
-  if (user.role != "admin" && user._id.toString() != post.sender.toString()) {
+  console.log("delte post user: ", post.sender);
+  if (
+    user.role != "admin" &&
+    user._id.toString() != post.sender._id.toString()
+  ) {
     console.log("User isn't poster or admin");
     return false;
   }

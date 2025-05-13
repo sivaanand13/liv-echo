@@ -151,6 +151,16 @@ async function updateFlagCount(chatId, userId) {
     { $inc: { "flaggedCount.$.flagCount": 1 } },
     { new: true }
   );
+
+  const user = result.flaggedCount.find((user) => {
+    user._id.toString() == userId;
+  });
+  const userObj = await getUserById(userId);
+  console.log("Checking for ban");
+  if (user.flagCount >= 5) {
+    await leaveChat(userObj.uid, chatId);
+  }
+
   if (!result) {
     return { success: false };
   } else {

@@ -69,6 +69,13 @@ router.route("/:chatId/messages").post(async (req, res) => {
   }
 
   try {
+    const flagCount = await chatsController.getFlagCount(
+      chatId,
+      user._id.toString()
+    );
+    if (flagCount.data >= 5) {
+      throw "You have been banned!";
+    }
     await chatsController.verifyUserChatAccess(uid, chat._id.toString());
   } catch (e) {
     return res.status(403).json({ message: e });
