@@ -19,6 +19,17 @@ const chatNamespaceHandler = (chatNamespace) => {
     socket.join(uid);
     console.log(`User connected to chat socket with uid: ${uid}`);
 
+    socket.on("refreshAccount", async () => {
+      try {
+        let user = await usersController.getUserByUID(uid);
+        user = usersController.getUserById(user._id.toString());
+        socket.join(chatId);
+        chatNamespace.to(uid).emit("accountUpdated", user);
+      } catch (e) {
+        socket.emit("error", { message: e });
+      }
+    });
+
     socket.on("joinChat", async (chatId) => {
       try {
         await chatsController.verifyUserChatAccess(uid, chatId);

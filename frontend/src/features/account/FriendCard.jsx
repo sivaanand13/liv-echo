@@ -14,12 +14,16 @@ import {
   CardActions,
 } from "@mui/material";
 import accountUtils from "./accountUtils";
+import { useContext } from "react";
+import { AuthContext } from "../../contexts/AuthContext";
 
 export default function FriendCard({ item: user, type }) {
+  const { refreshAccount } = useContext(AuthContext);
   async function handleResolveFriendRequest(type) {
     try {
       console.log("resolve friend request with: ", type, user.uid);
       await accountUtils.resolveFriendRequest(user.uid, type);
+      refreshAccount();
     } catch (e) {
       alert("Friend request resolution failed!");
     }
@@ -28,6 +32,7 @@ export default function FriendCard({ item: user, type }) {
   async function handleRemoveFriend() {
     try {
       await accountUtils.removeFriend(user.uid);
+      refreshAccount();
     } catch (e) {
       console.log(e);
       alert("Friend removal failed!");

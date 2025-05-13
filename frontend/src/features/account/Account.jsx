@@ -37,8 +37,9 @@ import { Link } from "react-router-dom";
 import StaticPaginatedList from "../../components/StaticPaginatedList.jsx";
 import FriendCard from "./FriendCard.jsx";
 import CustomList from "../../components/CustomList.jsx";
+import chatSocket from "../../sockets/namespaces/chatSocket.js";
 export default function Account() {
-  const { user } = useContext(AuthContext);
+  const { user, refreshAccount } = useContext(AuthContext);
   const theme = useTheme();
   const [openEditAccount, setOpenEditAccount] = useState(false);
   const [openEditProfile, setOpenEditProfile] = useState(false);
@@ -53,6 +54,7 @@ export default function Account() {
 
   const handleTabChange = (_, newValue) => {
     setTab(newValue);
+    refreshAccount();
   };
   function getFriends() {
     console.log(user.friends);
@@ -88,6 +90,7 @@ export default function Account() {
       const postList = await postUtils.getPostsByUID(user.uid);
       setPosts(postList);
     }
+    refreshAccount();
     getPosts();
   }, [user.uid]);
   if (user.role === "admin") {
