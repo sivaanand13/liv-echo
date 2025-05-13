@@ -106,8 +106,7 @@ export default function CommentListItem({ item: msg, onDelete }) {
   }
   const isCommentor =
     serverUser.uid === msg.sender?.uid ||
-    serverUser.uid === msg.sender ||
-    serverUser.role === "admin";
+    serverUser.uid === msg.sender
   return (
     <ListItem
       sx={{
@@ -189,7 +188,7 @@ export default function CommentListItem({ item: msg, onDelete }) {
               </Stack>
             )}
           </Stack>
-          {isCommentor && (
+          {(isCommentor || serverUser.role === "admin") && (
             <>
               <IconButton
                 onClick={handleOpen}
@@ -208,7 +207,7 @@ export default function CommentListItem({ item: msg, onDelete }) {
                 open={menuOpen}
                 onClose={handleClose}
               >
-                <MenuItem onClick={handleEdit}>Edit</MenuItem>
+                {isCommentor && (<MenuItem onClick={handleEdit}>Edit</MenuItem>)}
                 <MenuItem onClick={handleDelete}>Delete</MenuItem>
               </Menu>
             </>
