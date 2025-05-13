@@ -4,6 +4,15 @@ import { notificationsNamespace } from "../websockets/index.js";
 import usersController from "./users.js";
 
 export async function sendNotification(userId, uid, chatId, data) {
+  if (
+    userId === undefined ||
+    uid === undefined ||
+    chatId === undefined ||
+    data === undefined
+  ) {
+    console.error("Invalid Input Passed", userId, uid, chatId, data);
+    return { success: false, status: 400, error: "Invalid Input Passed" };
+  }
   const user =
     usersController.getUserById(userId) || usersController.getUserByUID(uid);
 

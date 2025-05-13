@@ -58,6 +58,7 @@ export default function MostCommentedFeed() {
         const mutualFriends = (await postUtils.getMutualFriends()) || []; //returns list of uids as friends
         setMutualFriends(mutualFriends);
         console.log("I got friends!", mutualFriends);
+        console.log("AP", allPosts);
         const filteredPosts = (
           await Promise.all(
             allPosts.map(async (post) => {

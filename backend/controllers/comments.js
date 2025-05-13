@@ -6,6 +6,7 @@ import settings from "../models/settings.js";
 import cloudinary from "../cloudinary/cloudinary.js";
 import Comment from "../models/comment.js";
 import Post from "../models/post.js";
+import { sendNotification } from "./notification.js";
 
 // create comment
 // each comment is tied to a post
@@ -13,6 +14,7 @@ import Post from "../models/post.js";
 async function createComment(postID, uid, text, attachments) {
   let user = await usersController.getUserByUID(uid);
   let post = await postsController.getPostById(postID);
+  let postOwnerInfo = await usersController.getUserById(post.sender);
 
   text = validation.validateString(text);
   if (text.length > settings.MESSAGE_LENGTH)
@@ -49,6 +51,12 @@ async function createComment(postID, uid, text, attachments) {
     },
     {}
   );
+
+  sendNotification(postOwnerInfo._id, postOwnerInfo.uid, "", {
+    title: `${user.name} commented on your post`,
+    body: "",
+    type: "comment",
+  });
 
   return com;
 }
@@ -161,7 +169,8 @@ async function deleteCommentAnyway(uid, commID) {
 // like comment
 async function likeComment(commID, uid) {
   let comm = await getCommentById(commID.toString());
-  let user = await usersController.getUserByUID(uid);
+  let user = await usersController.getUserByUID(uid); // User who liked the comment
+  let commentOwnerInfo = await usersController.getUserById(comm.sender);
   let licked = false;
   //console.log(comm.sender.toString());
   //console.log(user._id.toString());
@@ -187,6 +196,13 @@ async function likeComment(commID, uid) {
     },
     {}
   );
+
+  if (licked)
+    sendNotification(commentOwnerInfo._id, commentOwnerInfo.uid, "", {
+      title: `${user.name} liked your comment`,
+      body: "",
+      type: "comment",
+    });
 
   return licked;
 }
