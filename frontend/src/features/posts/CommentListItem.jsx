@@ -105,10 +105,9 @@ export default function CommentListItem({ item: msg, onDelete }) {
     setEditing(false);
   }
   const isCommentor =
-    serverUser.uid === msg.sender?.uid ||
-    serverUser.uid === msg.sender
+    serverUser.uid === msg.sender?.uid || serverUser.uid === msg.sender;
   return (
-    <ListItem
+    <Box
       sx={{
         backgroundColor: "#611F69",
         backdropFilter: "blur(10px)",
@@ -207,7 +206,7 @@ export default function CommentListItem({ item: msg, onDelete }) {
                 open={menuOpen}
                 onClose={handleClose}
               >
-                {isCommentor && (<MenuItem onClick={handleEdit}>Edit</MenuItem>)}
+                {isCommentor && <MenuItem onClick={handleEdit}>Edit</MenuItem>}
                 <MenuItem onClick={handleDelete}>Delete</MenuItem>
               </Menu>
             </>
@@ -272,6 +271,6 @@ export default function CommentListItem({ item: msg, onDelete }) {
           <Typography variant="body2">{liked ? "Liked" : "Like"}</Typography>
         </ListItemButton>
       </Stack>
-    </ListItem>
+    </Box>
   );
 }

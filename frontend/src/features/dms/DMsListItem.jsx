@@ -5,9 +5,9 @@ import { AuthContext } from "../../contexts/AuthContext";
 import ChatListItem from "../../components/ChatListItem";
 
 export default function DMsListItem({ item: chat }) {
-  console.log(chat);
-  const auth = useContext(AuthContext);
-  const user = chat.members.find((member) => member.uid !== auth.uid);
+  console.log("dm list chat: ", chat);
+  const { user: curUser } = useContext(AuthContext);
+  const user = chat.members.find((member) => member.uid !== curUser.uid);
   let preview = `${
     chat.latestMessage?.sender.username || chat.latestMessage?.senderName || ""
   }: ${chat?.latestMessage?.text}`;

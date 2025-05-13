@@ -28,6 +28,7 @@ import FlagIcon from "@mui/icons-material/Flag";
 import ErrorPage from "../../components/ErrorPage";
 import NotFound from "../../components/NotFound";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import validation from "../../utils/validation";
 
 export default function SinglePost() {
   const { currentUser, serverUser } = useContext(AuthContext);
@@ -101,10 +102,12 @@ export default function SinglePost() {
     }
   }
   async function handleAddComment() {
-    if (!newComment.trim()) return;
     setCommentSubmitting(true);
     setCommentError("");
+
     try {
+      validation.validateString(newComment, "comment text");
+
       const commentData = { text: newComment };
       const newCom = await postUtils.createComment(postId, commentData);
       setComments((prev) => [newCom, ...prev]); // Add new comment to top
@@ -114,6 +117,12 @@ export default function SinglePost() {
       if (err.type === "moderation") {
         setNewComment("");
         setCommentError(err.message);
+        return;
+      }
+      if (Array.isArray(err)) {
+        err = err.join(" ");
+        setNewComment("");
+        setCommentError(err);
         return;
       }
       setNewComment("");
@@ -290,24 +299,22 @@ export default function SinglePost() {
           </Stack>
           {commentError && <Alert severity="error">{commentError}</Alert>}
         </Stack>
-        <Grid container justifyContent="center" sx={{ width: "100%" }}>
-          <Grid
-            item
-            xs={12}
-            sm={10}
-            md={8}
-            lg={6}
-            sx={{ pt: 1, pb: 0, width: "100%" }}
-          >
-            {comments.map((comment) => (
-              <Box key={comment._id} sx={{ p: 0 }}>
-                <CommentListItem
-                  item={comment}
-                  onDelete={handleCommentDelete}
-                />
-              </Box>
-            ))}
-          </Grid>
+        <Grid justifyContent="center" sx={{ width: "100%" }}>
+          {comments.map((comment) => (
+            <Grid
+              xs={12}
+              sm={10}
+              md={8}
+              lg={6}
+              sx={{ pt: 1, pb: 0, width: "100%" }}
+            >
+              <CommentListItem
+                item={comment}
+                key={comment._id}
+                onDelete={handleCommentDelete}
+              />
+            </Grid>
+          ))}
         </Grid>
       </Paper>
       <DeletePostDialog

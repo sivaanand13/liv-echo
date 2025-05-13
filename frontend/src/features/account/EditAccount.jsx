@@ -190,6 +190,8 @@ function EditAccount({ handleClose }) {
         display: "flex",
         overflow: "auto",
         width: "100%",
+        maxHeight: "80vh",
+        overflowY: "auto",
         justifyContent: "center",
         alignItems: "center",
       }}

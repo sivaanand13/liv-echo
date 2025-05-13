@@ -149,7 +149,7 @@ router.route("/:postID").get(async (req, res) => {
         throw new Error("You can't see this!");
       }
     }
-    const pos = await postsController.getPostById(postID);
+    const pos = await postsController.getPostById(postID, true);
     console.log(pos);
     return res.status(200).json({
       message: "Got the post!",

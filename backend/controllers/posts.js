@@ -208,26 +208,29 @@ async function likePost(uid, postId) {
   let user = await usersController.getUserByUID(uid);
   // console.log("sender man", post.sender)
   // console.log("user", user._id)
-  let postOwnerInfo = await userController.getUserById(post.sender._id.toString());
+  let postOwnerInfo = await userController.getUserById(
+    post.sender._id.toString()
+  );
 
   if (user._id.toString() == post.sender._id.toString())
     throw new Error("you can't like your own post!");
 
   let likez = post.likes.map((id) => id.toString());
-  console.log("likes before", likez)
+  console.log("likes before", likez);
   let updatedLikes;
   let isLiked;
   // return false?
-  if (likez.includes(user._id.toString())){
+  if (likez.includes(user._id.toString())) {
     updatedLikes = post.likes.filter(
       (id) => id.toString() !== user._id.toString()
     );
     isLiked = false;
-  }
-  else{
+  } else {
     updatedLikes = [...post.likes, user._id];
     isLiked = true;
-    const postOwnerInfo = await userController.getUserById(post.sender._id.toString());
+    const postOwnerInfo = await userController.getUserById(
+      post.sender._id.toString()
+    );
     await sendNotification(post.sender, postOwnerInfo.uid, "", {
       title: `${user.name} liked your post`,
       body: "",
@@ -235,8 +238,8 @@ async function likePost(uid, postId) {
       link: `/posts/${postId}`,
     });
   }
-  console.log("likes after", likez)
-  console.log("post", updatedLikes)
+  console.log("likes after", likez);
+  console.log("post", updatedLikes);
   post = await Post.findOneAndUpdate(
     { _id: post._id },
     {
@@ -267,6 +270,7 @@ async function reportPost(uid, postId, reportType, comment) {
   let post = await getPostById(postId.toString());
   let user = await usersController.getUserByUID(uid);
   let com = "";
+  await redisUtils.unsetJSON(`posts/${post._id.toString()}`);
 
   if (user._id.toString() == post.sender.toString())
     throw new Error("how did you even manage to report your own post?!");
@@ -317,13 +321,16 @@ async function reportPost(uid, postId, reportType, comment) {
   return post;
 }
 
-async function getPostById(postId) {
+async function getPostById(postId, useCache) {
   postId = validation.validateString(postId, "Post Id", true);
   postId = ObjectId.createFromHexString(postId);
+  let post;
 
-  let post = await redisUtils.getJSON(`posts/${postId}`);
-  if (post) {
-    return post;
+  if (useCache) {
+    post = await redisUtils.getJSON(`posts/${postId}`);
+    if (post) {
+      return post;
+    }
   }
 
   post = await Post.findById(postId).populate(
