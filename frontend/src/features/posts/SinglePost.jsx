@@ -27,6 +27,7 @@ import ReportPostDialog from "./reportPostDialogue";
 import FlagIcon from "@mui/icons-material/Flag";
 import ErrorPage from "../../components/ErrorPage";
 import NotFound from "../../components/NotFound";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 
 export default function SinglePost() {
   const { currentUser, serverUser } = useContext(AuthContext);
@@ -223,6 +224,7 @@ export default function SinglePost() {
               onClick={handleLikePost}
               sx={{ mt: 2 }}
             >
+              <FavoriteIcon color={userHasLiked ? "red" : "purple"} />
               {userHasLiked ? "Liked" : "Like"} ({post.likes?.length || 0})
             </Button>
             {post.isPrivate && (
