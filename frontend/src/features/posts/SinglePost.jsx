@@ -48,7 +48,6 @@ export default function SinglePost() {
     serverUser?._id.toString() === senderId?.toString() ||
     serverUser?.role === "admin";
   const canEdit = serverUser?._id.toString() === senderId?.toString();
-
   console.log("user 2", post?.sender);
   async function handleReportPost() {
     try {
@@ -57,6 +56,14 @@ export default function SinglePost() {
     } catch (err) {
       console.error("Failed to report post:", err.message);
       alert("Failed to report post.");
+    }
+  }
+  async function handleLikePost() {
+    try {
+      const { post: updatedPost } = await postUtils.likePostByPostId(postId);
+      setPost(updatedPost);
+    } catch (err) {
+      console.error("Failed to like post:", err);
     }
   }
 
@@ -137,6 +144,7 @@ export default function SinglePost() {
   if (!post) {
     return <NotFound message="Post not found!" />;
   }
+  const userHasLiked = post.likes?.includes(serverUser?._id);
 
   return (
     <Box sx={{ p: 4 }}>
@@ -209,6 +217,14 @@ export default function SinglePost() {
                 </Box>
               </Box>
             )}
+            <Button
+              variant={userHasLiked ? "contained" : "outlined"}
+              color="primary"
+              onClick={handleLikePost}
+              sx={{ mt: 2 }}
+            >
+              {userHasLiked ? "Liked" : "Like"} ({post.likes?.length || 0})
+            </Button>
             {post.isPrivate && (
               <Typography variant="caption" color="warning.main">
                 Private Post

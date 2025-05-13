@@ -271,6 +271,8 @@ router.route("/:postID/like").patch(async (req, res) => {
         throw new Error("You can't see this!");
       }
     }
+    //console.log("uid", uid)
+    //console.log("postID",postID)
     const pos = await postsController.likePost(uid, postID);
     return res.status(200).json({
       message: "Got the post!",

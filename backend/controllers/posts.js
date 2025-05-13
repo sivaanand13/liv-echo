@@ -206,36 +206,59 @@ async function editPost(uid, postID, text, isPrivate, updateTimestamps) {
 async function likePost(uid, postId) {
   let post = await getPostById(postId.toString());
   let user = await usersController.getUserByUID(uid);
-  let postOwnerInfo = await userController.getUserById(post.sender.toString());
+  // console.log("sender man", post.sender)
+  // console.log("user", user._id)
+  let postOwnerInfo = await userController.getUserById(post.sender._id.toString());
 
-  if (user._id.toString() == post.sender.toString())
+  if (user._id.toString() == post.sender._id.toString())
     throw new Error("you can't like your own post!");
 
-  let likez = post.likes;
-
+  let likez = post.likes.map((id) => id.toString());
+  console.log("likes before", likez)
+  let updatedLikes;
+  let isLiked;
   // return false?
-  if (likez.includes(user._id)) return false;
-  likez.push(user._id);
-
+  if (likez.includes(user._id.toString())){
+    updatedLikes = post.likes.filter(
+      (id) => id.toString() !== user._id.toString()
+    );
+    isLiked = false;
+  }
+  else{
+    updatedLikes = [...post.likes, user._id];
+    isLiked = true;
+    const postOwnerInfo = await userController.getUserById(post.sender._id.toString());
+    await sendNotification(post.sender, postOwnerInfo.uid, "", {
+      title: `${user.name} liked your post`,
+      body: "",
+      type: "post-liked",
+      link: `/posts/${postId}`,
+    });
+  }
+  console.log("likes after", likez)
+  console.log("post", updatedLikes)
   post = await Post.findOneAndUpdate(
     { _id: post._id },
     {
       $set: {
-        likes: likez,
+        likes: updatedLikes,
       },
     },
-    {}
+    { new: true }
   );
   await redisUtils.unsetJSON(`posts/${post._id.toString()}`);
 
-  await sendNotification(post.sender, postOwnerInfo.uid, "", {
-    title: `${user.name} liked your post`,
-    body: "",
-    type: "post-liked",
-    link: `/posts/${postId}`,
-  });
+  // await sendNotification(post.sender, postOwnerInfo.uid, "", {
+  //   title: `${user.name} liked your post`,
+  //   body: "",
+  //   type: "post-liked",
+  //   link: `/posts/${postId}`,
+  // });
 
-  return true;
+  return {
+    post,
+    isLiked,
+  };
 }
 
 // report the post
