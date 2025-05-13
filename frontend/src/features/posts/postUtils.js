@@ -293,5 +293,6 @@ export default {
   editPost,
   editComment,
   getModPosts,
-  reportPost
+  reportPost,
+  likePostByPostId
 };
