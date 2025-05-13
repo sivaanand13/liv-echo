@@ -77,7 +77,7 @@ router.route("/:chatId/messages").post(async (req, res) => {
     if (flagCount.data >= 5) {
       await sendNotification(user._id, uid, chatId, {
         title: "You have been banned!",
-        body: "",
+        body: "Cannot send any messages",
         type: "system",
         link: "",
       });
