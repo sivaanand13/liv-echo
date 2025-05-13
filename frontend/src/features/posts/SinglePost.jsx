@@ -24,6 +24,9 @@ import CustomLink from "../../components/CustomLink";
 import SendIcon from "@mui/icons-material/Send";
 import { Padding } from "@mui/icons-material";
 import ReportPostDialog from "./reportPostDialogue";
+import FlagIcon from "@mui/icons-material/Flag";
+import ErrorPage from "../../components/ErrorPage";
+import NotFound from "../../components/NotFound";
 
 export default function SinglePost() {
   const { currentUser, serverUser } = useContext(AuthContext);
@@ -46,12 +49,10 @@ export default function SinglePost() {
     serverUser?.role === "admin";
   const canEdit = serverUser?._id.toString() === senderId?.toString();
 
-  //console.log("I I EXIST ", canDelete);
-  //console.log("user 1", serverUser?._id);
   console.log("user 2", post?.sender);
   async function handleReportPost() {
     try {
-      await postUtils.reportPost(postId); // Define this in your utils to call your backend
+      await postUtils.reportPost(postId);
       alert("Post reported successfully.");
     } catch (err) {
       console.error("Failed to report post:", err.message);
@@ -69,6 +70,7 @@ export default function SinglePost() {
         setPost(result);
         const coms = await postUtils.getComments(postId);
         setComments(coms);
+        console.log("post info", result);
       } catch (err) {
         console.error(err);
         setError("Failed to load post.");
@@ -127,19 +129,11 @@ export default function SinglePost() {
   }
 
   if (error) {
-    return (
-      <Typography color="error" textAlign="center" mt={4}>
-        {error}
-      </Typography>
-    );
+    return <ErrorPage title="Post Error" message={error} />;
   }
 
   if (!post) {
-    return (
-      <Typography textAlign="center" mt={4}>
-        Post not found.
-      </Typography>
-    );
+    return <NotFound message="Post not found!" />;
   }
 
   return (
@@ -165,14 +159,16 @@ export default function SinglePost() {
             }
             subheader={post.senderName}
             action={
-              currentUser &&
-              currentUser._id !== senderId && (
+              serverUser &&
+              serverUser._id !== senderId &&
+              !post?.reports?.reporters.includes(senderId) && (
                 <Button
                   size="small"
-                  color="warning"
+                  color="info"
                   onClick={() => setReportOpen(true)}
                   sx={{ textTransform: "none" }}
                 >
+                  <FlagIcon color="error" />
                   Report
                 </Button>
               )

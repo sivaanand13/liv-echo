@@ -9,6 +9,7 @@ import createIndex from "../elasticSearch/createPostIndex.js";
 import userController from "./users.js";
 import commentsController from "./comments.js";
 import { sendNotification } from "./notification.js";
+import redisUtils from "../redis/redisUtils.js";
 // delete post... make sure an admin can do it no matter what!
 
 async function getNPosts(n) {
@@ -128,6 +129,7 @@ async function deletePost(uid, postID) {
     index: "posts",
     id: post._id.toString(),
   });
+  await redisUtils.unsetJSON(`posts/${post._id.toString()}`);
 }
 
 // there's no "canEditPost" function because you can only edit if you're the poster
@@ -198,6 +200,8 @@ async function editPost(uid, postID, text, isPrivate, updateTimestamps) {
       },
     },
   });
+
+  await redisUtils.unsetJSON(`posts/${post._id.toString()}`);
   return post;
 }
 
@@ -224,6 +228,7 @@ async function likePost(uid, postId) {
     },
     {}
   );
+  await redisUtils.unsetJSON(`posts/${post._id.toString()}`);
 
   return true;
 }
@@ -279,6 +284,7 @@ async function reportPost(uid, postId, reportType, comment) {
     },
     {}
   );
+  await redisUtils.unsetJSON(`posts/${post._id.toString()}`);
 
   return post;
 }
@@ -286,13 +292,20 @@ async function reportPost(uid, postId, reportType, comment) {
 async function getPostById(postId) {
   postId = validation.validateString(postId, "Post Id", true);
   postId = ObjectId.createFromHexString(postId);
-  const post = await Post.findById(postId).populate(
+
+  let post = await redisUtils.getJSON(`posts/${postId}`);
+  if (post) {
+    return post;
+  }
+
+  post = await Post.findById(postId).populate(
     "sender",
     "name username email profile friends uid"
   );
   if (!post) {
     throw `No post with id (${post})!`;
   }
+  await redisUtils.cacheJSON(`posts/${postId}`, post, 3600);
   return post;
 }
 

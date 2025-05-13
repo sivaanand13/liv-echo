@@ -154,7 +154,7 @@ export default function MostCommentedFeed() {
         )}
         {error && <Typography color="error">{error}</Typography>}
 
-        {displayData && (
+        {displayData?.length > 0 && (
           <StaticPaginatedList
             title={displayTitle}
             type="posts"
