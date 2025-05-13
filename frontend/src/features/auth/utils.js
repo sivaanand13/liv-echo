@@ -94,12 +94,15 @@ async function signUpUser(name, email, username, dob, password) {
     ).data.data;
     console.log("signed up user", serverUser);
     await sendEmailVerification(user);
-
+    alert("Verify your email before logging in!");
     await firebaseUtils.signOutFirebaseUser();
 
     return { ...user, ...serverUser };
   } catch (e) {
-    await firebaseUtils.deleteFirebaseUser();
+    // await firebaseUtils.deleteFirebaseUser();
+    try {
+      await firebaseUtils.signOutFirebaseUser();
+    } catch (e) {}
     console.log(e);
     throw e.data && e.data.message
       ? e.data.message
@@ -242,6 +245,11 @@ async function editUser(name, email, username, dob, password, oldPassword) {
     if (password) {
       console.log("Password pls");
       await updatePassword(user, password);
+    }
+
+    const curUser = auth.currentUser;
+    if (!currentUser.emailVerified) {
+      await firebaseUtils.signOutFirebaseUser();
     }
     return {
       emailPendingVerification: false, // Since Admin SDK handles the verification automatically

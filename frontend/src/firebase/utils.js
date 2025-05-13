@@ -41,7 +41,11 @@ async function signInFirebaseUser(email, password) {
   let user = credential.user;
   console.log("sign in user: ", user);
   if (user.emailVerified != null && !user.emailVerified) {
-    await sendEmailVerification(user);
+    try {
+      await sendEmailVerification(user);
+    } catch (e) {
+      await signOutFirebaseUser();
+    }
     await signOutFirebaseUser();
     alert(
       "You havn't verified your email yet! Please check your inbox for the verification link!"
