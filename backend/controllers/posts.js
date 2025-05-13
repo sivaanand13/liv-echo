@@ -380,20 +380,7 @@ async function searchPosts(queryText, user) {
   }
   console.log("Checking friendsIds", friendIds);
   console.log("Checking UserId", currentUserId);
-  //console.log();
-  // const  {body} = await elasticClient.search({
-  //   index: 'posts',
-  //   body: {
-  //     query: {
-  //         multi_match: {
-  //             query: queryText.toLowerCase(),
-  //             fuzziness: "AUTO",  // Optional: Allow fuzzy search to handle typos
-  //             operator: "and",
-  //             fields: ["text", "senderUsername"],
-  //         }
-  //     }
-  //    }
-  // });
+
   let { body } = await elasticClient.search({
     index: "posts",
     body: {
@@ -404,7 +391,8 @@ async function searchPosts(queryText, user) {
               multi_match: {
                 query: queryText.toLowerCase(),
                 fuzziness: "AUTO",
-                operator: "and",
+                operator: "or",
+                minimum_should_match: "60%",
                 fields: ["text", "senderUsername"],
               },
             },

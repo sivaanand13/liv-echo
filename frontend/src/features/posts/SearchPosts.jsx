@@ -106,7 +106,7 @@ export default function SearchPosts() {
                 onKeyDown={(e) => {
                   if (e.key == "Enter") handleSearch();
                 }}
-                placeholder="Enter term to search through names, usernames, and emails!"
+                placeholder="Search by sender usernames or fuzzy search posts"
                 error={error != null}
                 onChange={(e) => {
                   setInputQuery(e.target.value);
