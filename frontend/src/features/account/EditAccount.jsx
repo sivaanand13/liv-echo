@@ -203,7 +203,7 @@ function EditAccount({ handleClose }) {
           <Typography variant="h4" sx={{ width: "100%" }}>
             Edit Account
           </Typography>
-          <Typography variant="h5" sx={{ width: "100%" }}>
+          <Typography variant="h7" sx={{ width: "100%" }}>
             To edit your account you can add in any of the fields you want to but you dont have to. However, to change email or password you need to put in your current password
           </Typography>
 
