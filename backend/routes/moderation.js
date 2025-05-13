@@ -154,6 +154,7 @@ router.route("/:chatId/check-ban").post(async (req, res) => {
         type: "system",
         title: "Warning!!!",
         body: "Final Warning: Continued violations will result in a permanent ban. Please adhere to the community guidelines.",
+        link: "",
       });
       return res.status(200).json({ success: true, message: "warning" });
     }
@@ -162,6 +163,7 @@ router.route("/:chatId/check-ban").post(async (req, res) => {
         type: "system",
         title: "Banned!",
         body: `You have been banned due to repeated violations of our community guidelines. This action is final`,
+        link: "",
       });
       return res.status(200).json({ success: true, message: "banned" });
     }

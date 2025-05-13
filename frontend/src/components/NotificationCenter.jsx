@@ -1,4 +1,3 @@
-// components/NotificationBell.jsx
 import { useState } from "react";
 import {
   Badge,
@@ -7,17 +6,26 @@ import {
   MenuItem,
   Typography,
   Box,
+  Grid,
+  Stack,
 } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import DoneIcon from "@mui/icons-material/Done";
 import { useNotification } from "../contexts/NotificationContext";
 import { useEffect } from "react";
+import { useNavigate } from "react-router";
 
 export default function NotificationCenter() {
   const { notifications, markAsRead } = useNotification();
   const [anchorEl, setAnchorEl] = useState(null);
 
+  const navigate = useNavigate();
+
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const handleNavigate = (navigationLink) => {
+    if (navigationLink !== "") navigate(navigationLink);
+  };
 
   const handleOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -52,50 +60,66 @@ export default function NotificationCenter() {
           },
         }}
       >
-        {notifications.length === 0 && (
+        {notifications.length === 0 ? (
           <MenuItem disabled>No notifications</MenuItem>
-        )}
-        {notifications.map((n) => (
-          <MenuItem
-            key={n._id}
-            selected={!n.read}
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 1,
-              width: "100%",
-            }}
-          >
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="subtitle2" fontWeight="bold">
-                {n.title}
-              </Typography>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{
-                  overflowWrap: "break-word",
-                  wordBreak: "break-word",
-                  whiteSpace: "normal",
-                }}
-              >
-                {n.body}
-              </Typography>
-            </Box>
-
-            <IconButton
-              size="small"
-              edge="end"
-              onClick={(e) => {
-                e.stopPropagation();
-                markAsRead(n._id);
+        ) : (
+          notifications.map((n) => (
+            <MenuItem
+              key={n._id}
+              selected={!n.read}
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "flex-start",
+                gap: 1,
+                width: "100%",
+                py: 1,
               }}
             >
-              <DoneIcon fontSize="small" />
-            </IconButton>
-          </MenuItem>
-        ))}
+              <Box
+                sx={{
+                  flexGrow: 1,
+                  minWidth: 0,
+                  cursor: "pointer",
+                }}
+                onClick={() => handleNavigate(n.link)}
+              >
+                <Typography
+                  variant="subtitle2"
+                  fontWeight="bold"
+                  sx={{
+                    wordBreak: "break-word",
+                    whiteSpace: "pre-line",
+                  }}
+                >
+                  {n.title}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    wordBreak: "break-word",
+                    whiteSpace: "pre-line",
+                  }}
+                >
+                  {n.body}
+                </Typography>
+              </Box>
+
+              <IconButton
+                size="small"
+                edge="end"
+                sx={{ mt: "4px" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  markAsRead(n._id);
+                }}
+              >
+                <DoneIcon fontSize="small" />
+              </IconButton>
+            </MenuItem>
+          ))
+        )}
       </Menu>
     </>
   );

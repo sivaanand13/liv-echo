@@ -9,8 +9,6 @@ import createIndex from "../elasticSearch/createPostIndex.js";
 import userController from "./users.js";
 import commentsController from "./comments.js";
 import { sendNotification } from "./notification.js";
-import { title } from "process";
-import { type } from "os";
 // delete post... make sure an admin can do it no matter what!
 
 async function getNPosts(n) {
@@ -84,6 +82,7 @@ async function postPost(uid, text, attachments, isPrivate) {
         type: "new-post",
         title: `A new post from ${user.name}`,
         body: "",
+        link: `/posts/${post._id}`,
       });
     }
   }
@@ -227,6 +226,7 @@ async function likePost(uid, postId) {
     title: `${user.name} liked your post`,
     body: "",
     type: "post-liked",
+    link: `/posts/${postId}`,
   });
 
   return true;

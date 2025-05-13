@@ -13,6 +13,7 @@ export async function sendNotification(userId, uid, chatId, data) {
     console.error("Invalid Input Passed", userId, uid, chatId, data);
     return { success: false, status: 400, error: "Invalid Input Passed" };
   }
+  console.log(data);
   const user =
     usersController.getUserById(userId) || usersController.getUserByUID(uid);
 
@@ -28,6 +29,7 @@ export async function sendNotification(userId, uid, chatId, data) {
     type: data.type,
     title: data.title,
     body: data.body,
+    link: data.link || "",
   };
 
   const result = await Notification.create(inputObj);

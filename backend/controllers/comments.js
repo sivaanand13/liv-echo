@@ -56,6 +56,7 @@ async function createComment(postID, uid, text, attachments) {
     title: `${user.name} commented on your post`,
     body: "",
     type: "comment",
+    link: `/posts/${postID.toString()}`,
   });
 
   return com;
@@ -126,20 +127,19 @@ async function deleteComment(uid, commID) {
   let canDel = await canDeleteComment(uid, commID);
   if (!canDel) throw new Error("You don't have permissions to delete this!");
   console.log("Another test", comm._id);
-  let k = comm._id.toString();
   await Comment.deleteOne({ _id: comm._id });
 
-  let coms = post.comments.filter((comment) => comment.toString() !== k);
-
-  post = await Post.findOneAndUpdate(
-    { _id: post._id, sender: user._id },
+  const result = await Post.findOneAndUpdate(
+    { _id: post._id },
     {
-      $set: {
-        comments: coms,
-      },
+      $pull: { comments: commID },
     },
-    {}
+    { new: true }
   );
+
+  if (result.comments.includes(commID)) {
+    throw "Could not delete comment in post";
+  }
 }
 async function deleteCommentAnyway(uid, commID) {
   let comm = await getCommentById(commID.toString());
@@ -202,6 +202,7 @@ async function likeComment(commID, uid) {
       title: `${user.name} liked your comment`,
       body: "",
       type: "comment",
+      link: `/posts/${comm.post.toString()}`,
     });
 
   return licked;

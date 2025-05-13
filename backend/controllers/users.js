@@ -245,7 +245,13 @@ async function sendFriendRequest(userUid, friendUid) {
   user = await getUserByUID(friendUid, false);
   console.log("Edited user", user);
   chatNamespace.to(user.uid).emit("accountUpdated", user);
-  return { message: "Friend added" };
+  sendNotification(friend._id, friend.uid, "", {
+    title: `${user.name} sent you a friend request`,
+    body: "",
+    type: "friend-request",
+    link: `/account`,
+  });
+  return { message: "Friend Request Sent" };
 }
 
 async function removeFriend(userUid, friendUid) {
@@ -309,6 +315,20 @@ async function resolveFriendRequest(currentUID, frientUID, resolution) {
 
   user = await getUserByUID(user.uid, false);
   chatNamespace.to(user.uid).emit("accountUpdated", user);
+
+  sendNotification(friend._id, friend.uid, "", {
+    title: `${user.name} accepted your friend request`,
+    body: "",
+    type: "friend-request",
+    link: `/users/${user.uid}`,
+  });
+
+  sendNotification(user._id, user.uid, "", {
+    title: `You are now friends with ${friend.name}`,
+    body: "",
+    type: "friend-request",
+    link: `/users/${friend.uid}`,
+  });
 
   return user;
 }

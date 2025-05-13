@@ -88,6 +88,7 @@ async function createChat(uid, chat) {
           type: "new-chat",
           title: `New chat created by ${adminUser.name}`,
           body: "",
+          link: "/group-chats",
         }
       );
     }
@@ -219,8 +220,6 @@ async function updateChat(chatId, uid, options) {
     cloudinary.validateCloudinaryObject(profile);
     update.profile = profile;
   }
-
-  
 
   if (Object.keys(update).length != 0) {
     newChat = await Chat.findOneAndUpdate({ _id: chat._id }, update, {
