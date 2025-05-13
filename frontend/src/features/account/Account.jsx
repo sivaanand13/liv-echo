@@ -506,8 +506,9 @@ export default function Account() {
 
       {openEditAccount && (
         <Dialog open={openEditAccount} onClose={closeModals}>
-          {" "}
-          <EditAccount handleClose={closeModals} />
+          <Box sx={{ maxHeight: "90vh", overflowY: "auto", p: 2 }}>
+            <EditAccount handleClose={closeModals} />
+          </Box>
         </Dialog>
       )}
 
