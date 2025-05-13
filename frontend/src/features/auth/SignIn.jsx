@@ -85,7 +85,7 @@ function SignIn() {
       try {
         await authUtils.signInUser(null, email, password);
       } catch (e) {
-        console.log("SignIn.jsx", e.message);
+        console.log("SignIn.jsx", e || e.message);
         setError(`Invalid email and password combination!`);
       }
     }

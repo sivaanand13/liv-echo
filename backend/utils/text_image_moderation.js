@@ -60,25 +60,27 @@ export async function moderationFunction(text, urls) {
     const response_data = moderation.results[0];
     const categories = [];
 
-    for (let [key, value] of Object.entries(response_data.categories)) {
-      if (value) {
-        categories.push({ [key]: response_data.category_scores[key] * 100 });
+    if (response_data) {
+      for (let [key, value] of Object.entries(response_data.categories)) {
+        if (value) {
+          categories.push({ [key]: response_data.category_scores[key] * 100 });
+        }
       }
+
+      const categoryList = categories
+        .map((cat) => Object.keys(cat)[0])
+        .join(", ");
+
+      const return_data = {
+        flagged: response_data.flagged,
+        message: categoryList,
+      };
+
+      console.log(return_data);
+      // console.log(moderation.results);
+
+      return return_data;
     }
-
-    const categoryList = categories
-      .map((cat) => Object.keys(cat)[0])
-      .join(", ");
-
-    const return_data = {
-      flagged: response_data.flagged,
-      message: categoryList,
-    };
-
-    console.log(return_data);
-    // console.log(moderation.results);
-
-    return return_data;
   } catch (error) {
     console.error("Moderation function error:", error);
 

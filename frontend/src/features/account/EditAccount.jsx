@@ -187,9 +187,10 @@ function EditAccount({ handleClose }) {
     <Container
       sx={{
         justifyContent: "center",
-        display: "flex",
         overflow: "auto",
         width: "100%",
+        maxHeight: "80vh",
+        overflowY: "auto",
         justifyContent: "center",
         alignItems: "center",
       }}
@@ -202,6 +203,11 @@ function EditAccount({ handleClose }) {
           </Typography>
           <Typography variant="h4" sx={{ width: "100%" }}>
             Edit Account
+          </Typography>
+          <Typography variant="h7" sx={{ width: "100%" }}>
+            To edit your account you can add in any of the fields you want to
+            but you dont have to. However, to change email or password you need
+            to put in your current password
           </Typography>
 
           <FormControl>

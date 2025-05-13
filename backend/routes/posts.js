@@ -135,9 +135,13 @@ router.route("/:postID").get(async (req, res) => {
       console.log("boo");
       console.log(uid.toString());
       console.log(poster.uid.toString());
+      console.log("friends: ", poster.friends.map(String));
+      console.log("viewer:", user._id);
       if (
         uid.toString() == poster.uid.toString() ||
-        poster.friends.includes(uid) ||
+        poster.friends
+          .map((obj) => obj._id.toString())
+          .includes(user._id.toString()) ||
         user.role == "admin"
       ) {
         // they can see the post! Yay!
@@ -145,7 +149,7 @@ router.route("/:postID").get(async (req, res) => {
         throw new Error("You can't see this!");
       }
     }
-    const pos = await postsController.getPostById(postID);
+    const pos = await postsController.getPostById(postID, true);
     console.log(pos);
     return res.status(200).json({
       message: "Got the post!",
@@ -192,6 +196,7 @@ router.route("/:postID").patch(async (req, res) => {
       throw new Error("You can't edit this!");
     }
   } catch (e) {
+    console.log(e);
     return res.status(403).json({ message: e });
   }
 });
@@ -256,7 +261,9 @@ router.route("/:postID/like").patch(async (req, res) => {
       console.log(poster.uid.toString());
       if (
         uid.toString() == poster.uid.toString() ||
-        poster.friends.includes(uid) ||
+        poster.friends
+          .map((obj) => obj._id.toString())
+          .includes(user._id.toString()) ||
         user.role == "admin"
       ) {
         // they can see the post! Yay!
@@ -264,6 +271,8 @@ router.route("/:postID/like").patch(async (req, res) => {
         throw new Error("You can't see this!");
       }
     }
+    //console.log("uid", uid)
+    //console.log("postID",postID)
     const pos = await postsController.likePost(uid, postID);
     return res.status(200).json({
       message: "Got the post!",
@@ -301,7 +310,7 @@ router.route("/:postID/report").patch(async (req, res) => {
       console.log(poster.uid.toString());
       if (
         uid.toString() == poster.uid.toString() ||
-        poster.friends.includes(uid) ||
+        poster.friends.map((obj) => obj.uid).includes(uid) ||
         user.role == "admin"
       ) {
         // they can see the post! Yay!
@@ -380,7 +389,7 @@ router.route("/:postID/comment").post(async (req, res) => {
       console.log(poster.uid.toString());
       if (
         uid.toString() == poster.uid.toString() ||
-        poster.friends.includes(uid) ||
+        poster.friends.map((obj) => obj.uid).includes(uid) ||
         user.role == "admin"
       ) {
         // they can see the post! Yay!
@@ -427,7 +436,9 @@ router.route("/:postID/:commentID").patch(async (req, res) => {
   // there's a lot of checks here actually, so I'll go one-by-one
   try {
     // first, let's make sure the comment is actually tied to the post
-    if (!post.comments.includes(commentID)) throw "comment isn't tied to post!";
+    console.log("Post comments: ", post.comments);
+    if (!post.comments.map(String).includes(commentID.toString()))
+      throw "comment isn't tied to post!";
 
     // only the commentor can edit this, but we gotta make sure they can see the post to begin with
     // if a public post was privated, someone who made a comment when it was public shouldn't be able to update it
@@ -437,7 +448,7 @@ router.route("/:postID/:commentID").patch(async (req, res) => {
       console.log(poster.uid.toString());
       if (
         uid.toString() == poster.uid.toString() ||
-        poster.friends.includes(uid) ||
+        poster.friends.map((obj) => obj.uid).includes(uid) ||
         user.role == "admin"
       ) {
         // they can see the post! Yay!
@@ -493,7 +504,7 @@ router.route("/:postID/:commentID").delete(async (req, res) => {
   // there's a lot of checks here actually, so I'll go one-by-one
   try {
     // first, let's make sure the comment is actually tied to the post
-    console.log("comments", post.comments);
+    console.log("comments", post.comments, commentID);
     if (!post.comments.includes(commentID)) throw "comment isn't tied to post!";
 
     // we only need to make the first two checks here
@@ -504,7 +515,7 @@ router.route("/:postID/:commentID").delete(async (req, res) => {
       console.log(poster.uid.toString());
       if (
         uid.toString() == poster.uid.toString() ||
-        poster.friends.includes(uid) ||
+        poster.friends.map((obj) => obj.uid).includes(uid) ||
         user.role == "admin"
       ) {
       } else {
@@ -549,7 +560,7 @@ router.route("/:postID/:commentID/like").patch(async (req, res) => {
       console.log(poster.uid.toString());
       if (
         uid.toString() == poster.uid.toString() ||
-        poster.friends.includes(uid) ||
+        poster.friends.map((obj) => obj.uid).includes(uid) ||
         user.role == "admin"
       ) {
       } else {
@@ -586,7 +597,9 @@ router.route("/:postID/comment").get(async (req, res) => {
     if (post.isPrivate) {
       if (
         uid.toString() == poster.uid.toString() ||
-        poster.friends.includes(uid) ||
+        poster.friends
+          .map((obj) => obj._id.toString())
+          .includes(user._id.toString()) ||
         user.role == "admin"
       ) {
       } else {
@@ -595,12 +608,16 @@ router.route("/:postID/comment").get(async (req, res) => {
     }
     let comments = [];
 
+    comments = await commentsController.getCommentsByPostId(
+      post._id.toString()
+    );
+    /*
     for (let i = 0; i < post.comments.length; i++) {
       let c = post.comments[i];
       console.log("post comment " + c);
       let gotCom = await commentsController.getCommentById(c.toString());
       comments.push(gotCom);
-    }
+    }*/
 
     return res.status(200).json({
       message: "Attached message media!",

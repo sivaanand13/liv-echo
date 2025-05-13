@@ -9,8 +9,9 @@ import {
   Switch,
   Alert,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import postUtils from "./postUtils";
+import validation from "../../utils/validation";
 
 export default function EditPostDialog({
   open,
@@ -18,13 +19,15 @@ export default function EditPostDialog({
   post,
   onEditSuccess,
 }) {
-  const [text, setText] = useState(post.text);
+  console.log("edit post: ", post);
+  const [text, setText] = useState(post.text || "");
   const [isPrivate, setIsPrivate] = useState(post.isPrivate);
   const [error, setError] = useState("");
 
   const handleSave = async () => {
     try {
-      setError(text);
+      setError("");
+      validation.validateString(text, "Post text");
       const updated = await postUtils.editPost(post._id, { text, isPrivate });
       onEditSuccess(updated);
       handleClose();
@@ -34,12 +37,22 @@ export default function EditPostDialog({
         return;
       }
       console.error(e);
+      if (Array.isArray(e)) {
+        e = e.join(" ");
+      }
+      if (typeof e == "string" || typeof e.message == "string") {
+        setError(e.message || e);
+        return;
+      }
+
       setError("Failed to update post.");
       return;
     }
   };
 
   const handleCancel = () => {
+    setText(post.text);
+    setIsPrivate(post.isPrivate);
     setError("");
     handleClose();
   };

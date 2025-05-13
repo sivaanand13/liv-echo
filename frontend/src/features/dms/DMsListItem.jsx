@@ -5,11 +5,11 @@ import { AuthContext } from "../../contexts/AuthContext";
 import ChatListItem from "../../components/ChatListItem";
 
 export default function DMsListItem({ item: chat }) {
-  console.log(chat);
-  const auth = useContext(AuthContext);
-  const user = chat.members.find((member) => member.uid !== auth.uid);
+  console.log("dm list chat: ", chat);
+  const { user: curUser } = useContext(AuthContext);
+  const user = chat.members.find((member) => member.uid !== curUser.uid);
   let preview = `${
-    chat.latestMessage?.sender.username || chat.latestMessage?.senderName || ""
+    chat.latestMessage?.sender?.username || chat.latestMessage?.senderName || ""
   }: ${chat?.latestMessage?.text}`;
   if (preview.length > 30) {
     preview = preview.slice(0, 30) + "...";
@@ -17,13 +17,17 @@ export default function DMsListItem({ item: chat }) {
   return (
     <ChatListItem item={chat} key={chat._id.toString()}>
       <ListItemAvatar>
-        <Profile user={user} />
+        <Profile user={user || "Orphan DM"} />
       </ListItemAvatar>
       <ListItemText
         disableTypography={true}
-        primary={`${user?.name || "Name not avaliable"} (${
-          user.username || "Username not avaliable"
-        })`}
+        primary={
+          user
+            ? `${user?.name || "Name not avaliable"} (${
+                user?.username || "Username not avaliable"
+              })`
+            : "Orphan DM"
+        }
         secondary={
           <Stack direction={"column"}>
             {chat?.latestMessage?.text ? (

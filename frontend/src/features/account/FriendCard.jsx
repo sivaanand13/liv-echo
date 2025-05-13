@@ -43,7 +43,7 @@ export default function FriendCard({ item: user, type }) {
     <Card
       sx={{
         width: "100%",
-        minWidth: "33vw",
+        minWidth: "30vw",
         display: "flex",
         justifyContent: "space-between",
         flexDirection: "column",

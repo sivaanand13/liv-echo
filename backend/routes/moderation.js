@@ -33,15 +33,16 @@ router.route("/").post(async (req, res) => {
     validation.validateArray(attachments);
 
     const moderationResponse = await moderationFunction(text, attachments);
-
-    if (moderationResponse.flagged) {
-      return res.status(200).json({
-        flagged: moderationResponse.flagged,
-        message: `Message got flagged: ${moderationResponse.message}`,
-      });
+    if (moderationResponse) {
+      if (moderationResponse.flagged) {
+        return res.status(200).json({
+          flagged: moderationResponse.flagged,
+          message: `Message got flagged: ${moderationResponse.message}`,
+        });
+      }
     }
     return res.status(200).json({
-      flagged: moderationResponse.flagged,
+      flagged: false,
       message: "Message did not get flagged",
     });
   } catch (e) {

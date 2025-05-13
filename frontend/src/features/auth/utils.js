@@ -94,6 +94,9 @@ async function signUpUser(name, email, username, dob, password) {
     ).data.data;
 
     console.log("signed up user", serverUser);
+
+    await firebaseUtils.signOutFirebaseUser();
+
     return { ...user, ...serverUser };
   } catch (e) {
     await firebaseUtils.deleteFirebaseUser();
