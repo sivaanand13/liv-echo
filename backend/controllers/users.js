@@ -246,7 +246,7 @@ async function sendFriendRequest(userUid, friendUid) {
   console.log("Edited user", user);
   chatNamespace.to(user.uid).emit("accountUpdated", user);
   sendNotification(friend._id, friend.uid, "", {
-    title: `${user.name} sent you a friend request`,
+    title: `${currUser.name} sent you a friend request`,
     body: "",
     type: "friend-request",
     link: `/account`,
