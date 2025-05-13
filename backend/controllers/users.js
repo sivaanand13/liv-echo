@@ -53,6 +53,7 @@ async function getUserByUID(uid, display) {
         profile: 1,
         banner: 1,
         friends: 1,
+        email: 1,
       }
     ).populate("friends", "name username email profile uid");
   } else {

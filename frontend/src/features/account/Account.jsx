@@ -33,11 +33,12 @@ import PostCard from "../posts/PostCard.jsx";
 import userUtils from "../users/userUtils.js";
 import DeletePostDialog from "../posts/DeletePostDialog";
 import EditPostDialog from "../posts/EditPostDialog";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import StaticPaginatedList from "../../components/StaticPaginatedList.jsx";
 import FriendCard from "./FriendCard.jsx";
 import CustomList from "../../components/CustomList.jsx";
 import chatSocket from "../../sockets/namespaces/chatSocket.js";
+import { useNotification } from "../../contexts/NotificationContext.jsx";
 export default function Account() {
   const { user, refreshAccount } = useContext(AuthContext);
   const theme = useTheme();
@@ -51,6 +52,7 @@ export default function Account() {
   const [posts, setPosts] = useState([]);
   const [userData, setUserData] = useState(null);
   const [modPosts, setModPosts] = useState([]);
+  const { notificatons } = useNotification();
 
   const handleTabChange = (_, newValue) => {
     setTab(newValue);
@@ -92,7 +94,7 @@ export default function Account() {
     }
     refreshAccount();
     getPosts();
-  }, [user.uid]);
+  }, [user.uid, notificatons]);
   if (user.role === "admin") {
     useEffect(() => {
       async function getModPosts() {
