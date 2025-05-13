@@ -100,7 +100,6 @@ function SignIn() {
         justifyContent: "center",
         display: "flex",
         overflow: "auto",
-        justifyContent: "center",
         alignItems: "center",
         minHeight: "100vh",
       }}
