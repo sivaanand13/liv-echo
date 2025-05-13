@@ -10,6 +10,7 @@ import usersController from "../controllers/users.js";
 import settings from "../models/settings.js";
 import { moderationFunction } from "../utils/text_image_moderation.js";
 import { set } from "mongoose";
+import { sendNotification } from "../controllers/notification.js";
 const router = express.Router();
 
 //middlewares
@@ -74,6 +75,12 @@ router.route("/:chatId/messages").post(async (req, res) => {
       user._id.toString()
     );
     if (flagCount.data >= 5) {
+      await sendNotification(user._id, uid, chatId, {
+        title: "You have been banned!",
+        body: "",
+        type: "system",
+        link: "",
+      });
       throw "You have been banned!";
     }
     await chatsController.verifyUserChatAccess(uid, chat._id.toString());
