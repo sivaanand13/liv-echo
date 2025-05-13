@@ -151,6 +151,14 @@ async function updateFlagCount(chatId, userId) {
     { $inc: { "flaggedCount.$.flagCount": 1 } },
     { new: true }
   );
+
+  const flagCountInfo = result.flaggedCount.find((items) => {
+    if (items.userId.toString() === userId.toString()) {
+      return items.flagCount;
+    }
+  });
+  // console.log("u", flagCountInfo);
+  // const userObj = await userController.getUserById(userId);
   if (!result) {
     return { success: false };
   } else {
