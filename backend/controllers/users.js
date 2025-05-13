@@ -316,17 +316,6 @@ async function resolveFriendRequest(currentUID, frientUID, resolution) {
         },
       }
     );
-    await sendNotification(friend._id, friend.uid, "", {
-      type: "friend-request",
-      title: `${user.name} has accepted your friend request`,
-      body: "",
-    });
-  } else {
-    await sendNotification(friend._id, friend.uid, "", {
-      type: "friend-request",
-      title: `${user.name} has rejected your friend request`,
-      body: "",
-    });
   }
 
   user = await getUserByUID(user.uid, false);
