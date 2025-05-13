@@ -25,7 +25,11 @@ async function createPost(text, attachments, isPrivate = false) {
     // Validate the post text
     text = validation.validateString(text, "Post Text");
     if (text.length > MESSAGE_LENGTH) {
-      throw `Post must be less than ${MESSAGE_LENGTH} characters`;
+      const postError = new Error(
+        `Post must be less than ${MESSAGE_LENGTH} characters`
+      );
+      postError.text("post-too-long");
+      throw postError;
     }
 
     // If there are attachments, ensure they're valid (optional step)
@@ -266,17 +270,18 @@ async function deletePost(pos) {
   }
 }
 
-async function reportPost(postId,type,comment) {
-  try{
-    const response = await axios.patch(`posts/${postId}/report`,{reportType: type, comment})
-    return response.data.data
-  }
-  catch(e){
+async function reportPost(postId, type, comment) {
+  try {
+    const response = await axios.patch(`posts/${postId}/report`, {
+      reportType: type,
+      comment,
+    });
+    return response.data.data;
+  } catch (e) {
     console.log(e);
-    throw `Report post failed`
+    throw `Report post failed`;
   }
 }
-
 
 export default {
   createPost,
@@ -294,5 +299,5 @@ export default {
   editComment,
   getModPosts,
   reportPost,
-  likePostByPostId
+  likePostByPostId,
 };

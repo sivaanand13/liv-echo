@@ -39,7 +39,13 @@ function CreatePost() {
       try {
         post = await postUtils.createPost(text, attachments, isPrivate);
       } catch (e) {
+        if (e.status === 400) {
+          throw e.data.error;
+        }
         if (typeof e == "string") {
+          throw e;
+        }
+        if (e.type === "post-too-long") {
           throw e;
         }
         throw `Failed to create post!`;
