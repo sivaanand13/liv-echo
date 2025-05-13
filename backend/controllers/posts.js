@@ -403,8 +403,8 @@ async function searchPosts(queryText, user) {
       shouldClauses.push({ terms: { uid: finalArray } });
     }
   }
-  console.log("Checking friendsIds", friendIds);
-  console.log("Checking UserId", currentUserId);
+  //console.log("Checking friendsIds", friendIds);
+  //console.log("Checking UserId", currentUserId);
 
   let { body } = await elasticClient.search({
     index: "posts",
@@ -433,22 +433,22 @@ async function searchPosts(queryText, user) {
     },
   });
 
-  console.log("Raw Elasticsearch Response:", JSON.stringify(body, null, 2));
-  console.log("Values we mentioned", body);
-  console.log("hits", body.hits);
-  console.log("length", body.hits.hits.length);
+  //console.log("Raw Elasticsearch Response:", JSON.stringify(body, null, 2));
+  //console.log("Values we mentioned", body);
+  //console.log("hits", body.hits);
+  //console.log("length", body.hits.hits.length);
   if (body && body.hits && body.hits.hits.length > 0) {
-    console.log("Search Results:", body.hits.hits);
-    const results = body.hits.hits.map((hit) => ({
+    //console.log("Search Results:", body.hits.hits);
+    let results = body.hits.hits.map((hit) => ({
       id: hit._id,
       ...hit._source,
     }));
-    console.log("Mapped Search Results:", results);
+    //console.log("Mapped Search Results:", results);
     for (let i = 0; i < results.length; i++) {
       const curPost = results[i];
-      console.log("update sender: ", curPost);
+      //console.log("update sender: ", curPost);
       const post = await getPostById(curPost.id);
-      console.log("updated post:", post);
+      //console.log("updated post:", post);
       results[i] = post;
     }
     return results;
