@@ -436,7 +436,9 @@ router.route("/:postID/:commentID").patch(async (req, res) => {
   // there's a lot of checks here actually, so I'll go one-by-one
   try {
     // first, let's make sure the comment is actually tied to the post
-    if (!post.comments.includes(commentID)) throw "comment isn't tied to post!";
+    console.log("Post comments: ", post.comments);
+    if (!post.comments.map(String).includes(commentID.toString()))
+      throw "comment isn't tied to post!";
 
     // only the commentor can edit this, but we gotta make sure they can see the post to begin with
     // if a public post was privated, someone who made a comment when it was public shouldn't be able to update it
@@ -502,7 +504,7 @@ router.route("/:postID/:commentID").delete(async (req, res) => {
   // there's a lot of checks here actually, so I'll go one-by-one
   try {
     // first, let's make sure the comment is actually tied to the post
-    console.log("comments", post.comments);
+    console.log("comments", post.comments, commentID);
     if (!post.comments.includes(commentID)) throw "comment isn't tied to post!";
 
     // we only need to make the first two checks here

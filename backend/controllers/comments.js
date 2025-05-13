@@ -42,6 +42,7 @@ async function createComment(postID, uid, text, attachments) {
   const com = await getCommentById(res._id.toString());
   let coms = post.comments;
   coms.push(com._id);
+  console.log("new comment id: ", com._id);
   post = await Post.findOneAndUpdate(
     { _id: post._id },
     {
@@ -51,6 +52,7 @@ async function createComment(postID, uid, text, attachments) {
     },
     { returnDocument: "after" }
   );
+  await redisUtils.unsetJSON(`posts/${post._id.toString()}`);
 
   sendNotification(postOwnerInfo._id, postOwnerInfo.uid, "", {
     title: `${user.name} commented on your post`,
@@ -136,6 +138,7 @@ async function deleteComment(uid, commID) {
     },
     { new: true }
   );
+  await redisUtils.unsetJSON(`posts/${post._id.toString()}`);
 
   if (result.comments.includes(commID)) {
     throw "Could not delete comment in post";
@@ -196,6 +199,7 @@ async function likeComment(commID, uid) {
     },
     {}
   );
+  await redisUtils.unsetJSON(`posts/${comm.post.toString()}`);
 
   if (licked)
     sendNotification(commentOwnerInfo._id, commentOwnerInfo.uid, "", {
