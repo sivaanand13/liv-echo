@@ -61,6 +61,10 @@ export default function SinglePost() {
     }
   }
   async function handleLikePost() {
+    if (serverUser?._id.toString() === senderId?.toString()) {
+      alert("You can't like you own post!");
+    }
+
     try {
       const { post: updatedPost } = await postUtils.likePostByPostId(postId);
       setPost(updatedPost);
