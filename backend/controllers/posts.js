@@ -83,6 +83,7 @@ async function postPost(uid, text, attachments, isPrivate) {
         type: "new-post",
         title: `A new post from ${user.name}`,
         body: "",
+        link: `/posts/${post._id}`,
       });
     }
   }
@@ -97,10 +98,7 @@ async function canDeletePost(uid, postID) {
   let user = await usersController.getUserByUID(uid);
 
   // if the user is an admin we can ignore these checks
-  if (
-    !user.role != "admin" &&
-    user._id.toString() != post.sender._id.toString()
-  ) {
+  if (!user.role != "admin" && user._id.toString() != post.sender.toString()) {
     console.log("User isn't poster or admin");
     return false;
   }
@@ -137,12 +135,10 @@ async function editPost(uid, postID, text, isPrivate, updateTimestamps) {
   let post = await getPostById(postID.toString());
   let user = await usersController.getUserByUID(uid);
   validation.validateBoolean(isPrivate);
-  console.log("post.sender", post.sender);
-  console.log("post.sender._id", post.sender.id);
-  console.log("user._id", user._id);
-  if (post.sender.id.toString() != user._id.toString())
+
+  if (post.sender.toString() != user._id.toString())
     throw new Error("You can't delete this post!");
-  console.log("Chieff");
+
   if (text) {
     text = validation.validateString(text);
     if (text.length > settings.MESSAGE_LENGTH)
@@ -209,6 +205,7 @@ async function editPost(uid, postID, text, isPrivate, updateTimestamps) {
 async function likePost(uid, postId) {
   let post = await getPostById(postId.toString());
   let user = await usersController.getUserByUID(uid);
+  let postOwnerInfo = await userController.getUserById(post.sender.toString());
 
   if (user._id.toString() == post.sender.toString())
     throw new Error("you can't like your own post!");
@@ -229,6 +226,13 @@ async function likePost(uid, postId) {
     {}
   );
   await redisUtils.unsetJSON(`posts/${post._id.toString()}`);
+
+  await sendNotification(post.sender, postOwnerInfo.uid, "", {
+    title: `${user.name} liked your post`,
+    body: "",
+    type: "post-liked",
+    link: `/posts/${postId}`,
+  });
 
   return true;
 }

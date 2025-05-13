@@ -88,6 +88,7 @@ async function createChat(uid, chat) {
           type: "new-chat",
           title: `New chat created by ${adminUser.name}`,
           body: "",
+          link: "/group-chats",
         }
       );
     }

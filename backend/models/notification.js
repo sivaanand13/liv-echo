@@ -12,6 +12,7 @@ const NotificationSchema = new Schema(
         "new-message",
         "new-chat",
         "friend-request",
+        "friend-request-accept",
         "new-post",
         "post-liked",
         "comment",

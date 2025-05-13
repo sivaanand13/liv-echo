@@ -6,6 +6,7 @@ import settings from "../models/settings.js";
 import cloudinary from "../cloudinary/cloudinary.js";
 import Comment from "../models/comment.js";
 import Post from "../models/post.js";
+import { sendNotification } from "./notification.js";
 
 // create comment
 // each comment is tied to a post
@@ -13,6 +14,7 @@ import Post from "../models/post.js";
 async function createComment(postID, uid, text, attachments) {
   let user = await usersController.getUserByUID(uid);
   let post = await postsController.getPostById(postID);
+  let postOwnerInfo = await usersController.getUserById(post.sender);
 
   text = validation.validateString(text);
   if (text.length > settings.MESSAGE_LENGTH)
@@ -49,6 +51,13 @@ async function createComment(postID, uid, text, attachments) {
     },
     {}
   );
+
+  sendNotification(postOwnerInfo._id, postOwnerInfo.uid, "", {
+    title: `${user.name} commented on your post`,
+    body: "",
+    type: "comment",
+    link: `/posts/${postID.toString()}`,
+  });
 
   return com;
 }
@@ -118,20 +127,19 @@ async function deleteComment(uid, commID) {
   let canDel = await canDeleteComment(uid, commID);
   if (!canDel) throw new Error("You don't have permissions to delete this!");
   console.log("Another test", comm._id);
-  let k = comm._id.toString();
   await Comment.deleteOne({ _id: comm._id });
 
-  let coms = post.comments.filter((comment) => comment.toString() !== k);
-
-  post = await Post.findOneAndUpdate(
-    { _id: post._id, sender: user._id },
+  const result = await Post.findOneAndUpdate(
+    { _id: post._id },
     {
-      $set: {
-        comments: coms,
-      },
+      $pull: { comments: commID },
     },
-    {}
+    { new: true }
   );
+
+  if (result.comments.includes(commID)) {
+    throw "Could not delete comment in post";
+  }
 }
 async function deleteCommentAnyway(uid, commID) {
   let comm = await getCommentById(commID.toString());
@@ -161,7 +169,8 @@ async function deleteCommentAnyway(uid, commID) {
 // like comment
 async function likeComment(commID, uid) {
   let comm = await getCommentById(commID.toString());
-  let user = await usersController.getUserByUID(uid);
+  let user = await usersController.getUserByUID(uid); // User who liked the comment
+  let commentOwnerInfo = await usersController.getUserById(comm.sender);
   let licked = false;
   //console.log(comm.sender.toString());
   //console.log(user._id.toString());
@@ -187,6 +196,14 @@ async function likeComment(commID, uid) {
     },
     {}
   );
+
+  if (licked)
+    sendNotification(commentOwnerInfo._id, commentOwnerInfo.uid, "", {
+      title: `${user.name} liked your comment`,
+      body: "",
+      type: "comment",
+      link: `/posts/${comm.post.toString()}`,
+    });
 
   return licked;
 }

@@ -63,11 +63,32 @@ async function postMessage(chatId, uid, text, attachments, tempId) {
   for (const memeber of uiChat.members) {
     console.log("Notification Sending System Executed...");
     if (memeber.uid !== uid) {
-      const result = await sendNotification(memeber._id, memeber.uid, chatId, {
-        type: "new-message",
-        title: `Message from ${user.name}`,
-        body: text.slice(0, 40) + "...",
-      });
+      if (chat.type === "group") {
+        const result = await sendNotification(
+          memeber._id,
+          memeber.uid,
+          chatId,
+          {
+            type: "new-message",
+            title: `Message from ${user.name} in ${chat.name}`,
+            body: text.slice(0, 40) + "...",
+            link: "/group-chats",
+          }
+        );
+      }
+      if (chat.type === "dm") {
+        const result = await sendNotification(
+          memeber._id,
+          memeber.uid,
+          chatId,
+          {
+            type: "new-message",
+            title: `Message from ${user.name}`,
+            body: text.slice(0, 40) + "...",
+            link: "/dms",
+          }
+        );
+      }
     }
   }
 }
