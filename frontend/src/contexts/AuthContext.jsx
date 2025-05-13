@@ -3,6 +3,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Loading from "../components/Loading";
 import chatSocket from "../sockets/namespaces/chatSocket.js";
 import axios from "../utils/requests/axios.js";
+import userUtils from "../features/users/userUtils.js";
 export const AuthContext = createContext();
 
 export default function AuthProvider({ children }) {
@@ -12,6 +13,20 @@ export default function AuthProvider({ children }) {
 
   const [loadingUser, setLoadingUser] = useState(true);
   const auth = getAuth();
+
+  async function refreshAccount() {
+    try {
+      const profile = await userUtils.fetchUserByUID(currentUser.uid);
+      setServerUser(profile);
+      console.log("refreshing account: ", profile);
+      setUser((prev) => {
+        return { ...prev, ...profile };
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   useEffect(() => {
     let unsubscribe = onAuthStateChanged(auth, async (user) => {
       setLoadingUser(true);
@@ -68,7 +83,9 @@ export default function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ currentUser, serverUser, user, setUser }}>
+    <AuthContext.Provider
+      value={{ currentUser, serverUser, user, setUser, refreshAccount }}
+    >
       {children}
     </AuthContext.Provider>
   );

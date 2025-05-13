@@ -184,13 +184,14 @@ export default function UserProfile() {
           {!currUser.friends?.some(
             (val) =>
               val.toString() == user._id || val._id?.toString() == user._id
-          ) && (
-            <Box textAlign="center" mt={2}>
-              <Button variant="contained" onClick={onClickAddFriend}>
-                {"Send Friend Request"}
-              </Button>
-            </Box>
-          )}
+          ) &&
+            currUser.uid !== user.uid && (
+              <Box textAlign="center" mt={2}>
+                <Button variant="contained" onClick={onClickAddFriend}>
+                  {"Send Friend Request"}
+                </Button>
+              </Box>
+            )}
           {tab === 0 && (
             <Box sx={{ p: 2 }}>
               <Card

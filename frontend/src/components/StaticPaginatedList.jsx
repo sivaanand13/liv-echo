@@ -229,6 +229,7 @@ function StaticPaginatedList({
                   backgroundColor: "rgba(255, 255, 255, 0.8)",
                   borderRadius: "0.3em",
                   margin: "1em",
+                  padding: "1em",
                 }}
                 size="large"
               />

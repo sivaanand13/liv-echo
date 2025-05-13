@@ -227,7 +227,7 @@ async function sendFriendRequest(userUid, friendUid) {
   if (userUid === friendUid) throw "You cannot friend yourself.";
 
   const currUser = await getUserByUID(userUid);
-  const friend = await getUserByUID(friendUid);
+  let friend = await getUserByUID(friendUid);
   const friendId = friend._id;
   if (currUser.friends.some((f) => f._id.toString() == friendId.toString())) {
     throw "You are already friends with this user.";
@@ -242,9 +242,15 @@ async function sendFriendRequest(userUid, friendUid) {
   console.log("Edited user", user);
   chatNamespace.to(user.uid).emit("accountUpdated", user);
 
-  user = await getUserByUID(friendUid, false);
-  console.log("Edited user", user);
-  chatNamespace.to(user.uid).emit("accountUpdated", user);
+  friend = await getUserByUID(friend.uid, false);
+  chatNamespace.to(friend.uid).emit("accountUpdated", friend);
+
+  await sendNotification(friendId, friendUid, "", {
+    type: "friend-request",
+    title: `${currUser.name} sent you a friend request`,
+    body: "",
+  });
+
   return { message: "Friend added" };
 }
 
@@ -285,6 +291,14 @@ async function resolveFriendRequest(currentUID, frientUID, resolution) {
       },
     }
   );
+  await User.updateOne(
+    { _id: friend._id },
+    {
+      $pull: {
+        friendRequests: user._id,
+      },
+    }
+  );
   if (resolution == 1) {
     await User.updateOne(
       { _id: user._id },
@@ -302,13 +316,25 @@ async function resolveFriendRequest(currentUID, frientUID, resolution) {
         },
       }
     );
+    await sendNotification(friend._id, friend.uid, "", {
+      type: "friend-request",
+      title: `${user.name} has accepted your friend request`,
+      body: "",
+    });
+  } else {
+    await sendNotification(friend._id, friend.uid, "", {
+      type: "friend-request",
+      title: `${user.name} has rejected your friend request`,
+      body: "",
+    });
   }
 
-  friend = await getUserByUID(frientUID, false);
-  chatNamespace.to(frientUID).emit("accountUpdated", friend);
-
   user = await getUserByUID(user.uid, false);
+  console.log("Edited user", user);
   chatNamespace.to(user.uid).emit("accountUpdated", user);
+
+  friend = await getUserByUID(friend.uid, false);
+  chatNamespace.to(friend.uid).emit("accountUpdated", friend);
 
   return user;
 }
