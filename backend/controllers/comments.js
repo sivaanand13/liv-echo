@@ -7,7 +7,7 @@ import cloudinary from "../cloudinary/cloudinary.js";
 import Comment from "../models/comment.js";
 import Post from "../models/post.js";
 import { sendNotification } from "./notification.js";
-
+import redisUtils from "../redis/redisUtils.js";
 // create comment
 // each comment is tied to a post
 
