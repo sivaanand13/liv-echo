@@ -45,11 +45,11 @@ async function createComment(postID, uid, text, attachments) {
   post = await Post.findOneAndUpdate(
     { _id: post._id },
     {
-      $set: {
-        comments: coms,
+      $addToSet: {
+        comments: com._id,
       },
     },
-    {}
+    { returnDocument: "after" }
   );
 
   sendNotification(postOwnerInfo._id, postOwnerInfo.uid, "", {
@@ -132,7 +132,7 @@ async function deleteComment(uid, commID) {
   const result = await Post.findOneAndUpdate(
     { _id: post._id },
     {
-      $pull: { comments: commID },
+      $pull: { comments: comm._id },
     },
     { new: true }
   );
@@ -175,7 +175,7 @@ async function likeComment(commID, uid) {
   //console.log(comm.sender.toString());
   //console.log(user._id.toString());
 
-  if (user._id.toString() == comm.sender._id.toString()) return licked;//throw new Error("you can't like your own comment!");
+  if (user._id.toString() == comm.sender._id.toString()) return licked; //throw new Error("you can't like your own comment!");
 
   let likez = comm.likes;
 
@@ -223,6 +223,20 @@ async function getCommentById(commID) {
   return comm;
 }
 
+async function getCommentsByPostId(postId) {
+  postId = validation.validateString(postId, "Post Id", true);
+  postId = ObjectId.createFromHexString(postId);
+  const posts = await Comment.find({ post: postId })
+    .populate("sender", "name username email profile friends uid")
+    .sort({ createdAt: -1 })
+    .lean();
+  if (!posts) {
+    console.log("oops");
+    throw `No comments with for post (${postId})!`;
+  }
+  return posts;
+}
+
 export default {
   createComment,
   editComment,
@@ -231,4 +245,5 @@ export default {
   getCommentById,
   deleteCommentAnyway,
   canDeleteComment,
+  getCommentsByPostId,
 };

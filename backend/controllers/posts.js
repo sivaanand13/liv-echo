@@ -98,7 +98,7 @@ async function canDeletePost(uid, postID) {
   let user = await usersController.getUserByUID(uid);
 
   // if the user is an admin we can ignore these checks
-  if (!user.role != "admin" && user._id.toString() != post.sender.toString()) {
+  if (user.role != "admin" && user._id.toString() != post.sender.toString()) {
     console.log("User isn't poster or admin");
     return false;
   }
@@ -136,8 +136,9 @@ async function editPost(uid, postID, text, isPrivate, updateTimestamps) {
   let user = await usersController.getUserByUID(uid);
   validation.validateBoolean(isPrivate);
 
-  if (post.sender.toString() != user._id.toString())
-    throw new Error("You can't delete this post!");
+  console.log(post.sender, user._id);
+  if (post.sender._id.toString() != user._id.toString())
+    throw new Error("You can't edit this post!");
 
   if (text) {
     text = validation.validateString(text);
@@ -306,6 +307,7 @@ async function getPostById(postId) {
     "sender",
     "name username email profile friends uid"
   );
+
   if (!post) {
     throw `No post with id (${post})!`;
   }

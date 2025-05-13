@@ -71,6 +71,7 @@ export default function SinglePost() {
         const coms = await postUtils.getComments(postId);
         setComments(coms);
         console.log("post info", result);
+        console.log("post comments", coms);
       } catch (err) {
         console.error(err);
         setError("Failed to load post.");

@@ -135,9 +135,13 @@ router.route("/:postID").get(async (req, res) => {
       console.log("boo");
       console.log(uid.toString());
       console.log(poster.uid.toString());
+      console.log("friends: ", poster.friends.map(String));
+      console.log("viewer:", user._id);
       if (
         uid.toString() == poster.uid.toString() ||
-        poster.friends.includes(uid) ||
+        poster.friends
+          .map((obj) => obj._id.toString())
+          .includes(user._id.toString()) ||
         user.role == "admin"
       ) {
         // they can see the post! Yay!
@@ -192,6 +196,7 @@ router.route("/:postID").patch(async (req, res) => {
       throw new Error("You can't edit this!");
     }
   } catch (e) {
+    console.log(e);
     return res.status(403).json({ message: e });
   }
 });
@@ -256,7 +261,9 @@ router.route("/:postID/like").patch(async (req, res) => {
       console.log(poster.uid.toString());
       if (
         uid.toString() == poster.uid.toString() ||
-        poster.friends.includes(uid) ||
+        poster.friends
+          .map((obj) => obj._id.toString())
+          .includes(user._id.toString()) ||
         user.role == "admin"
       ) {
         // they can see the post! Yay!
@@ -586,7 +593,9 @@ router.route("/:postID/comment").get(async (req, res) => {
     if (post.isPrivate) {
       if (
         uid.toString() == poster.uid.toString() ||
-        poster.friends.includes(uid) ||
+        poster.friends
+          .map((obj) => obj._id.toString())
+          .includes(user._id.toString()) ||
         user.role == "admin"
       ) {
       } else {
@@ -595,12 +604,16 @@ router.route("/:postID/comment").get(async (req, res) => {
     }
     let comments = [];
 
+    comments = await commentsController.getCommentsByPostId(
+      post._id.toString()
+    );
+    /*
     for (let i = 0; i < post.comments.length; i++) {
       let c = post.comments[i];
       console.log("post comment " + c);
       let gotCom = await commentsController.getCommentById(c.toString());
       comments.push(gotCom);
-    }
+    }*/
 
     return res.status(200).json({
       message: "Attached message media!",
