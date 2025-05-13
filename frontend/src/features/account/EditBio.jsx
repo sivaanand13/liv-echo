@@ -66,7 +66,6 @@ export default function EditBio({ handleClose }) {
         backgroundColor: theme.palette.background.default,
         justifyContent: "center",
         alignItems: "center",
-        minWidth: "50vw",
       }}
     >
       <Stack spacing={2} width="100%">

@@ -1,18 +1,55 @@
 import React, { useEffect, useState, useContext } from "react";
-import { Box, Grid, Typography, CircularProgress } from "@mui/material";
+import {
+  Box,
+  Grid,
+  Typography,
+  CircularProgress,
+  Tabs,
+  Tab,
+} from "@mui/material";
 import PostCard from "./PostCard";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import searchBg from "../../assets/users/search.jpg";
 import postUtils from "./postUtils"; // or wherever getPosts is defined
 import { AuthContext } from "../../contexts/AuthContext.jsx";
 import userUtils from "../users/userUtils.js";
+import StaticPaginatedList from "../../components/StaticPaginatedList.jsx";
+import { Co2Sharp } from "@mui/icons-material";
+import { post } from "../../utils/requests/axios.js";
+import { formatDistanceToNow } from "date-fns";
 
 export default function MostCommentedFeed() {
   const { currentUser, serverUser } = useContext(AuthContext);
   const [posts, setPosts] = useState([]);
-   const [mutualFriend, setMutualFriends] = useState([]);
+  const [mutualFriend, setMutualFriends] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [tab, setTab] = useState(0);
+  const [displayData, setDisplayData] = useState(null);
+  const [displayTitle, setDisplayTitle] = useState("");
+
+  function handleTabChange(_, newTab) {
+    console.log("Handling tab change: ", newTab);
+    setTab(newTab);
+    let data;
+    switch (newTab) {
+      case 0:
+        setDisplayTitle("Most Liked Posts");
+        data = sortByLikes();
+        break;
+      case 1:
+        setDisplayTitle("Most Commented Posts");
+        data = sortByComments();
+        break;
+      case 2:
+        setDisplayTitle("Friends' Posts");
+        data = sortByMutualFriendsPosts();
+        break;
+    }
+    console.log("sorted: ", data);
+    setDisplayData(data);
+  }
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -40,6 +77,7 @@ export default function MostCommentedFeed() {
         ).filter(Boolean); // remove nulls
         console.log("I got these posts as possible", filteredPosts);
         setPosts(filteredPosts);
+        setTab(0);
       } catch (err) {
         console.error(err);
         setError("Could not load posts.");
@@ -49,19 +87,29 @@ export default function MostCommentedFeed() {
     };
 
     fetchPosts();
-  }, [currentUser.uid]);
-   const sortByComments = () => {
-    return posts.sort((a, b) => (b.comments?.length || 0) - (a.comments?.length || 0));
+  }, [currentUser]);
+
+  useEffect(() => {
+    console.log("Posts updated");
+    handleTabChange(null, tab);
+  }, [posts, tab]);
+
+  const sortByComments = () => {
+    return [...posts].sort(
+      (a, b) => (b.comments?.length || 0) - (a.comments?.length || 0)
+    );
   };
 
   // Sort posts by the number of likes
   const sortByLikes = () => {
-    return posts.sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0));
+    return [...posts].sort(
+      (a, b) => (b.likes?.length || 0) - (a.likes?.length || 0)
+    );
   };
 
   // Sort posts by the number of friends of the sender
   const sortByMutualFriendsPosts = () => {
-    return posts.filter(post => {
+    return [...posts].filter((post) => {
       return post.sender && mutualFriend.includes(post.sender.uid); // Only posts by mutual friends
     });
   };
@@ -75,58 +123,48 @@ export default function MostCommentedFeed() {
         padding: "20px",
       }}
     >
-      <Typography
-        variant="h4"
-        sx={{ color: "white", marginBottom: "20px", textAlign: "center" }}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "2em",
+        }}
       >
-        Most Commented Posts
-      </Typography>
+        <Tabs
+          centered
+          sx={{
+            width: "fit-content",
+            backgroundColor: "white",
+            padding: 2,
+            display: "flex",
+            borderRadius: "0.5em",
+          }}
+          value={tab}
+          onChange={handleTabChange}
+        >
+          <Tab label="Most Liked" />
+          <Tab label="Most Commented" />
+          <Tab label="Friends' Posts" />
+        </Tabs>
+      </Box>
 
-      {loading && (
-        <CircularProgress sx={{ display: "block", margin: "0 auto" }} />
-      )}
-      {error && <Typography color="error">{error}</Typography>}
+      <Box>
+        {loading && (
+          <CircularProgress sx={{ display: "block", margin: "0 auto" }} />
+        )}
+        {error && <Typography color="error">{error}</Typography>}
 
-      <Grid container spacing={3} justifyContent="center">
-        {sortByComments().map((post) => (
-          <Grid item xs={12} sm={6} md={4} key={post._id}>
-            <Link to={`/posts/${post._id}`} style={{ textDecoration: "none" }}>
-              <PostCard item={post} />
-            </Link>
-          </Grid>
-        ))}
-      </Grid>
-      <Typography
-        variant="h4"
-        sx={{ color: "white", marginBottom: "20px", textAlign: "center" }}
-      >
-        Most Liked Posts
-      </Typography>
-      <Grid container spacing={3} justifyContent="center">
-        {sortByLikes().map((post) => (
-          <Grid item xs={12} sm={6} md={4} key={post._id}>
-            <Link to={`/posts/${post._id}`} style={{ textDecoration: "none" }}>
-              <PostCard item={post} />
-            </Link>
-          </Grid>
-        ))}
-      </Grid>
-
-      <Typography
-        variant="h4"
-        sx={{ color: "white", marginBottom: "20px", textAlign: "center" }}
-      >
-        Friends Posts
-      </Typography>
-      <Grid container spacing={3} justifyContent="center">
-        {sortByMutualFriendsPosts().map((post) => (
-          <Grid item xs={12} sm={6} md={4} key={post._id}>
-            <Link to={`/posts/${post._id}`} style={{ textDecoration: "none" }}>
-              <PostCard item={post} />
-            </Link>
-          </Grid>
-        ))}
-      </Grid>
+        {displayData && (
+          <StaticPaginatedList
+            title={displayTitle}
+            type="posts"
+            sourceData={displayData}
+            ListItemComponent={PostCard}
+            enableSearch={false}
+            PAGE_SIZE={10}
+          />
+        )}
+      </Box>
     </Box>
   );
 }

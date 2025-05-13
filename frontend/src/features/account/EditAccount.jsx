@@ -169,8 +169,14 @@ function EditAccount({ handleClose }) {
         const updatedUser = auth.currentUser;
         handleClose();
       } catch (e) {
+        if (e.type === "moderation") {
+          console.log("Account.jsx", e);
+          setError(e.message);
+          return;
+        }
         console.log("Account.jsx", e);
         setError(e || "Edit account failed!");
+        return;
       }
     }
   };
@@ -183,7 +189,7 @@ function EditAccount({ handleClose }) {
         justifyContent: "center",
         display: "flex",
         overflow: "auto",
-        minWidth: "50vw",
+        width: "100%",
         justifyContent: "center",
         alignItems: "center",
       }}
@@ -324,6 +330,10 @@ function EditAccount({ handleClose }) {
           </FormControl>
           <FormControl>
             <FormLabel htmlFor="password">Password</FormLabel>
+            <Typography>
+              *Current password is reqired to update password!
+            </Typography>
+
             <TextField
               error={passwordError != ""}
               helperText={passwordError}
@@ -361,6 +371,7 @@ function EditAccount({ handleClose }) {
               }}
             />
           </FormControl>
+          <Typography>*Only fill in what you want to update.</Typography>
 
           {error && (
             <Typography sx={{ color: "red", textAlign: "center" }}>

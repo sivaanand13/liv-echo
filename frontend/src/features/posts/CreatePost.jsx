@@ -12,6 +12,7 @@ import {
   Grid,
 } from "@mui/material";
 import postBg from "../../assets/users/search.jpg";
+import { useNavigate } from "react-router";
 
 function CreatePost() {
   const [text, setText] = useState("");
@@ -19,7 +20,7 @@ function CreatePost() {
   const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-
+  let navigate = useNavigate();
   const handleFileChange = (e) => {
     setAttachments([...e.target.files]);
   };
@@ -29,11 +30,12 @@ function CreatePost() {
     setLoading(true);
     setMessage("");
     try {
-      await postUtils.createPost(text, attachments, isPrivate);
+      const post = await postUtils.createPost(text, attachments, isPrivate);
       setMessage("Post created successfully!");
       setText("");
       setAttachments([]);
       setIsPrivate(false);
+      navigate(`/posts/${post._id}`);
     } catch (err) {
       setMessage("Failed to create post." + JSON.stringify(err));
     } finally {

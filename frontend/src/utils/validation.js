@@ -1,4 +1,6 @@
-import { differenceInYears } from "date-fns";
+// @ts-nocheck
+import { differenceInYears, parse, isBefore } from "date-fns";
+import { parseOneAddress } from "email-addresses";
 
 export const usernamePolicies = [
   {
@@ -134,12 +136,13 @@ const validateLoginPassword = (str, varName) => {
 
 const validateEmail = (email) => {
   email = validateString(email, "email");
-  // got email regex from https://regex101.com/library/SOgUIV
-  const emailRegex = /^((?!\.)[\w\-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/;
 
-  if (!emailRegex.test(email)) {
+  const parseRFC = parseOneAddress(email);
+
+  if (!parseRFC) {
     throw [`Email (${email}) is not valid!`];
   }
+
   return email.toLowerCase();
 };
 
@@ -232,8 +235,12 @@ function validateDate(date, varName) {
 function validateDob(date, varName) {
   date = validateString(date);
   const now = new Date();
-  const dob = new Date(date);
-
+  const dob = parse(date, "yyyy-MM-dd", new Date());
+  dob.setHours(0, 0, 0, 0);
+  now.setHours(0, 0, 0, 0);
+  if (isBefore(now, dob)) {
+    throw `Date of Birth cannot be in the future!`;
+  }
   let age = differenceInYears(now, dob);
   if (age < 13) {
     throw "Must be at least 13 years old to register";

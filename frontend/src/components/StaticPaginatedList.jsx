@@ -1,7 +1,6 @@
 import { useParams } from "react-router";
 import { useState, useEffect } from "react";
 import Loading from "./Loading.jsx";
-import { PAGE_SIZE } from "./Pagination.jsx";
 import { useNavigate } from "react-router";
 import {
   List,
@@ -15,35 +14,31 @@ import {
   useTheme,
   Typography,
   Stack,
-  Snackbar,
-  Alert,
 } from "@mui/material";
 import NotFound from "./NotFound.jsx";
 import ErrorPage from "./ErrorPage.jsx";
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshIcon from "@mui/icons-material/Refresh";
 
-function PaginatedList({
+function StaticPaginatedList({
   title,
   type,
-  dataSource,
+  sourceData,
   ListItemComponent,
   enableSearch,
+  PAGE_SIZE,
 }) {
-  const navigate = useNavigate();
-
+  console.log("display data: ", sourceData);
   const theme = useTheme();
   const [curPage, setCurPage] = useState(1);
   const [curPageData, setCurPageData] = useState(undefined);
-  const [listData, setlistData] = useState([]);
+  const [listData, setlistData] = useState(sourceData);
   const [loading, setLoading] = useState(true);
-  const [totalPages, setTotalPages] = useState(undefined);
+  const [totalPages, setTotalPages] = useState(1);
   const [searchInput, setSearchInput] = useState(undefined);
   const [searchKey, setSearchKey] = useState(undefined);
   const [searchKeyError, setSearchKeyError] = useState(undefined);
   const [error, setError] = useState(null);
-  const [noUserFoundError, setNoUserFoundError] = useState("");
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const handleSearchKey = () => {
     if (!searchInput || searchInput.trim().length == 0) {
@@ -55,9 +50,9 @@ function PaginatedList({
     }
   };
   const handleSearchReset = () => {
-    setSearchKey("");
+    setSearchKey(undefined);
     setSearchInput("");
-    setSearchKeyError("");
+    setSearchKeyError(undefined);
     changePage(1);
   };
 
@@ -68,25 +63,16 @@ function PaginatedList({
   useEffect(() => {
     async function fetchData() {
       try {
-        // setSnackbarOpen(false);
-        setNoUserFoundError("");
-        const data = await dataSource(searchKey || ".*");
-        console.log("users:", data);
-        if (data.length > 0) {
-          setlistData(data);
-          setLoading(false);
-          setTotalPages(Math.ceil(data.length / PAGE_SIZE));
-        } else {
-          console.error("User not found!");
-          setNoUserFoundError(`No ${type} found for "${searchKey}"`);
-          setSnackbarOpen(true);
-        }
+        console.log("static list data: ", sourceData);
+        setLoading(false);
+        setlistData(sourceData);
+        setTotalPages(Math.ceil(sourceData.length / PAGE_SIZE));
       } catch (e) {
         console.log(e);
       }
     }
     fetchData();
-  }, [searchKey, dataSource, type]);
+  }, [sourceData, searchKey]);
 
   useEffect(() => {
     setError(null);
@@ -98,14 +84,17 @@ function PaginatedList({
     }
   }, [curPage, totalPages, listData]);
 
-  if (loading || !listData) {
+  if (loading) {
     return <Loading />;
   } else {
     if (error) {
       return <ErrorPage title="Invalid Page Number" message={error} />;
     } else if (curPage > totalPages) {
       return (
-        <NotFound message={`No more ${type} for page number (${curPage})`} />
+        <NotFound
+          background={false}
+          message={`No more ${type} for page number (${curPage})`}
+        />
       );
     } else {
       return (
@@ -125,7 +114,7 @@ function PaginatedList({
             <Loading />
           ) : error ? (
             <ErrorPage title="Invalid Page Number" message={error} />
-          ) : curPage > totalPages ? (
+          ) : curPage > totalPages && totalPages !== 0 ? (
             <NotFound
               message={`No more ${type} for page number (${curPage})`}
             />
@@ -195,29 +184,6 @@ function PaginatedList({
                         sx={{ height: 28, m: 0.5 }}
                         orientation="vertical"
                       />
-                      <Snackbar
-                        open={snackbarOpen}
-                        autoHideDuration={4000}
-                        onClose={() => {
-                          handleSearchReset();
-                          setSnackbarOpen(false);
-                        }}
-                        anchorOrigin={{
-                          vertical: "bottom",
-                          horizontal: "center",
-                        }}
-                      >
-                        <Alert
-                          severity="info"
-                          variant="filled"
-                          onClose={() => {
-                            handleSearchReset();
-                            setSnackbarOpen(false);
-                          }}
-                        >
-                          {noUserFoundError}
-                        </Alert>
-                      </Snackbar>
 
                       <IconButton type="button" onClick={handleSearchReset}>
                         <RefreshIcon />
@@ -243,7 +209,7 @@ function PaginatedList({
                           display: "flex",
                         }}
                       >
-                        <ListItemComponent item={listItem} />
+                        <ListItemComponent type={type} item={listItem} />
                         <Divider sx={{ opacity: 0.2 }} />
                       </Grid>
                     );
@@ -254,8 +220,8 @@ function PaginatedList({
                 onChange={(e, newPage) => {
                   changePage(newPage);
                 }}
-                hideNextButton={curPage == totalPages}
-                hidePrevButton={curPage == 1}
+                hideNextButton={totalPages === 1 || curPage === totalPages}
+                hidePrevButton={totalPages === 1 || curPage === 1}
                 page={curPage}
                 sx={{
                   display: "flex",
@@ -274,4 +240,4 @@ function PaginatedList({
   }
 }
 
-export default PaginatedList;
+export default StaticPaginatedList;
