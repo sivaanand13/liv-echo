@@ -318,8 +318,19 @@ async function reportPost(uid, postId, reportType, comment) {
         },
       },
     },
-    {}
+    { new: true }
   );
+
+  console.log("report count: ", post.reports.reporters.length);
+  if (post.reports.reporters.length >= 5) {
+    console.log(process.env.ADMIN_ID, process.env.ADMIN_UID);
+    await sendNotification(process.env.ADMIN_ID, process.env.ADMIN_UID, "", {
+      title: `Post (${post._id.toString()}) has been flagged a lot!`,
+      body: `Post was send by ${post.senderName}`,
+      type: "system",
+      link: `/posts/${post._id.toString()}`,
+    });
+  }
   await redisUtils.unsetJSON(`posts/${post._id.toString()}`);
 
   return post;

@@ -177,7 +177,8 @@ async function editUser(name, email, username, dob, password, oldPassword) {
   }
 
   try {
-    const auth = getAuth();
+    let auth = getAuth();
+    console.log("Auth: ", auth);
     const user = auth.currentUser;
     let bool = false;
     if (!user) {
@@ -247,8 +248,10 @@ async function editUser(name, email, username, dob, password, oldPassword) {
       await updatePassword(user, password);
     }
 
+    auth = getAuth();
+    console.log("Updated auth: ", auth);
     const curUser = auth.currentUser;
-    if (!currentUser.emailVerified) {
+    if (email !== user.email) {
       await firebaseUtils.signOutFirebaseUser();
     }
     return {
