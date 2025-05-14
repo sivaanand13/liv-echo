@@ -2,8 +2,6 @@
 
 The LivEcho web application improves the social lives of users by allowing them to post content, communicate with other users, and like and comment on other posts.
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Click%20Here-green?style=for-the-badge&logo=vercel)](https://liv-echo.vercel.app/)
-
 ### Features
 
 - Allow the users to post, edit, and remove posts and more to other users whether public or private
@@ -20,7 +18,7 @@ The backend Express API has been deployed on Render and the frontend Vite + Reac
 
 ### Access Deployment
 
-- Live: https://liv-echo.vercel.app/
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Click%20Here-green?style=for-the-badge&logo=vercel)](https://liv-echo.vercel.app/)
 - Render Dashbaord: https://dashboard.render.com/
 - Versal Dashbaord: https://vercel.com/livechos-projects/liv-echo
 
