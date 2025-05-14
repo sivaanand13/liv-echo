@@ -12,7 +12,7 @@ import {
   Stack,
 } from "@mui/material";
 export default function UserCard({ item: user }) {
-  console.log("user card:", user);
+  // console.log("user card:", user);
 
   return (
     <Card

@@ -27,7 +27,7 @@ export default function UserProfile() {
   const theme = useTheme();
   const { userUID } = useParams();
   const { user: currUser } = useContext(AuthContext);
-  console.log("curr user: ", currUser);
+  // console.log("curr user: ", currUser);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -56,7 +56,7 @@ export default function UserProfile() {
           user.friends.some((friend) => friend._id === currUser._id);
 
         setUser(user);
-        console.log("other profile: ", user);
+        // console.log("other profile: ", user);
         setPosts(userPosts);
         setIsFriend(isNowFriend);
         setMutualFriend(isMutual);
@@ -74,7 +74,7 @@ export default function UserProfile() {
       socket = await chatSocket.connect();
 
       socket.on("friend-request-sent", async (data) => {
-        console.log("New friend request:", data);
+        // console.log("New friend request:", data);
         const user = await userUtils.fetchUserByUID(userUID);
         setUser(user);
         setRequest(true);
@@ -83,7 +83,7 @@ export default function UserProfile() {
       });
 
       socket.on("friend-request-denied", async (data) => {
-        console.log("New friend request:", data);
+        // console.log("New friend request:", data);
         const user = await userUtils.fetchUserByUID(userUID);
         setUser(user);
         setRequest(false);
@@ -110,7 +110,7 @@ export default function UserProfile() {
   }
   async function onClickRemoveRequest() {
     try {
-      console.log("Step 1");
+      // console.log("Step 1");
       await userUtils.removeRequest(userUID);
       setIsFriend(false);
       setRequest(false);

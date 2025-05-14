@@ -98,7 +98,7 @@ const chatStore = create((set, get) => ({
 
   currentChat: null,
   setCurrentChat: (chat) => {
-    console.log("setting current chat: ", chat);
+    // console.log("setting current chat: ", chat);
     set({ currentChat: chat });
   },
   unsetCurrentChat: () => {
@@ -116,7 +116,7 @@ const chatStore = create((set, get) => ({
 
     if (currentChat && currentChat._id === message.chat.toString()) {
       set((state) => {
-        console.log("Temp message: ", message);
+        // console.log("Temp message: ", message);
         return {
           currentChatMessages: [...state.currentChatMessages, message],
         };
@@ -131,7 +131,7 @@ const chatStore = create((set, get) => ({
         const tempMessage = state.currentChatMessages.find(
           (msg) => msg._id === tempId
         );
-        console.log(tempMessage);
+        // console.log(tempMessage);
         if (tempMessage) {
           return {
             currentChatMessages: state.currentChatMessages.map((msg) => {

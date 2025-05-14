@@ -42,7 +42,7 @@ async function addFriendwithUID(uid) {
 async function removeRequest(uid) {
   try {
     uid = validation.validateString(uid, "User id");
-    console.log("Step 2");
+    // console.log("Step 2");
     const response = await axios.patch("users/friends/requests/remove", {
       friendUID: uid,
     });

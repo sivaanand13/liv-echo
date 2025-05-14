@@ -17,7 +17,7 @@ export default function GroupChats() {
   useEffect(() => {
     const fetchUserGroupChats = async () => {
       const chats = await groupChatUtils.getUserGroupChats();
-      console.log("User group chats: ", chats);
+      // console.log("User group chats: ", chats);
       setGroupChats(chats);
     };
 

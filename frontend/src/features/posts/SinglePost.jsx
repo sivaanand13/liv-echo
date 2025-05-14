@@ -50,7 +50,7 @@ export default function SinglePost() {
     serverUser?._id.toString() === senderId?.toString() ||
     serverUser?.role === "admin";
   const canEdit = serverUser?._id.toString() === senderId?.toString();
-  console.log("user 2", post?.sender);
+  // console.log("user 2", post?.sender);
   async function handleReportPost() {
     try {
       await postUtils.reportPost(postId);
@@ -76,15 +76,15 @@ export default function SinglePost() {
   useEffect(() => {
     async function fetchPost() {
       try {
-        console.log("ServerUser", serverUser);
-        console.log("CurrentUser", currentUser);
-        console.log("Im post", postId);
+        // console.log("ServerUser", serverUser);
+        // console.log("CurrentUser", currentUser);
+        // console.log("Im post", postId);
         const result = await postUtils.getPostByPostId(postId);
         setPost(result);
         const coms = await postUtils.getComments(postId);
         setComments(coms);
-        console.log("post info", result);
-        console.log("post comments", coms);
+        // console.log("post info", result);
+        // console.log("post comments", coms);
       } catch (err) {
         console.error(err);
         setError("Failed to load post.");
@@ -117,7 +117,6 @@ export default function SinglePost() {
       setComments((prev) => [newCom, ...prev]); // Add new comment to top
       setNewComment("");
     } catch (err) {
-      console.log(err.type);
       if (err.type === "moderation") {
         setNewComment("");
         setCommentError(err.message);

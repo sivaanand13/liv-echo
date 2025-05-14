@@ -28,7 +28,7 @@ import CustomLink from "../../components/CustomLink";
 import { formatDistanceToNow } from "date-fns";
 
 export default function CommentListItem({ item: msg, onDelete }) {
-  console.log("comment list item: ", msg);
+  // console.log("comment list item: ", msg);
   const { currentUser, serverUser } = useContext(AuthContext);
   const auth = useContext(AuthContext);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -41,14 +41,14 @@ export default function CommentListItem({ item: msg, onDelete }) {
   const [editCommentError, setEditCommentError] = useState("");
 
   useEffect(() => {
-    console.log("serverUser", serverUser);
+    // console.log("serverUser", serverUser);
     async function fetchLiked() {
       const likedByCurrentUser = msg.likes.includes(serverUser._id);
       setLiked(likedByCurrentUser);
       setLik(!likedByCurrentUser);
     }
     fetchLiked();
-  }, [currentUser._id, msg]);
+  }, [currentUser._id, msg, serverUser]);
 
   function handleOpen(e) {
     setMenuOpen((prev) => !prev);
@@ -242,7 +242,7 @@ export default function CommentListItem({ item: msg, onDelete }) {
           onClick={() => {
             handleLike();
             //setLiked((prev) => !prev);
-            console.log(`${!liked ? "Liked" : "Unliked"} post:`, msg._id);
+            // console.log(`${!liked ? "Liked" : "Unliked"} post:`, msg._id);
             // Optional: postUtils.likePost(msg._id, !liked)
           }}
           sx={{

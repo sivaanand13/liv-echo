@@ -49,7 +49,7 @@ async function createPost(text, attachments, isPrivate = false) {
 
     const image_url = body.attachments.map((items) => items.secure_url);
 
-    console.log("Post Body Attachment: ", body.attachments);
+    // console.log("Post Body Attachment: ", body.attachments);
     //Post Moderation
     const moderationResponse = await postModeration(body.text, image_url);
     if (moderationResponse.flagged) {
@@ -93,7 +93,7 @@ async function uploadAttachments(attachments) {
 async function searchPosts(query) {
   try {
     query = validation.validateString(query, "Search Text");
-    console.log("Sending query:", query);
+    // console.log("Sending query:", query);
     const response = await axios.get("posts/search", {
       query,
     });
@@ -168,7 +168,7 @@ async function createComment(postID, data) {
   }
   try {
     const response = await axios.post(`posts/${postID}/comment`, data);
-    console.log("Comment Info", response);
+    // console.log("Comment Info", response);
     return response.data.data;
   } catch (e) {
     console.error(e);
@@ -242,7 +242,7 @@ async function editComment(postID, commentID, data) {
 async function getPostsByUID(userUid) {
   try {
     const response = await axios.get(`posts/user/${userUid}`);
-    console.log(response.data.posts);
+    // console.log(response.data.posts);
     return response.data.posts;
   } catch (e) {
     console.log(e);
@@ -252,7 +252,7 @@ async function getPostsByUID(userUid) {
 async function getMutualFriends() {
   try {
     const response = await axios.get(`posts/user/find/mutualFriend`);
-    console.log(response.data.results);
+    // console.log(response.data.results);
     return response.data.results;
   } catch (e) {
     console.log(e);

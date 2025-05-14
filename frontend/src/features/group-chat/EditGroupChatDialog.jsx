@@ -78,7 +78,7 @@ export default function EditGroupChatDialog({ open, handleClose }) {
     }
 
     try {
-      console.log("call editChat with fields: ", curMembers, curName);
+      // console.log("call editChat with fields: ", curMembers, curName);
 
       const chat = await groupChatUtils.editGroupChat(
         currentChat,

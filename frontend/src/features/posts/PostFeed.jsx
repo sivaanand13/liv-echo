@@ -31,9 +31,9 @@ export default function MostCommentedFeed() {
   const [displayTitle, setDisplayTitle] = useState("");
 
   const { notifications } = useNotification();
-  console.log("notifications", notifications);
+  // console.log("notifications", notifications);
   function handleTabChange(_, newTab) {
-    console.log("Handling tab change: ", newTab);
+    // console.log("Handling tab change: ", newTab);
     setTab(newTab);
     let data;
     switch (newTab) {
@@ -50,7 +50,7 @@ export default function MostCommentedFeed() {
         data = sortByMutualFriendsPosts();
         break;
     }
-    console.log("sorted: ", data);
+    // console.log("sorted: ", data);
     setDisplayData(data);
   }
 
@@ -60,8 +60,7 @@ export default function MostCommentedFeed() {
         const allPosts = await postUtils.getPosts();
         const mutualFriends = (await postUtils.getMutualFriends()) || []; //returns list of uids as friends
         setMutualFriends(mutualFriends);
-        console.log("I got friends!", mutualFriends);
-        console.log("AP", allPosts);
+        // console.log("I got friends!", mutualFriends);
         const filteredPosts = (
           await Promise.all(
             allPosts.map(async (post) => {
@@ -79,7 +78,7 @@ export default function MostCommentedFeed() {
             })
           )
         ).filter(Boolean); // remove nulls
-        console.log("I got these posts as possible", filteredPosts);
+        // console.log("I got these posts as possible", filteredPosts);
         setPosts(filteredPosts);
         setTab(0);
       } catch (err) {

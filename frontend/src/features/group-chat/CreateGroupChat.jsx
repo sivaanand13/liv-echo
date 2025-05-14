@@ -30,7 +30,7 @@ export default function CreateGroupChat({ handleCloseModal }) {
     async function fetchAvaliableUsers() {
       try {
         const users = await groupChatUtils.getAvaliableUsers();
-        console.log("aval users:", users);
+        // console.log("aval users:", users);
         setUsers(users);
       } catch (e) {
         setError(e);
@@ -61,14 +61,14 @@ export default function CreateGroupChat({ handleCloseModal }) {
     }
 
     try {
-      console.log("cur fields: ", curMembers, curName);
+      // console.log("cur fields: ", curMembers, curName);
 
       const chat = await groupChatUtils.createGroupChat(
         curName,
         curProfile,
         curMembers
       );
-      console.log(chat);
+      // console.log(chat);
       handleCloseModal();
     } catch (e) {
       setError(e);

@@ -32,7 +32,7 @@ function NonAuthNavigation() {
 
 function NavBarLinks() {
   const { currentUser } = useContext(AuthContext);
-  console.log(currentUser);
+  // console.log(currentUser);
   if (currentUser) {
     return <AuthNavigation />;
   } else {

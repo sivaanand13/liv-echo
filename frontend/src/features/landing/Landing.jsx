@@ -19,7 +19,9 @@ function Landing() {
       }}
     >
       {homePageData.map((content, index) => {
-        console.log(content);
+        {
+          /* console.log(content); */
+        }
         return (
           <Box
             sx={{
