@@ -150,6 +150,14 @@ function EditAccount({ handleClose }) {
       return;
     }
 
+    if (
+      currentUser.email.trim().toLowerCase() !== email.trim().toLowerCase() &&
+      password
+    ) {
+      setError(`You can only change email or password at on time!`);
+      return;
+    }
+
     console.log(
       finalName,
       finalEmail,
