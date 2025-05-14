@@ -13,7 +13,7 @@ export async function sendNotification(userId, uid, chatId, data) {
     console.error("Invalid Input Passed", userId, uid, chatId, data);
     return { success: false, status: 400, error: "Invalid Input Passed" };
   }
-  console.log(data);
+  console.log("notification: ", data);
   const user =
     usersController.getUserById(userId) || usersController.getUserByUID(uid);
 

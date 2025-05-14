@@ -78,7 +78,9 @@ router
     }
 
     try {
-      await admin.auth().updateUser(uid, { email: newEmail });
+      await admin
+        .auth()
+        .updateUser(uid, { email: newEmail, emailVerified: false });
       res.status(200).json({
         message: "Email successfully updated in Firebase.",
       });

@@ -95,6 +95,7 @@ export default function Account() {
     refreshAccount();
     getPosts();
   }, [user.uid, notificatons]);
+
   if (user.role === "admin") {
     useEffect(() => {
       async function getModPosts() {
@@ -103,7 +104,7 @@ export default function Account() {
         setModPosts(modPostList);
       }
       getModPosts();
-    }, []);
+    }, [notificatons]);
   }
   console.log("posts: ", posts);
   return (

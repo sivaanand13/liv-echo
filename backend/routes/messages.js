@@ -81,6 +81,7 @@ router.route("/:chatId/messages").post(async (req, res) => {
         type: "system",
         link: "",
       });
+
       throw "You have been banned!";
     }
     await chatsController.verifyUserChatAccess(uid, chat._id.toString());
