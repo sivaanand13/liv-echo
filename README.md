@@ -19,6 +19,7 @@ The backend Express API has been deployed on Render and the frontend Vite + Reac
 ### Access Deployment
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Click%20Here-green?style=for-the-badge&logo=vercel)](https://liv-echo.vercel.app/)
+
 - Render Dashbaord: https://dashboard.render.com/
 - Versal Dashbaord: https://vercel.com/livechos-projects/liv-echo
 
@@ -96,3 +97,7 @@ $ cd frontend
 $ npm install
 $ npm start
 ```
+
+## Seed Data
+
+Since the app uses MoongoDB Atlas, there is no need for a seed file. The Atlas Database has already been populated with seed data.
