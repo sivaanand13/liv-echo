@@ -20,7 +20,7 @@ import { formatDistanceToNow } from "date-fns";
 
 export default function PostCard({ item: post }) {
   const theme = useTheme();
-  console.log("display post:", post);
+  // console.log("display post:", post);
   if (!post) {
     return <div>No post data available</div>;
   }

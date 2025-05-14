@@ -71,7 +71,7 @@ function PaginatedList({
         // setSnackbarOpen(false);
         setNoUserFoundError("");
         const data = await dataSource(searchKey || ".*");
-        console.log("users:", data);
+        // console.log("users:", data);
         if (data.length > 0) {
           setlistData(data);
           setLoading(false);
@@ -229,7 +229,9 @@ function PaginatedList({
               <Grid container spacing={10}>
                 {curPageData &&
                   curPageData.map((listItem) => {
-                    console.log(listItem);
+                    {
+                      /* console.log(listItem); */
+                    }
                     return (
                       <Grid
                         size={{

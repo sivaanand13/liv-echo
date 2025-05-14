@@ -21,7 +21,7 @@ export function NotificationProvider({ children }) {
         const socket = await connectSocket("notifications");
 
         const res = await axios.get("notifications/get-notifications");
-        console.log("res/noti", res);
+        // console.log("res/noti", res);
         if (res.status === 200) {
           setNotifications(res.data.data);
         }

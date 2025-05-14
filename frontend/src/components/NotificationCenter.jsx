@@ -36,7 +36,7 @@ export default function NotificationCenter() {
   };
 
   useEffect(() => {
-    if (notifications) console.log(notifications);
+    if (notifications) console.log("Notification Loaded");
   }, [notifications]);
 
   return (

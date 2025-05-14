@@ -28,7 +28,7 @@ function StaticPaginatedList({
   enableSearch,
   PAGE_SIZE,
 }) {
-  console.log("display data: ", sourceData);
+  // console.log("display data: ", sourceData);
   const theme = useTheme();
   const [curPage, setCurPage] = useState(1);
   const [curPageData, setCurPageData] = useState(undefined);
@@ -63,7 +63,7 @@ function StaticPaginatedList({
   useEffect(() => {
     async function fetchData() {
       try {
-        console.log("static list data: ", sourceData);
+        // console.log("static list data: ", sourceData);
         setLoading(false);
         setlistData(sourceData);
         setTotalPages(Math.ceil(sourceData.length / PAGE_SIZE));
@@ -195,7 +195,9 @@ function StaticPaginatedList({
               <Grid container spacing={10}>
                 {curPageData &&
                   curPageData.map((listItem) => {
-                    console.log(listItem);
+                    {
+                      /* console.log(listItem); */
+                    }
                     return (
                       <Grid
                         size={{

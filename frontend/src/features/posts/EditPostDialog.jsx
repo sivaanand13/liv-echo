@@ -19,7 +19,7 @@ export default function EditPostDialog({
   post,
   onEditSuccess,
 }) {
-  console.log("edit post: ", post);
+  // console.log("edit post: ", post);
   const [text, setText] = useState(post.text || "");
   const [isPrivate, setIsPrivate] = useState(post.isPrivate);
   const [error, setError] = useState("");

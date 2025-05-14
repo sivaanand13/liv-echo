@@ -40,7 +40,7 @@ export default function ChangeAdminDialog({ open, handleClose }) {
     const avalMembers = currentChat.members.filter(
       (user) => user.uid !== serverUser?.uid
     );
-    console.log("Aval members for admin access: ", avalMembers);
+    // console.log("Aval members for admin access: ", avalMembers);
     setMembers(avalMembers);
     setAdmin("");
   }
@@ -64,7 +64,7 @@ export default function ChangeAdminDialog({ open, handleClose }) {
     }
 
     try {
-      console.log("calling changeChat admin with new admin: ", curAdmin);
+      // console.log("calling changeChat admin with new admin: ", curAdmin);
 
       const chat = await groupChatUtils.changeAdmin(currentChat, curAdmin);
       handleCancel();

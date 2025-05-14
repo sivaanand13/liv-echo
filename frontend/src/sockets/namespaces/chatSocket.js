@@ -16,7 +16,7 @@ const connect = async () => {
   });
 
   socket.on("chatUpdated", (chat) => {
-    console.log("Updating chat:", chat._id, chat);
+    // console.log("Updating chat:", chat._id, chat);
     if (chat.type == "dm") {
       chatStore.getState().updateDirectMessageChat(chat);
     } else {

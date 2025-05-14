@@ -44,14 +44,14 @@ export default function MessageDisplay({ chat }) {
       if (currentChat) {
         try {
           const messages = await chatUtils.getMessages(currentChat);
-          console.log("fetched messages: ", messages);
+          // console.log("fetched messages: ", messages);
           setCurrentMessages(messages);
         } catch (e) {
           console.log(e);
         }
       }
     }
-    console.log(currentChat);
+    // console.log(currentChat);
     fetchMessages();
   }, [currentChat, setCurrentMessages]);
 
@@ -176,7 +176,9 @@ export default function MessageDisplay({ chat }) {
                   }}
                 >
                   {attachments.map((attachment, index) => {
-                    console.log(attachment);
+                    {
+                      /* console.log(attachment); */
+                    }
                     return (
                       <ImageListItem key={index} sx={{ maxHeight: "15vh" }}>
                         <img

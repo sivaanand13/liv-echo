@@ -59,7 +59,7 @@ export default function Account() {
     refreshAccount();
   };
   function getFriends() {
-    console.log(user.friends);
+    // console.log(user.friends);
     return user.friends;
   }
   async function handleDeleteSuccess() {
@@ -71,7 +71,7 @@ export default function Account() {
     setPosts(postList);
     setEditPost(null);
   }
-  console.log("Cur user: ", user);
+  // console.log("Cur user: ", user);
   function closeModals() {
     setOpenEditAccount(false);
     setOpenEditBanner(false);
@@ -100,13 +100,13 @@ export default function Account() {
     useEffect(() => {
       async function getModPosts() {
         const modPostList = await postUtils.getModPosts();
-        console.log("mod posts: " + modPostList);
+        // console.log("mod posts: " + modPostList);
         setModPosts(modPostList);
       }
       getModPosts();
     }, [notificatons]);
   }
-  console.log("posts: ", posts);
+  // console.log("posts: ", posts);
   return (
     <Box
       sx={{

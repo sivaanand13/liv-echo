@@ -4,6 +4,7 @@ import Loading from "../components/Loading";
 import chatSocket from "../sockets/namespaces/chatSocket.js";
 import axios from "../utils/requests/axios.js";
 import userUtils from "../features/users/userUtils.js";
+
 export const AuthContext = createContext();
 
 export default function AuthProvider({ children }) {
@@ -18,7 +19,7 @@ export default function AuthProvider({ children }) {
     try {
       const profile = await userUtils.fetchUserByUID(currentUser.uid);
       setServerUser(profile);
-      console.log("refreshing account: ", profile);
+      // console.log("refreshing account: ", profile);
       setUser((prev) => {
         return { ...prev, ...profile };
       });
@@ -33,7 +34,7 @@ export default function AuthProvider({ children }) {
       if (user) {
         setCurrentUser(user);
         setUser(user);
-        console.log(user);
+        // console.log(user);
         let chatSocketRef;
         try {
           chatSocketRef = await chatSocket.connect();
@@ -50,11 +51,11 @@ export default function AuthProvider({ children }) {
         if (server) {
           setServerUser(server);
           setUser({ ...user, ...server });
-          console.log("server user: ", server);
+          // console.log("server user: ", server);
         }
 
         chatSocketRef?.on("accountUpdated", (newUser) => {
-          console.log("accountUpdated:", newUser);
+          // console.log("accountUpdated:", newUser);
           setServerUser(newUser);
           setUser({ ...auth.currentUser, ...newUser });
           console.log("AuthContext updated");

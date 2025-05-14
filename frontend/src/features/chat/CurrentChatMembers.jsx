@@ -10,7 +10,7 @@ export default function CurrentChatMembers() {
     <CustomList
       listData={currentChat.members}
       mappingFunction={(member) => {
-        console.log(member);
+        // console.log(member);
         return (
           <ListItem>
             <UserListItem user={member} admin={admins.includes(member.uid)} />

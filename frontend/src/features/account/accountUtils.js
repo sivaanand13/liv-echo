@@ -35,9 +35,9 @@ async function editBanner(banner) {
   let body = {};
   try {
     if (banner) {
-      console.log(banner);
+      // console.log(banner);
       const images = await axios.uploadAttachments(banner);
-      console.log(images);
+      // console.log(images);
       body.banner = images.data[0];
     }
   } catch (e) {
@@ -46,7 +46,7 @@ async function editBanner(banner) {
   }
 
   try {
-    console.log(body);
+    // console.log(body);
     const urlList = [body?.banner?.url].filter(Boolean);
     const moderationResponse = await accountInfoModeration("", urlList);
     if (moderationResponse.flagged) throw moderationResponse.message;
@@ -56,9 +56,9 @@ async function editBanner(banner) {
   }
 
   try {
-    console.log("uploaded banner:", body);
+    // console.log("uploaded banner:", body);
     if (Object.keys(body).length > 0) {
-      console.log("Trying to edit chat: ", body);
+      // console.log("Trying to edit chat: ", body);
       const response = await axios.patch(`users/editAccount`, body);
       return response.data.data;
     }
@@ -72,9 +72,9 @@ async function editProfile(profile) {
   let body = {};
   try {
     if (profile) {
-      console.log(profile);
+      // console.log(profile);
       const images = await axios.uploadAttachments(profile);
-      console.log(images);
+      // console.log(images);
       body.profile = images.data[0];
     }
   } catch (e) {
@@ -92,9 +92,9 @@ async function editProfile(profile) {
   }
 
   try {
-    console.log("uploaded profile:", body);
+    // console.log("uploaded profile:", body);
     if (Object.keys(body).length > 0) {
-      console.log("Trying to edit chat: ", body);
+      // console.log("Trying to edit chat: ", body);
       const response = await axios.patch(`users/editAccount`, body);
       return response.data.data;
     }
@@ -134,7 +134,7 @@ async function editBio(bio) {
 
   try {
     if (Object.keys(body).length > 0) {
-      console.log("Trying to edit bio: ", body);
+      // console.log("Trying to edit bio: ", body);
       const response = await axios.patch(`users/editAccount`, body);
       return response.data.data;
     }

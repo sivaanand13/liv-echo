@@ -18,7 +18,7 @@ function DirectMessages() {
   useEffect(() => {
     const fetchUserDms = async () => {
       const dms = await dmUtils.getUserDMs();
-      console.log("User dms: ", dms);
+      // console.log("User dms: ", dms);
       setDirectMessageChats(dms);
     };
 

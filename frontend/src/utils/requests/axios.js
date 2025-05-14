@@ -4,7 +4,7 @@ import { getAuth } from "firebase/auth";
 let BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
 
 const url = (endpoint) => {
-  console.log("backend uri: ", BACKEND_URI);
+  // console.log("backend uri: ", BACKEND_URI);
   return BACKEND_URI + endpoint;
 };
 
@@ -30,7 +30,7 @@ export const get = async (endpoint, queryParams = {}) => {
       data,
     };
   } catch (e) {
-    console.log(`GET request failed for ${url(endpoint)}`, queryParams, e);
+    // console.log(`GET request failed for ${url(endpoint)}`, queryParams, e);
     throw {
       status: e.response ? e.response.status : null,
       data: e.response ? e.response.data : null,
@@ -46,7 +46,7 @@ export const post = async (endpoint, body = {}) => {
       data,
     };
   } catch (e) {
-    console.log(`POST request failed for ${url(endpoint)}`, body, e);
+    // console.log(`POST request failed for ${url(endpoint)}`, body, e);
     throw {
       status: e.response ? e.response.status : null,
       data: e.response ? e.response.data : null,
@@ -62,7 +62,7 @@ export const patch = async (endpoint, body = {}) => {
       data,
     };
   } catch (e) {
-    console.log(`PATCH request failed for ${url(endpoint)}`, body, e);
+    // console.log(`PATCH request failed for ${url(endpoint)}`, body, e);
     throw {
       status: e.response ? e.response.status : null,
       data: e.response ? e.response.data : null,
@@ -78,7 +78,7 @@ export const del = async (endpoint, body = {}) => {
       data,
     };
   } catch (e) {
-    console.log(`DELETE request failed for ${url(endpoint)}`, body, e);
+    // console.log(`DELETE request failed for ${url(endpoint)}`, body, e);
     throw {
       status: e.response ? e.response.status : null,
       data: e.response ? e.response.data : null,

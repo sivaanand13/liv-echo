@@ -61,7 +61,7 @@ export default function CreateDM({ handleCloseModal }) {
 
     try {
       const chat = await dmUtils.createDM(user);
-      console.log(chat);
+      // console.log(chat);
       handleCloseModal();
     } catch (e) {
       setError(e);

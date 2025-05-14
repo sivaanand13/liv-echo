@@ -5,7 +5,7 @@ import { AuthContext } from "../../contexts/AuthContext";
 import ChatListItem from "../../components/ChatListItem";
 
 export default function DMsListItem({ item: chat }) {
-  console.log("dm list chat: ", chat);
+  // console.log("dm list chat: ", chat);
   const { user: curUser } = useContext(AuthContext);
   const user = chat.members.find((member) => member.uid !== curUser.uid);
   let preview = `${

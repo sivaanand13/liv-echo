@@ -64,7 +64,7 @@ async function createGroupChat(curName, curProfile, curMembers) {
     body.members = curMembers;
     if (curProfile) {
       const images = await axios.uploadAttachments(curProfile);
-      console.log("upload porfile: ", images);
+      // console.log("upload porfile: ", images);
       body.profile = images.data[0];
     }
   } catch (e) {
@@ -90,7 +90,7 @@ async function createGroupChat(curName, curProfile, curMembers) {
   }
 
   try {
-    console.log("Trying to create chat: ", body);
+    // console.log("Trying to create chat: ", body);
     const response = await axios.post("chats/group-chats/create", body);
     return response.data.data;
   } catch (e) {
@@ -101,24 +101,24 @@ async function createGroupChat(curName, curProfile, curMembers) {
 
 async function editGroupChat(curChat, name, profile, members) {
   try {
-    console.log("validationg for edit chat", name, members);
+    // console.log("validationg for edit chat", name, members);
     const body = {};
     if (name) {
       if (name && curChat.name !== name) {
         body.name = name;
-        console.log("setting edit name:", body.name);
+        // console.log("setting edit name:", body.name);
       }
     }
     if (profile) {
       const images = await axios.uploadAttachments(profile);
-      console.log("upload porfile: ", images);
+      // console.log("upload porfile: ", images);
       body.profile = images.data[0];
     }
     if (members) {
       const membersList = curChat.members.map((m) => m.uid).sort();
       if (JSON.stringify(membersList) !== JSON.stringify(members.sort())) {
         body.members = members;
-        console.log("setting edit name:", body.members);
+        // console.log("setting edit name:", body.members);
       }
     }
 
@@ -142,15 +142,15 @@ async function editGroupChat(curChat, name, profile, members) {
       throw err;
     }
 
-    console.log(body);
+    // console.log(body);
     if (Object.keys(body).length > 0) {
-      console.log("Trying to edit chat: ", body);
+      // console.log("Trying to edit chat: ", body);
       const response = await axios.patch(`chats/${curChat._id}/update`, body);
       return response.data.data;
     }
   } catch (e) {
     if (e.type === "moderation") throw e.message;
-    console.log("update chat error: ", JSON.stringify(e));
+    // console.log("update chat error: ", JSON.stringify(e));
     throw `Group chat update failed!`;
   }
 }
@@ -161,7 +161,7 @@ async function changeAdmin(curChat, selectedAdmin) {
 
     const body = { adminUID: selectedAdmin };
 
-    console.log("Trying to change chat admin: ", body);
+    // console.log("Trying to change chat admin: ", body);
     const response = await axios.patch(
       `chats/${curChat._id}/change-admin`,
       body

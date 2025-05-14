@@ -13,7 +13,7 @@ export default function LeaveChatDialog({ open, handleClose }) {
 
   async function handleLeaveChat(e) {
     e.preventDefault();
-    console.log("Trying to leave chat:", currentChat._id.toString());
+    // console.log("Trying to leave chat:", currentChat._id.toString());
     try {
       await chatUtils.leaveChat(currentChat);
       handleClose();

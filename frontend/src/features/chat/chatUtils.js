@@ -60,7 +60,7 @@ async function messageModeration(messageText, attachments) {
 
 async function updateFlagCount(curChat, userId) {
   try {
-    console.log("Updating Flag Count");
+    // console.log("Updating Flag Count");
     const response = await axios.patch(`moderation/${curChat._id}/flag-user`, {
       userId,
     });
@@ -84,7 +84,7 @@ async function sendMessage(chat, messageText, attachments, sender) {
   try {
     if (attachments && Array.isArray(attachments) && attachments.length > 0) {
       const images = await axios.uploadAttachments(attachments);
-      console.log("upload atttachments: ", images);
+      // console.log("upload atttachments: ", images);
       body.attachments = images.data;
     }
   } catch (e) {
@@ -106,7 +106,7 @@ async function sendMessage(chat, messageText, attachments, sender) {
     if (moderationResponse.flagged) {
       const updateFlagResponse = await updateFlagCount(chat, sender._id);
       if (updateFlagResponse.success) {
-        console.log(checkBan(chat, sender._id));
+        // console.log(checkBan(chat, sender._id));
         throw moderationResponse.message;
       }
       throw `Something went wrong during update flag-count`;
@@ -117,7 +117,7 @@ async function sendMessage(chat, messageText, attachments, sender) {
   }
 
   try {
-    console.log("Attempting to send message:", body);
+    // console.log("Attempting to send message:", body);
 
     newMessage = {
       _id: tempId,
@@ -146,7 +146,7 @@ async function sendMessage(chat, messageText, attachments, sender) {
 }
 
 async function deleteMessage(msg) {
-  console.log("Attempting to delte message: ", msg._id, "chat", msg.chat);
+  // console.log("Attempting to delte message: ", msg._id, "chat", msg.chat);
   try {
     const response = await axios.del(
       `chats/${msg.chat}/messages/${msg._id}`,
