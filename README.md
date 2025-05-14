@@ -24,6 +24,8 @@ The backend Express API has been deployed on Render and the frontend Vite + Reac
 
 _Access the Render and Versal dashboards by logging in through Google using the livechofficial@gmail.com account._
 
+_The Express API is deployed on Render's free tier, which will spin down deployments that have been inactive for 15mins. As a result, it may take up to 50s, after the deployed React + Vite app is accessed, for the deployed backend server to start up._
+
 ### Branches
 
 - Master (main): https://github.com/sivaanand13/liv-echo
