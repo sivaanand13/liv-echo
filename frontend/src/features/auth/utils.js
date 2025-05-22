@@ -44,32 +44,6 @@ async function signUpUser(name, email, username, dob, password) {
     throw `Name length cannot exceed 500!`;
   }
 
-  // try {
-  //   const moderationResponse = await userInfoModeration(name, []);
-  //   if (moderationResponse.flagged) {
-  //     const moderationErr = new Error("Moderation Error");
-  //     moderationErr.type = "moderation";
-  //     moderationErr.message = "Name not allowed";
-  //     throw moderationErr;
-  //   }
-  // } catch (err) {
-  //   console.error("Name not allowed Error");
-  //   throw err;
-  // }
-
-  // try {
-  //   const moderationResponse = await userInfoModeration(username, []);
-  //   if (moderationResponse.flagged) {
-  //     const moderationErr = new Error("Moderation Error");
-  //     moderationErr.type = "moderation";
-  //     moderationErr.message = "Username not allowed";
-  //     throw moderationErr;
-  //   }
-  // } catch (err) {
-  //   console.error("Username not allowed Error");
-  //   throw err;
-  // }
-
   try {
     await get("users/signup/uniqueCheck/", {
       email: email,
@@ -186,7 +160,6 @@ async function editUser(name, email, username, dob, password, oldPassword) {
 
   try {
     let auth = getAuth();
-    // console.log("Auth: ", auth);
     const user = auth.currentUser;
     let bool = false;
     if (!user) {
@@ -204,7 +177,6 @@ async function editUser(name, email, username, dob, password, oldPassword) {
       });
     }
     if (email !== user.email) {
-      console.log("EMAIL PLS");
       if (!user.emailVerified) {
         // User's email is not verified, so send verification email and stop
         await sendEmailVerification(user);
@@ -235,7 +207,6 @@ async function editUser(name, email, username, dob, password, oldPassword) {
           uid: uid,
           newEmail: email,
         });
-        // console.log(response.data.message); // Email updated successfully
       } catch (err) {
         console.log("Failed to update email in backend:", err);
         throw new Error("Failed to update email in backend.");
@@ -257,7 +228,6 @@ async function editUser(name, email, username, dob, password, oldPassword) {
     }
 
     auth = getAuth();
-    // console.log("Updated auth: ", auth);
     const curUser = auth.currentUser;
     if (email !== user.email) {
       await firebaseUtils.signOutFirebaseUser();
