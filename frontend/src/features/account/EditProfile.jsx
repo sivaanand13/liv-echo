@@ -48,7 +48,7 @@ export default function EditProfile({ handleClose }) {
     let selectedImage = image;
 
     try {
-      console.log("call editBanner");
+      // console.log("call editBanner");
 
       const chat = await accountUtils.editProfile(selectedImage);
       handleCancel();
@@ -105,7 +105,7 @@ export default function EditProfile({ handleClose }) {
               required={true}
               type="file"
               onChange={(e) => {
-                console.log(e);
+                // console.log(e);
                 setImage(e.target.files[0]);
               }}
               hidden={true}

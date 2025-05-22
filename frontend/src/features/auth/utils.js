@@ -96,7 +96,7 @@ async function signUpUser(name, email, username, dob, password) {
     let serverUser = (
       await post("users/signup/", { uid: user.uid, name, email, username, dob })
     ).data.data;
-    console.log("signed up user", serverUser);
+    // console.log("signed up user", serverUser);
     await sendEmailVerification(user);
     alert("Verify your email before logging in!");
     await firebaseUtils.signOutFirebaseUser();
@@ -186,7 +186,7 @@ async function editUser(name, email, username, dob, password, oldPassword) {
 
   try {
     let auth = getAuth();
-    console.log("Auth: ", auth);
+    // console.log("Auth: ", auth);
     const user = auth.currentUser;
     let bool = false;
     if (!user) {
@@ -235,7 +235,7 @@ async function editUser(name, email, username, dob, password, oldPassword) {
           uid: uid,
           newEmail: email,
         });
-        console.log(response.data.message); // Email updated successfully
+        // console.log(response.data.message); // Email updated successfully
       } catch (err) {
         console.log("Failed to update email in backend:", err);
         throw new Error("Failed to update email in backend.");
@@ -257,7 +257,7 @@ async function editUser(name, email, username, dob, password, oldPassword) {
     }
 
     auth = getAuth();
-    console.log("Updated auth: ", auth);
+    // console.log("Updated auth: ", auth);
     const curUser = auth.currentUser;
     if (email !== user.email) {
       await firebaseUtils.signOutFirebaseUser();

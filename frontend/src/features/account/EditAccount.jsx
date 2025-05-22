@@ -42,7 +42,7 @@ function EditAccount({ handleClose }) {
   const [passwordError, setPasswordError] = useState("");
   const [hasError, setHasError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  console.log(currentUser);
+  // console.log(currentUser);
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
   };
@@ -87,7 +87,7 @@ function EditAccount({ handleClose }) {
     }
   };
   const handleEditAccount = async (e) => {
-    console.log("Account.jsx", "Handler for editing account");
+    // console.log("Account.jsx", "Handler for editing account");
     e.preventDefault();
 
     setHasError(false);
@@ -108,9 +108,9 @@ function EditAccount({ handleClose }) {
     if (name) {
       validateField(name, validation.validateString, setName, setNameError);
     }
-    console.log(finalEmail, currentUser.email);
+    // console.log(finalEmail, currentUser.email);
     if (email.trim() && finalEmail != currentUser.email) {
-      console.log("here");
+      // console.log("here");
       validateField(email, validation.validateEmail, setEmail, setEmailError);
       validateField(
         oldPassword,
@@ -158,7 +158,7 @@ function EditAccount({ handleClose }) {
       return;
     }
 
-    console.log(
+    // console.log(
       finalName,
       finalEmail,
       finalUsername,
@@ -190,7 +190,7 @@ function EditAccount({ handleClose }) {
         setError(e.message);
         return;
       }
-      console.log("Account.jsx", e);
+      // console.log("Account.jsx", e);
       setError(e || "Edit account failed!");
       return;
     }

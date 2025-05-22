@@ -55,7 +55,7 @@ export default function EditBanner({ handleClose }) {
     let selectedImage = image;
 
     try {
-      console.log("call editBanner");
+      // console.log("call editBanner");
 
       const chat = await accountUtils.editBanner(selectedImage);
       handleCancel();
@@ -120,7 +120,7 @@ export default function EditBanner({ handleClose }) {
                   accept="image/*"
                   hidden
                   onChange={(e) => {
-                    console.log(e.target.files[0]);
+                    // console.log(e.target.files[0]);
                     setImage(e.target.files[0]);
                   }}
                 />
