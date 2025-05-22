@@ -25,7 +25,7 @@ const connect = async () => {
   });
 
   socket.on("chatRemoved", (chat) => {
-    console.log("chatRemoved", chat);
+    // console.log("chatRemoved", chat);
     chatStore.getState().removeDirectMessageChat(chat);
     chatStore.getState().removeGroupChat(chat);
   });
@@ -40,7 +40,7 @@ const connect = async () => {
   });
 
   socket.on("messageRemoved", (message) => {
-    console.log("messageRemoved: ", message._id);
+    // console.log("messageRemoved: ", message._id);
     chatStore.getState().removeCurrentChatMessages(message);
   });
 
