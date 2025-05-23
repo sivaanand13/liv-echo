@@ -21,7 +21,6 @@ export default function FriendCard({ item: user, type }) {
   const { refreshAccount } = useContext(AuthContext);
   async function handleResolveFriendRequest(type) {
     try {
-      // // console.log("resolve friend request with: ", type, user.uid);
       await accountUtils.resolveFriendRequest(user.uid, type);
       refreshAccount();
     } catch (e) {

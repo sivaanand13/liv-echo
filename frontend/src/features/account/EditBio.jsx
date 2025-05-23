@@ -50,7 +50,6 @@ export default function EditBio({ handleClose }) {
     let curBio = bio;
 
     try {
-      // console.log("calling EditBio");
 
       await accountUtils.editBio(curBio);
       handleCancel();

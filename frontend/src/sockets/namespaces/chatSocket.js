@@ -16,7 +16,6 @@ const connect = async () => {
   });
 
   socket.on("chatUpdated", (chat) => {
-    // console.log("Updating chat:", chat._id, chat);
     if (chat.type == "dm") {
       chatStore.getState().updateDirectMessageChat(chat);
     } else {
@@ -25,13 +24,11 @@ const connect = async () => {
   });
 
   socket.on("chatRemoved", (chat) => {
-    // console.log("chatRemoved", chat);
     chatStore.getState().removeDirectMessageChat(chat);
     chatStore.getState().removeGroupChat(chat);
   });
 
   socket.on("messageCreated", (message, tempId) => {
-    console.log("recived message: ", message, tempId);
     chatStore.getState().addCurrentChatMessages(message, tempId);
   });
 
@@ -40,7 +37,6 @@ const connect = async () => {
   });
 
   socket.on("messageRemoved", (message) => {
-    // console.log("messageRemoved: ", message._id);
     chatStore.getState().removeCurrentChatMessages(message);
   });
 
