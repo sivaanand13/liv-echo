@@ -7,7 +7,7 @@ LivEcho is a social media web application which allowing uses to connect with fr
 - Allow the users to post, edit, and remove posts and more to other users whether public or private
 - Feed page with current popular posts
 - Search feature for posts and users with search filters
-- Friends managent to share private private posts
+- Friends management to share private private posts
 - Notifications
 - Private messaging between friends and private group chats
 - Text and Image moderation (using OpenAI Moderation)
