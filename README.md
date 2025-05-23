@@ -1,16 +1,17 @@
 # LivEcho
 
-LivEcho is a social media web application which allowing uses to connect with friends, post and comment on content, and communicate with other users real-time through DMs and group chats.
+LivEcho is a social media web application that allows users to connect, post, and comment on content and communicate with other users through DMs and group chats.
 
 ### Features
-
-- Allow the users to post, edit, and remove posts and more to other users whether public or private
+- Allow the users to post, edit, and remove posts with image attachments and visibility options
 - Feed page with current popular posts
-- Search feature for posts and users with search filters
-- Friends management to share private private posts
-- Notifications
+- Search feature for posts and users with filters
+- Friends management to share private posts
+- Realtime Notifications, implemented with Socket.IO
 - Private messaging between friends and private group chats
 - Text and Image moderation (using OpenAI Moderation)
+- Account management with options to update user profile image, banner, bio, username, email, and password
+
 
 ## Deployment
 
