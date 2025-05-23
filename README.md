@@ -1,6 +1,6 @@
 # LivEcho
 
-The LivEcho web application improves the social lives of users by allowing them to post content, communicate with other users, and like and comment on other posts.
+LivEcho is a social media web application which allowing uses to connect with friends, post and comment on content, and communicate with other users real-time through DMs and group chats.
 
 ### Features
 
