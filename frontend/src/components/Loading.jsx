@@ -1,20 +1,18 @@
-import { CircularProgress } from "@mui/material";
-import { styled, useTheme } from "@mui/material/styles";
-
-const StyledCircularProgress = styled(CircularProgress)(({ theme }) => ({
-  overflowY: "scroll",
-  margin: "auto",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  minHeight: "100vh",
-  width: "20%",
-  height: "20%",
-}));
+import { CircularProgress, Box } from "@mui/material";
 
 function Loading() {
-  const theme = useTheme();
-  return <CircularProgress size="10%" />;
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "100vh",
+      }}
+    >
+      <CircularProgress size={80} />
+    </Box>
+  );
 }
 
 export default Loading;
