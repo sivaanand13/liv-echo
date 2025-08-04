@@ -14,7 +14,7 @@ const StyledCircularProgress = styled(CircularProgress)(({ theme }) => ({
 
 function Loading() {
   const theme = useTheme();
-  return <StyledCircularProgress size="10%" />;
+  return <CircularProgress size="10%" />;
 }
 
 export default Loading;
