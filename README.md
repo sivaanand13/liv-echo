@@ -1,49 +1,142 @@
 # LivEcho
 
-LivEcho is a social media web application that allows users to connect, post, and comment on content and communicate with other users through DMs and group chats.
-
-### Features
-- Allow the users to post, edit, and remove posts with image attachments and visibility options
-- Feed page with current popular posts
-- Search feature for posts and users with filters
-- Friends management to share private posts
-- Realtime Notifications, implemented with Socket.IO
-- Private messaging between friends and private group chats
-- Text and Image moderation (using OpenAI Moderation)
-- Account management with options to update user profile image, banner, bio, username, email, and password
+LivEcho is a real-time social platform designed to explore scalable feed generation, low-latency messaging, and distributed search. It enables users to share content, interact through posts and comments, and communicate via direct and group chats, while integrating caching, event-driven updates, and content moderation to simulate production-grade social media architecture.
 
 
-## Deployment
+## Demo
 
-The backend Express API has been deployed on Render and the frontend Vite + React app has been deployed on Versal.
+### Feed & Trending Posts
+<img src="./assets/gifs/feed-page.gif" alt="Feed Demo" height="360" />
 
-### Access Deployment
+Displays trending feed sections including most liked, most commented, and friends’ posts.
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Click%20Here-green?style=for-the-badge&logo=vercel)](https://liv-echo.vercel.app/)
+---
 
-- Render Dashbaord: https://dashboard.render.com/
-- Versal Dashbaord: https://vercel.com/livechos-projects/liv-echo
+### Post Creation & Media Upload
+<img src="./assets/gifs/create-post.gif" alt="Post Creation" height="360" />
 
-_Access the Render and Versal dashboards by logging in through Google using the livechofficial@gmail.com account._
+Shows creating a post with text, image upload, and visibility settings.
 
-_The Express API is deployed on Render's free tier, which will spin down deployments that have been inactive for 15mins. As a result, it may take up to 50s, after the deployed React + Vite app is accessed, for the deployed backend server to start up._
+---
 
-### Branches
+### Real-time Chat
+<img src="./assets/gifs/real-time-chat.gif" alt="Chat Demo" height="360" />
 
-- Master (main): https://github.com/sivaanand13/liv-echo
+Demonstrates real-time messaging using Socket.IO with synchronized updates across multiple clients without page refresh.
+
+---
+
+### Moderation Workflow & Event-Driven Notifications
+<img src="./assets/gifs/report-post.gif" alt="Moderation Demo" height="360" />
+
+A user report triggers a moderation threshold, automatically generating a real-time notification for admin review.
+
+---
+
+### Search System
+<img src="./assets/gifs/search-posts.gif" alt="Search Demo" height="360" />
+
+Demonstrates filtering and searching posts and users with instant results.
+
+---
+
+### Authentication & Email Verification
+<img src="./assets/gifs/signup-user-verification.gif" alt="Auth Demo" height="360" />
+
+Demonstrates user registration with email-based verification, ensuring account authenticity before enabling full platform interactions.
+
+## Key Features
+
+- Post, edit, and remove posts with image attachments and visibility options
+- Feed page with trending posts
+- Search for posts and users with filters
+- Friends management for sharing private posts
+- Real-time notifications (Socket.IO)
+- Private messaging (DMs) and group chats
+- Text and image moderation (OpenAI Moderation)
+- Account management (profile, banner, bio, username, email, password)
+
+## Architecture Overview
+
+```mermaid
+graph TD
+
+subgraph FE["Frontend (React + Vite)"]
+    UI[User Interface]
+end
+
+subgraph BE["Backend (Express.js + Node.js)"]
+    API[API Server]
+end
+
+UI -->|REST / Socket.IO| API
+
+subgraph DATA["Data Layer"]
+    MDB[(MongoDB Atlas)]
+    REDIS[(Redis Cache)]
+    OS[(OpenSearch)]
+end
+
+subgraph SERVICES["External Services"]
+    CLD[Cloudinary - Media Storage]
+    OAI[OpenAI Moderation API]
+    FBA[Firebase Auth]
+end
+
+API --> MDB
+API --> REDIS
+API --> OS
+
+API --> CLD
+API --> OAI
+API --> FBA
+```
+
+## System Design Highlights
+
+- **Data modeling & validation:** Mongoose schemas enforce domain-level validation and structure across users, posts, and messages  
+- **Real-time system:** Socket.IO powers messaging, notifications, and feed updates without polling
+- **Caching layer:** Redis reduces database load for frequently accessed posts
+- **Search engine:** OpenSearch provides scalable full-text search beyond MongoDB indexing  
+- **Media pipeline:** Cloudinary + Sharp handle storage and image optimization  
+- **Moderation flow:** Content is validated via OpenAI before persistence to prevent unsafe data from entering the system  
+
+## Modules & Technologies
+
+### Backend
+- **Node.js**, **Express.js** (API server)
+- **MongoDB** (Mongoose ODM)
+- **Redis** (caching)
+- **Firebase Admin SDK** (auth)
+- **Cloudinary** (image storage)
+- **OpenAI Moderation API** (content moderation)
+- **OpenSearch/Elasticsearch** (search)
+- **Socket.IO** (real-time chat/notifications)
+- **Sharp** (image processing)
+- **Multer** (file uploads)
+- **XSS** (input sanitization)
+
+### Frontend
+- **React** (with Vite)
+- **Material UI (MUI)**
+- **Zustand** (state management)
+- **Firebase JS SDK**
+- **Socket.IO client**
+- **Axios** (API calls)
+- **Email validation libs**
+- **Day.js**, **date-fns** (date utils)
 
 ## Getting Started
 
-The app has five components: the React + Vite front-end, the Express API, the MongoDB Atlas cluster, the OpenSearch server, and the Redis Cloud service.
+The app has five main components: the React + Vite frontend, the Express API backend, MongoDB Atlas, OpenSearch, and Redis Cloud.
 
-The instructions below will describe how to set up the front and backend environment, which also involves setting the .env file for each.
+Follow the instructions below to set up the frontend and backend environments, including the required `.env` files.
 
 ### Prerequisites
 
-The following variables will need to be set in a .env file in the /backend folder.
+**Backend .env variables:**
 
 - PORT
-- FRONTEND_URI
 - MONGO_URI
 - CLOUDINARY_CLOUD_NAME
 - CLOUDINARY_API_KEY
@@ -66,10 +159,11 @@ The following variables will need to be set in a .env file in the /backend folde
 - REDIS_USERNAME
 - REDIS_PASSWORD
 - REDIS_HOST
+- REDIS_PORT
 - ADMIN_ID
 - ADMIN_UID
 
-The following variables will need to be set in a .env file in the /frontend folder.
+**Frontend .env variables:**
 
 - VITE_FIREBASE_KEY
 - VITE_FIREBASE_DOMAIN
@@ -83,22 +177,18 @@ The following variables will need to be set in a .env file in the /frontend fold
 
 ### Installation
 
-To install the dependencies for the backend and to run it, perform:
+To install backend dependencies and run the server:
 
-```
-$ cd backend
-$ npm install
-$ npm start
-```
-
-To install the dependencies for the frontend and to run it, perform:
-
-```
-$ cd frontend
-$ npm install
-$ npm start
+```sh
+cd backend
+npm install
+npm start
 ```
 
-## Seed Data
+To install frontend dependencies and run the app:
 
-Since the app uses MoongoDB Atlas, there is no need for a seed file. The Atlas Database has already been populated with seed data.
+```sh
+cd frontend
+npm install
+npm start
+```
