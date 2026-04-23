@@ -6,42 +6,42 @@ LivEcho is a real-time social platform designed to explore scalable feed generat
 ## Demo
 
 ### Feed & Trending Posts
-![Feed Demo](./assets/gifs/feed-page.gif)
+<img src="./assets/gifs/feed-page.gif" alt="Feed Demo" height="360" />
 
 Displays trending feed sections including most liked, most commented, and friends’ posts.
 
 ---
 
 ### Post Creation & Media Upload
-![Post Creation](./assets/gifs/create-post.gif)
+<img src="./assets/gifs/create-post.gif" alt="Post Creation" height="360" />
 
 Shows creating a post with text, image upload, and visibility settings.
 
 ---
 
-### 💬 Real-time Chat
-![Chat Demo](./assets/gifs/real-time-chat.gif)
+### Real-time Chat
+<img src="./assets/gifs/real-time-chat.gif" alt="Chat Demo" height="360" />
 
 Demonstrates real-time messaging using Socket.IO with synchronized updates across multiple clients without page refresh.
 
 ---
 
 ### Moderation Workflow & Event-Driven Notifications
-![Moderation Demo](./assets/gifs/report-post.gif)
+<img src="./assets/gifs/report-post.gif" alt="Moderation Demo" height="360" />
 
 A user report triggers a moderation threshold, automatically generating a real-time notification for admin review.
 
 ---
 
 ### Search System
-![Search Demo](./assets/gifs/search-posts.gif)
+<img src="./assets/gifs/search-posts.gif" alt="Search Demo" height="360" />
 
 Demonstrates filtering and searching posts and users with instant results.
 
 ---
 
 ### Authentication & Email Verification
-![Auth Demo](./assets/gifs/signup-user-verification.gif)
+<img src="./assets/gifs/signup-user-verification.gif" alt="Auth Demo" height="360" />
 
 Demonstrates user registration with email-based verification, ensuring account authenticity before enabling full platform interactions.
 
